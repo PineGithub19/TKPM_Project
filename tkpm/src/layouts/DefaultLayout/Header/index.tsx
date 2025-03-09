@@ -1,7 +1,7 @@
 function Header() {
     return (
         <>
-            <h3>Header</h3>
+            <h3 className="text-primary">Header</h3>
         </>
     );
 }
