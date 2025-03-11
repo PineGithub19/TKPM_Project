@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const request = axios.create({
+const request: AxiosInstance = axios.create({
     baseURL: process.env.BACKEND_URL,
     timeout: 10000,
     headers: {
