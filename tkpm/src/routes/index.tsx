@@ -3,6 +3,7 @@ import DashBoard from '../pages/Dashboard';
 import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import Management from '../pages/Management';
+import TestPrompt from '../pages/TestPrompt';
 
 interface Route {
     path: string;
@@ -16,6 +17,7 @@ const publicRoutes: Route[] = [
     { path: '/createvideo', component: CreateVideo },
     { path: '/editvideo', component: EditVideo },
     { path: '/management', component: Management },
+    { path: '/test-prompt', component: TestPrompt },
 ];
 
 // with authentication

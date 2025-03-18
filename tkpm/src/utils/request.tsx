@@ -1,11 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const request: AxiosInstance = axios.create({
-    baseURL: process.env.BACKEND_URL,
-    timeout: 10000,
+    baseURL: import.meta.env.VITE_BACKEND_URL as string,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -30,5 +26,3 @@ export const del = async (url: string) => {
     const response = await request.delete(url);
     return response.data;
 };
-
-export default request;
