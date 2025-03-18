@@ -1,29 +1,47 @@
 import clsx from 'clsx';
 import { useState } from 'react';
 import * as request from '../../utils/request';
+import LoadingComponent from '../../components/Loading';
 
 function TestPrompt() {
-    const [promptInfo, setPromptInfo] = useState<string>('');
-    const [imageData, setImageData] = useState<string>('');
+    const [promptInfo, setPromptInfo] = useState<string>();
+    const [imageData, setImageData] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleSubmit = async () => {
         try {
-            const response = await request.post('/image/text-to-image', {
+            setIsLoading(true);
+            const response = await request.post('/image/text-to-multiple-images', {
                 prompt: promptInfo,
             });
 
-            const base64Image = response.image;
-            const imageSrc = `data:image/png;base64,${base64Image}`;
+            const base64Images = response.imageList;
+            const imageSources = base64Images.map((base64Image: string) => `data:image/png;base64,${base64Image}`);
 
-            setImageData(imageSrc);
+            setImageData(imageSources);
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <div className={clsx('container', 'd-flex', 'flex-column', 'h-100', 'w-100')}>
-            <div className={clsx('prompt-body')}>{imageData && <img src={imageData} alt="Prompt Image" />}</div>
+            <div className={clsx('prompt-body')}>
+                <div className={clsx('d-flex', 'flex-wrap', 'justify-content-start')}>
+                    {imageData.length > 0 &&
+                        imageData.map((image, index) => (
+                            <img
+                                key={index}
+                                src={image}
+                                alt={`image-${index}`}
+                                className={clsx('rounded', 'm-2', 'img-thumbnail')}
+                            />
+                        ))}
+                </div>
+                {isLoading && <LoadingComponent />}
+            </div>
             <div className={clsx('d-flex', 'flex-column', 'align-items-end')}>
                 <div className={clsx('form-floating', 'w-100')}>
                     <textarea
@@ -36,7 +54,11 @@ function TestPrompt() {
                     ></textarea>
                     <label htmlFor="floatingTextarea2">Prompt Here</label>
                 </div>
-                <button className={clsx('btn', 'btn-primary', 'float-right', 'mt-2')} onClick={handleSubmit}>
+                <button
+                    className={clsx('btn', 'btn-primary', 'float-right', 'mt-2')}
+                    disabled={isLoading || !promptInfo}
+                    onClick={handleSubmit}
+                >
                     Submit
                 </button>
             </div>

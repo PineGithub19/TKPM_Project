@@ -71,8 +71,8 @@ class ImageController {
 
             if (response.status === 200) {
                 const base64Image = response.data.images[0]; // Get base64 string
-                const imageBuffer = Buffer.from(base64Image, 'base64'); // Decode base64
-                fs.writeFileSync('./lighthouse.jpeg', imageBuffer); // Save as an image file
+                // const imageBuffer = Buffer.from(base64Image, 'base64'); // Decode base64
+                // fs.writeFileSync('./lighthouse.jpeg', imageBuffer); // Save as an image file
                 // const imageData: IImageConfig = {
                 //     style: 'classic',
                 //     size: 'small',
@@ -111,13 +111,13 @@ class ImageController {
                 batch_size: number;
             } = {
                 prompt,
-                steps: 20,
+                steps: 10,
                 width: this.DEFAULT_IMAGE_WIDTH,
                 height: this.DEFAULT_IMAGE_HEIGHT,
                 cfg_scale: 7,
                 seed: -1,
                 sampler_name: 'Euler a',
-                batch_size: 4,
+                batch_size: 2,
             };
 
             const response = await axios.post(stableDiffusionUrl, payload, {
@@ -140,8 +140,8 @@ class ImageController {
                     generated_images: images,
                 };
 
-                await DBServices.createDocument(ImageConfigModel, imageData);
-                res.status(200).send('Images saved successfully');
+                const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
+                res.status(200).json({ imageList: imageDataResult.generated_images });
             } else {
                 res.status(response.status).send('Failed to generate images');
             }
