@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import VideoRouter from './routers/VideoRouter';
 import ImageRouter from './routers/ImageRouter';
+import LiteratureRouter from './routers/LiteratureRouter';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/video', VideoRouter);
 app.use('/image', ImageRouter);
+app.use('/literature', LiteratureRouter);
 
 mongoose
     .connect(databaseURL)

@@ -3,6 +3,7 @@ import DashBoard from '../pages/Dashboard';
 import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import Management from '../pages/Management';
+import Literature from '../pages/Literature';
 
 interface Route {
     path: string;
@@ -12,10 +13,12 @@ interface Route {
 
 // without authentication
 const publicRoutes: Route[] = [
+    { path: '/', component: DashBoard },
     { path: '/dashboard', component: DashBoard },
     { path: '/createvideo', component: CreateVideo },
     { path: '/editvideo', component: EditVideo },
     { path: '/management', component: Management },
+    { path: '/literature', component: Literature },
 ];
 
 // with authentication
