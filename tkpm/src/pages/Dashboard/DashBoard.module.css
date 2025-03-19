@@ -1,0 +1,8 @@
+.dashboard {
+    background: linear-gradient(to top right, #011321 10%, #102632 88%);
+}
+
+.dashboardContainer {
+    max-height: 100vh;
+    overflow-y: scroll;
+}

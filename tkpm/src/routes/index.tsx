@@ -14,8 +14,8 @@ interface Route {
 // without authentication
 const publicRoutes: Route[] = [
     { path: '/dashboard', component: DashBoard },
-    { path: '/createvideo', component: CreateVideo },
-    { path: '/editvideo', component: EditVideo },
+    { path: '/create-video', component: CreateVideo },
+    { path: '/edit-video', component: EditVideo },
     { path: '/management', component: Management },
     { path: '/test-prompt', component: TestPrompt },
 ];

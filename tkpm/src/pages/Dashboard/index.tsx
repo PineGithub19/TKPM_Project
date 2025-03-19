@@ -1,9 +1,30 @@
-import './DashBoard.module.css';
+import clsx from 'clsx';
+import styles from './DashBoard.module.css';
 
 function DashBoard() {
     return (
-        <div>
-            <h1>Dashboard</h1>
+        <div className={clsx(styles.dashboard)}>
+            <div className={clsx('container', styles.dashboardContainer)}>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+                <h1>Dashboard</h1>
+            </div>
         </div>
     );
 }
