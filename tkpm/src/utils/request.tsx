@@ -12,7 +12,7 @@ export const get = async (url: string, params?: Record<string, unknown>) => {
     return response.data;
 };
 
-export const post = async (url: string, data: Record<string, unknown>) => {
+export const post = async (url: string, data?: Record<string, unknown>) => {
     const response = await request.post(url, data);
     return response.data;
 };

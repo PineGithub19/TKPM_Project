@@ -94,7 +94,7 @@ class ImageController {
 
     async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt } = req.body;
+            const { prompt, promptId } = req.body;
 
             if (!prompt) {
                 res.status(400).json({ message: 'Prompt is required' });
@@ -140,8 +140,23 @@ class ImageController {
                     generated_images: images,
                 };
 
-                const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
-                res.status(200).json({ imageList: imageDataResult.generated_images });
+                const existedPrompt = await DBServices.getDocumentById(ImageConfigModel, promptId);
+
+                if (!existedPrompt) {
+                    const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
+                    if (imageDataResult) {
+                        res.status(200).json({ imageList: imageDataResult.generated_images });
+                    } else {
+                        res.status(500).send('Error: imageDataResult is null');
+                    }
+                } else {
+                    const imageDataResult = await DBServices.updateDocument(ImageConfigModel, promptId, imageData);
+                    if (imageDataResult) {
+                        res.status(200).json({ imageList: imageDataResult.generated_images });
+                    } else {
+                        res.status(500).send('Error: imageDataResult is null');
+                    }
+                }
             } else {
                 res.status(response.status).send('Failed to generate images');
             }

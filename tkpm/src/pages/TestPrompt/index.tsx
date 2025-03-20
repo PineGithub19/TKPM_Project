@@ -2,8 +2,11 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import * as request from '../../utils/request';
 import LoadingComponent from '../../components/Loading';
+import { useLocation } from 'react-router-dom';
 
 function TestPrompt() {
+    const location = useLocation();
+    const promptId = location.state.promptId;
     const [promptInfo, setPromptInfo] = useState<string>();
     const [imageData, setImageData] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -13,6 +16,7 @@ function TestPrompt() {
             setIsLoading(true);
             const response = await request.post('/image/text-to-multiple-images', {
                 prompt: promptInfo,
+                promptId: promptId.id,
             });
 
             const base64Images = response.imageList;
