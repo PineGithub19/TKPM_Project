@@ -4,7 +4,7 @@ import styles from './Sidebar.module.css';
 import { publicRoutes } from '../../../routes';
 import { Link } from 'react-router-dom';
 
-interface HeaderItem {
+interface SidebarItem {
     name: string;
     route: string;
 }
@@ -16,26 +16,28 @@ function formatName(str: string): string {
         .join(' ');
 }
 
-function Header() {
-    const [routes, setRoutes] = useState<HeaderItem[]>([]);
+function Sidebar() {
+    const [routes, setRoutes] = useState<SidebarItem[]>([]);
     const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
 
     useEffect(() => {
-        const newRoutes = publicRoutes.map((route) => ({
-            name: formatName(route.path.slice(1)),
-            route: route.path,
-        }));
+        const newRoutes = publicRoutes
+            .filter((route) => !route.private) // Filter out non-private routes
+            .map((route) => ({
+                name: formatName(route.path.slice(1)), // Format the name
+                route: route.path, // Keep the route path
+            }));
         setRoutes(newRoutes);
     }, []);
 
     return (
-        <div className={clsx('d-flex', 'flex-column', styles.header)}>
+        <div className={clsx('d-flex', 'flex-column', styles.sidebar)}>
             <h3 className={clsx('text-light', 'mb-4')}>Sidebar</h3>
             {routes.map((route, index) => (
                 <Link
                     to={route.route}
                     key={index}
-                    className={clsx(styles.headerItem, {
+                    className={clsx(styles.sidebarItem, {
                         [styles.activeSelected]: index === selectedItemIndex,
                     })}
                     onClick={() => setSelectedItemIndex(index)}
@@ -47,4 +49,4 @@ function Header() {
     );
 }
 
-export default Header;
+export default Sidebar;

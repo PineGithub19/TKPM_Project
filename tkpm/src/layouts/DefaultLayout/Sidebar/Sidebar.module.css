@@ -1,10 +1,10 @@
-.header {
+.sidebar {
     background-color: #3749a6;
     padding: 24px 16px;
     height: 100vh;
 }
 
-.headerItem {
+.sidebarItem {
     text-decoration: none;
     font-size: 16px;
     padding: 16px 60px;

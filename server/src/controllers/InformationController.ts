@@ -40,6 +40,27 @@ class InformationController {
             res.status(500).send('Cannot create a Image Prompt');
         }
     }
+
+    async deleteImagePrompt(req: Request, res: Response, next: NextFunction) {
+        const { promptId } = req.query;
+
+        if (!promptId) {
+            res.status(400).json({ message: 'Prompt ID is required' });
+        }
+
+        try {
+            const response = await DBServices.deleteDocument(ImageConfigModel, promptId as string);
+
+            if (response) {
+                res.status(200).json({ message: 'Prompt deleted' });
+            } else {
+                res.status(500).send('Error: prompt is null');
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error deleting prompt');
+        }
+    }
 }
 
 export default InformationController;

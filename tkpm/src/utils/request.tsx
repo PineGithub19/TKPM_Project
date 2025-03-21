@@ -22,7 +22,7 @@ export const put = async (url: string, data: Record<string, unknown>) => {
     return response.data;
 };
 
-export const del = async (url: string) => {
-    const response = await request.delete(url);
+export const del = async (url: string, params?: Record<string, unknown>) => {
+    const response = await request.delete(url, { params });
     return response.data;
 };

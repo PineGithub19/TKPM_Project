@@ -6,5 +6,6 @@ const informationController = new InformationController();
 const router = express.Router();
 
 router.post('/create', informationController.createNewImagePrompt);
+router.delete('/delete', informationController.deleteImagePrompt);
 
 export default router;

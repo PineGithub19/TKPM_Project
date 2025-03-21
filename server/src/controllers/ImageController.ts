@@ -32,63 +32,29 @@ class ImageController {
         this.DEFAULT_IMAGE_HEIGHT = 256;
         this.DEFAULT_IMAGE_WIDTH = 256;
 
-        this.handleTextToImage = this.handleTextToImage.bind(this);
         this.handleTextToMultipleImages = this.handleTextToMultipleImages.bind(this);
         this.handleImageToText = this.handleImageToText.bind(this);
+        this.getImages = this.getImages.bind(this);
     }
 
-    async handleTextToImage(req: Request, res: Response, next: NextFunction) {
+    async getImages(req: Request, res: Response, next: NextFunction) {
+        const { promptId } = req.query;
+
+        if (!promptId) {
+            res.status(400).json({ message: 'Prompt ID is required' });
+        }
+
         try {
-            const { prompt } = req.body;
+            const response = await DBServices.getDocumentById(ImageConfigModel, promptId as string);
 
-            if (!prompt) {
-                res.status(400).json({ message: 'Prompt is required' });
-            }
-
-            const payload: {
-                prompt: string;
-                steps: number;
-                width: number;
-                height: number;
-                cfg_scale: number;
-                seed: number;
-                sampler_name: string;
-            } = {
-                prompt,
-                steps: 10,
-                width: this.DEFAULT_IMAGE_WIDTH,
-                height: this.DEFAULT_IMAGE_HEIGHT,
-                cfg_scale: 7,
-                seed: -1,
-                sampler_name: 'Euler a',
-            };
-
-            const response = await axios.post(stableDiffusionUrl, payload, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.status === 200) {
-                const base64Image = response.data.images[0]; // Get base64 string
-                // const imageBuffer = Buffer.from(base64Image, 'base64'); // Decode base64
-                // fs.writeFileSync('./lighthouse.jpeg', imageBuffer); // Save as an image file
-                // const imageData: IImageConfig = {
-                //     style: 'classic',
-                //     size: 'small',
-                //     resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
-                //     color_scheme: 'normal',
-                //     generated_images: [base64Image],
-                // };
-
-                // await DBServices.createDocument(ImageConfigModel, imageData);
-                res.status(200).json({ image: base64Image });
+            if (response) {
+                res.status(200).json({ imageList: response.generated_images });
             } else {
-                res.status(response.status).send('Failed to generate image');
+                res.status(500).send('Error: images is null');
             }
         } catch (error) {
             console.error(error);
-            res.status(500).send('Error generating image');
+            res.status(500).send('Error getting images');
         }
     }
 
@@ -132,6 +98,8 @@ class ImageController {
                 //     const imageBuffer = Buffer.from(base64Image, 'base64');
                 //     fs.writeFileSync(`./lighthouse-${index}.jpeg`, imageBuffer);
                 // });
+                // res.status(200).json({ imageList: images });
+
                 const imageData: IImageConfig = {
                     style: 'classic',
                     size: 'small',
@@ -150,6 +118,9 @@ class ImageController {
                         res.status(500).send('Error: imageDataResult is null');
                     }
                 } else {
+                    const previousImages = existedPrompt.generated_images;
+                    imageData.generated_images = [...previousImages, ...images];
+
                     const imageDataResult = await DBServices.updateDocument(ImageConfigModel, promptId, imageData);
                     if (imageDataResult) {
                         res.status(200).json({ imageList: imageDataResult.generated_images });
