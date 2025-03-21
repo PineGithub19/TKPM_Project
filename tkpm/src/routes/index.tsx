@@ -4,6 +4,7 @@ import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import Management from '../pages/Management';
 import Literature from '../pages/Literature';
+import ScriptAutoGenerate from '../pages/ScriptAutoGenerate';
 
 interface Route {
     path: string;
@@ -19,6 +20,7 @@ const publicRoutes: Route[] = [
     { path: '/editvideo', component: EditVideo },
     { path: '/management', component: Management },
     { path: '/literature', component: Literature },
+    { path: '/generate_scrip', component: ScriptAutoGenerate},
 ];
 
 // with authentication
