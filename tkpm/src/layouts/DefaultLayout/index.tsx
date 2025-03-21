@@ -6,7 +6,7 @@ import Header from './Header';
 import styles from './DefaultLayout.module.css';
 
 interface DefaultLayoutProps {
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
