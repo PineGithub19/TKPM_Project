@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import { publicRoutes } from './routes';
+import { publicRoutes, privateRoutes } from './routes';
 import { DefaultLayout } from './layouts';
+import { useState } from 'react';
 
 function App() {
-    console.log('App component rendering');
-    console.log('Routes:', publicRoutes);
-
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  
     return (
         <div>
             <Routes>
@@ -25,6 +25,22 @@ function App() {
                         />
                     );
                 })}
+                {isAuthenticated &&
+                    privateRoutes.map((route, index) => {
+                        const Layout = route.layout || DefaultLayout;
+                        const Page = route.component;
+                        return (
+                            <Route
+                                key={index}
+                                path={route.path}
+                                element={
+                                    <Layout>
+                                        <Page />
+                                    </Layout>
+                                }
+                            />
+                        );
+                    })}
             </Routes>
         </div>
     );

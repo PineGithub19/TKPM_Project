@@ -6,6 +6,8 @@ import VideoRouter from './routers/VideoRouter';
 import ImageRouter from './routers/ImageRouter';
 import LiteratureRouter from './routers/LiteratureRouter';
 import ScriptRouter from './routers/ScriptGenerateRouter';
+import InformationRouter from './routers/InformationRouter';
+
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ app.use('/video', VideoRouter);
 app.use('/image', ImageRouter);
 app.use('/literature', LiteratureRouter);
 app.use('/script_generate', ScriptRouter);
+app.use('/information', InformationRouter);
 
 mongoose
     .connect(databaseURL)

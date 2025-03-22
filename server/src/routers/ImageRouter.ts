@@ -4,7 +4,8 @@ import ImageController from '../controllers/ImageController';
 const imageController = new ImageController();
 const router = express.Router();
 
-router.post('/text-to-image', imageController.handleTextToImage);
+router.get('/get-images', imageController.getImages);
+router.post('/text-to-multiple-images', imageController.handleTextToMultipleImages);
 router.post('/image-to-text', imageController.handleImageToText);
 
 export default router;

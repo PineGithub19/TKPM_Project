@@ -1,0 +1,33 @@
+.dashboard {
+    background: linear-gradient(to top right, #011321 10%, #102632 88%);
+}
+
+.dashboardContainer {
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.dashboardContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.videoContainer,
+.imageContainer {
+    background: linear-gradient(to top right, #00c6dd 2%, #13d8ec 32%, #bef3ff 100%);
+    color: #090c14;
+    padding: 24px 36px;
+    border-radius: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.imageContainer {
+    background: linear-gradient(to top right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
+}
+
+.icon {
+    font-size: 32px;
+}
