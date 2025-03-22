@@ -4,6 +4,8 @@ import DashBoard from '../pages/Dashboard';
 import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import Management from '../pages/Management';
+import Literature from '../pages/Literature';
+import ScriptAutoGenerate from '../pages/ScriptAutoGenerate';
 import ImagePrompt from '../pages/ImagePrompt';
 import { OutSideLayout } from '../layouts';
 import Login from '../pages/Login';
@@ -30,6 +32,8 @@ const publicRoutes: Route[] = [
     { path: '/signup', component: Signup, layout: OutSideLayout, private: true },
     { path: '/forgot-password', component: ForgotPassword, layout: OutSideLayout, private: true },
     { path: '/reset-password', component: ResetPassword, layout: OutSideLayout, private: true },
+    { path: '/literature', component: Literature, layout: OutSideLayout, private: true },
+    { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
 ];
 
 // with authentication
