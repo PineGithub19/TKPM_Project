@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import * as request from '../../utils/request'; // Import your request utility
 
 const ResetPassword: React.FC = () => {
     const [password, setPassword] = useState("");
@@ -15,31 +16,35 @@ const ResetPassword: React.FC = () => {
             setMessage("Please fill in all fields.");
             return;
         }
-
+    
         if (password.length < 6) {
             setMessage("Password must be at least 6 characters long.");
             return;
         }
-
+    
         if (password !== confirmPassword) {
             setMessage("Passwords do not match.");
             return;
         }
-
+    
         if (!token) {
             setMessage("Invalid or expired reset link.");
             return;
         }
-
+    
         setLoading(true);
-        
-        // Fake API call to reset password
-        setTimeout(() => {
+    
+        try {
+            await request.put(`/user/resetpassword?token=${token}`, { password });
+            setMessage("Password reset successfully. Please log in.");
             setLoading(false);
-            setMessage("Password reset successfully! Redirecting...");
-            setTimeout(() => navigate("/login"), 2000);
-        }, 1500);
+            navigate("/login");
+        } catch (error) {
+            console.error(error);
+            setMessage("Error resetting password. Please try again.");
+        }       
     };
+    
 
     return (
         <div className="d-flex flex-column align-items-center justify-content-center vh-100">

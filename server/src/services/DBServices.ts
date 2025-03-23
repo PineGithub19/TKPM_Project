@@ -20,4 +20,10 @@ const deleteDocument = async <T extends Document>(model: Model<T>, id: string) =
     return await model.findByIdAndDelete(id);
 };
 
-export { createDocument, getDocuments, getDocumentById, updateDocument, deleteDocument };
+const getDocumentByQuery = async <T extends Document>(model: Model<T>, query: any) => {
+    return await model
+        .findOne(query)
+        .exec();
+};
+
+export { createDocument, getDocuments, getDocumentById, updateDocument, deleteDocument, getDocumentByQuery };
