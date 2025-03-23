@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import VideoRouter from './routers/VideoRouter';
 import ImageRouter from './routers/ImageRouter';
+import LiteratureRouter from './routers/LiteratureRouter';
+import ScriptRouter from './routers/ScriptGenerateRouter';
 import cookieParser from 'cookie-parser';
 import InformationRouter from './routers/InformationRouter';
 import UserRouter from './routers/UserRouter';
@@ -31,6 +33,8 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/video', VideoRouter);
 app.use('/image', ImageRouter);
+app.use('/literature', LiteratureRouter);
+app.use('/script_generate', ScriptRouter);
 app.use('/information', InformationRouter);
 app.use('/user', UserRouter);
 

@@ -5,13 +5,14 @@ import { useState } from 'react';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-
+  
     return (
         <div>
             <Routes>
                 {publicRoutes.map((route, index) => {
                     const Layout = route.layout || DefaultLayout;
                     const Page = route.component;
+                    console.log(`Rendering route: ${route.path}`);
                     return (
                         <Route
                             key={index}
