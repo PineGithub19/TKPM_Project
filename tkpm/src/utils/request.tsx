@@ -5,7 +5,7 @@ const request: AxiosInstance = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, 
+    withCredentials: true,
 });
 
 export const get = async (url: string, params?: Record<string, unknown>) => {

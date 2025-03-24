@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import * as request from '../../utils/request';
 
 interface WikipediaResponse {
     success: boolean;
@@ -14,7 +15,7 @@ interface WikipediaResponse {
         url: string;
         displayTitle: string;
         originalImage: string;
-        fullText : string;
+        fullText: string;
     };
 }
 
@@ -36,8 +37,16 @@ const Literature = () => {
         setError(null);
 
         try {
-            const response = await axios.get<WikipediaResponse>(`http://localhost:3000/literature/wikipedia?query=${encodeURIComponent(query)}`);
-            setResponse(response.data);
+            // const response = await axios.get<WikipediaResponse>(
+            //     `http://localhost:3000/literature/wikipedia?query=${encodeURIComponent(query)}`,
+            // );
+            const response = (await request.get(
+                `/literature/wikipedia?query=${encodeURIComponent(query)}`,
+            )) as WikipediaResponse | null;
+
+            if (response !== null && response.success) {
+                setResponse(response);
+            }
         } catch (err) {
             setError('Lỗi khi tìm kiếm');
             console.error('Error searching Wikipedia:', err);
@@ -64,8 +73,8 @@ const Literature = () => {
             navigate('/generate_scrip', {
                 state: {
                     content: response.data.fullText,
-                    title: response.data.title
-                }
+                    title: response.data.title,
+                },
             });
         }
     };
@@ -82,10 +91,7 @@ const Literature = () => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && searchWikipedia()}
                 />
-                <button 
-                    className="btn btn-primary"
-                    onClick={searchWikipedia}
-                >
+                <button className="btn btn-primary" onClick={searchWikipedia}>
                     Tìm kiếm
                 </button>
             </div>
@@ -108,39 +114,30 @@ const Literature = () => {
                 <div className="card">
                     <div className="card-body">
                         <h3 className="card-title">{response.data.displayTitle}</h3>
-                        
+
                         <div className="mb-3">
-                            <button 
+                            <button
                                 className="btn btn-secondary me-2"
                                 onClick={() => setShowFullContent(!showFullContent)}
                             >
                                 {showFullContent ? 'Xem tóm tắt' : 'Xem toàn bộ nội dung'}
                             </button>
-                            <button 
-                                className="btn btn-primary me-2"
-                                onClick={handleCopy}
-                            >
+                            <button className="btn btn-primary me-2" onClick={handleCopy}>
                                 Sao chép nội dung
                             </button>
-                            <button 
-                                className="btn btn-success"
-                                onClick={handleGenerateScript}
-                            >
+                            <button className="btn btn-success" onClick={handleGenerateScript}>
                                 Tạo kịch bản video
                             </button>
                         </div>
 
                         {showFullContent ? (
-                            <div 
-                                className="content"
-                                dangerouslySetInnerHTML={{ __html: response.data.fullText }}
-                            />
+                            <div className="content" dangerouslySetInnerHTML={{ __html: response.data.fullText }} />
                         ) : (
                             <div>
                                 {response.data.sections.map((section, index) => (
                                     <div key={index} className="mb-4">
                                         <h4>{section.title}</h4>
-                                        <div 
+                                        <div
                                             className="content"
                                             dangerouslySetInnerHTML={{ __html: section.content }}
                                         />
