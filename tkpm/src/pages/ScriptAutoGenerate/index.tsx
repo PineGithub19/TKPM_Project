@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+import * as request from '../../utils/request';
 
 interface ScriptResponse {
     success: boolean;
@@ -20,7 +21,7 @@ const ScriptAutoGenerate = () => {
     useEffect(() => {
         // Lấy dữ liệu từ location state
         const { content, title } = location.state || {};
-        
+
         if (!content || !title) {
             setError('Không tìm thấy nội dung tác phẩm');
             return;
@@ -34,13 +35,23 @@ const ScriptAutoGenerate = () => {
         setError(null);
 
         try {
-            const response = await axios.post<ScriptResponse>('http://localhost:3000/script_generate/generate', {
-                content,
-                title
-            });
+            // const response = await axios.post<ScriptResponse>('http://localhost:3000/script_generate/generate', {
+            //     content,
+            //     title
+            // });
 
-            if (response.data.success) {
-                setScript(response.data.script);
+            // if (response.data.success) {
+            //     setScript(response.data.script);
+            // } else {
+            //     setError('Không thể tạo kịch bản');
+            // }
+            const response = (await request.post('/script_generate/generate', {
+                content,
+                title,
+            })) as ScriptResponse | null;
+
+            if (response !== null && response.success) {
+                setScript(response.script);
             } else {
                 setError('Không thể tạo kịch bản');
             }
@@ -62,13 +73,24 @@ const ScriptAutoGenerate = () => {
         setError(null);
 
         try {
-            const response = await axios.post<ScriptResponse>('http://localhost:3000/script_generate/edit', {
-                originalScript: script,
-                editInstructions
-            });
+            // const response = await axios.post<ScriptResponse>('http://localhost:3000/script_generate/edit', {
+            //     originalScript: script,
+            //     editInstructions
+            // });
 
-            if (response.data.success) {
-                setEditedScript(response.data.script);
+            // if (response.data.success) {
+            //     setEditedScript(response.data.script);
+            //     setEditMode(false);
+            // } else {
+            //     setError('Không thể chỉnh sửa kịch bản');
+            // }
+            const response = (await request.post('/script_generate/edit', {
+                originalScript: script,
+                editInstructions,
+            })) as ScriptResponse | null;
+
+            if (response !== null && response.success) {
+                setEditedScript(response.script);
                 setEditMode(false);
             } else {
                 setError('Không thể chỉnh sửa kịch bản');
@@ -96,10 +118,7 @@ const ScriptAutoGenerate = () => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Kịch bản video</h2>
-                <button 
-                    className="btn btn-outline-primary"
-                    onClick={() => navigate('/literature')}
-                >
+                <button className="btn btn-outline-primary" onClick={() => navigate('/literature')}>
                     Quay lại
                 </button>
             </div>
@@ -133,35 +152,24 @@ const ScriptAutoGenerate = () => {
                                     onChange={(e) => setEditInstructions(e.target.value)}
                                 />
                             </div>
-                            <button 
-                                className="btn btn-primary mt-2"
-                                onClick={handleEdit}
-                            >
+                            <button className="btn btn-primary mt-2" onClick={handleEdit}>
                                 Áp dụng chỉnh sửa
                             </button>
                         </div>
                     ) : (
-                        <button 
-                            className="btn btn-secondary mb-4"
-                            onClick={() => setEditMode(true)}
-                        >
+                        <button className="btn btn-secondary mb-4" onClick={() => setEditMode(true)}>
                             Chỉnh sửa kịch bản
                         </button>
                     )}
 
                     <div className="card">
                         <div className="card-body">
-                            <pre className="whitespace-pre-wrap">
-                                {editedScript || script}
-                            </pre>
+                            <pre className="whitespace-pre-wrap">{editedScript || script}</pre>
                         </div>
                     </div>
 
                     <div className="mt-4">
-                        <button 
-                            className="btn btn-primary"
-                            onClick={handleCopy}
-                        >
+                        <button className="btn btn-primary" onClick={handleCopy}>
                             Sao chép kịch bản
                         </button>
                     </div>
@@ -171,4 +179,4 @@ const ScriptAutoGenerate = () => {
     );
 };
 
-export default ScriptAutoGenerate; 
+export default ScriptAutoGenerate;

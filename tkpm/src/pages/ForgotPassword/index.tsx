@@ -1,16 +1,18 @@
 import React, { useState } from "react";
+import * as request from "../../utils/request"; // Import request API
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [isDisabled, setIsDisabled] = useState(false);
     const [timer, setTimer] = useState(60);
+    const [link, setLink] = useState("");
 
     const isValidEmail = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
 
-    const handleSendResetLink = () => {
+    const handleSendResetLink = async () => {
         if (!email) {
             setMessage("Please enter your email.");
             return;
@@ -25,6 +27,18 @@ const ForgotPassword: React.FC = () => {
         console.log("Sending reset link to:", email);
         setMessage("Reset link sent! You can resend after 1 minute.");
         setIsDisabled(true);
+        
+        const respone = await request.post("/user/getJwt", { email });
+        if(respone)
+        {
+            setLink(`/reset-password?token=${respone.token}`);
+        }
+        else
+        {
+            setMessage("Invalid email format. Please enter a valid email.");
+            setIsDisabled(false);
+        };
+
 
         let countdown = 60;
         setTimer(countdown);
@@ -68,7 +82,7 @@ const ForgotPassword: React.FC = () => {
                     <a href="/login" className="text-primary fw-medium text-decoration-none">Back to Login</a>
                 </p>
                 <p className="mt-3 text-center">
-                    <a href="/reset-password?token=1" className="text-primary fw-medium text-decoration-none">Test reset password page</a>
+                    <a href={link} className="text-primary fw-medium text-decoration-none">Test reset password page</a>
                 </p>
             </div>
         </div>
