@@ -1,74 +1,172 @@
-import { useEffect, useState, useRef } from 'react';
-import clsx from 'clsx';
+import React, { useState } from "react";
 import styles from './CreateVideo.module.css';
-import StepBar from './CreateVideoComponents/StepBar/StepBar';
-import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
-import Literature from '../Literature';
-import ImagePrompt from '../ImagePrompt';
+import clsx from "clsx";
+import axios from "axios";
 
-import * as request from '../../utils/request';
+const contentStyleOptions = ["Analytical", "Narrative", "Poetic Illustration", "Classic", "Storytelling", "Dramatic", "Satirical", "Modern"];
+const voiceStyleOptions = ["ElevenLabs", "Google TTS", "Amazon Polly"];
+const voiceGenderOptions = ["Female", "Male"];
 
-const steps = [
-    {
-        label: 'Summarize Literature & Generate Script',
-        description: `Enter a topic and let the AI summarize the literature and generate a script for your Video.`,
-    },
-    {
-        label: 'Create Voice Configuration',
-        description: 'Choose a voice configuration for your video. You can select the voice, language, and accent.',
-    },
-    {
-        label: 'Create Images for Video',
-        description: 'Generate images for your video. You can choose the style, resolution, and other parameters.',
-    },
-];
+const CreateVideo: React.FC = () => {
+    const [selectedContentStyles, setSelectedContentStyles] = useState<string[]>([]);
+    const [selectedVoiceStyle, setSelectedVoiceStyle] = useState<string>(voiceStyleOptions[0]);
+    const [selectedVoiceGender, setSelectedVoiceGender] = useState<string>(voiceGenderOptions[0]);
 
-function CreateVideo() {
-    const [promptId, setPromptId] = useState<string>('');
-    const [activeStep, setActiveStep] = useState(0);
-    const hasFetchedPromptId = useRef(false);
+    const [speed, setSpeed] = useState<number>(50);
+    const [tone, setTone] = useState<number>(50);
+    const [intensity, setIntensity] = useState<number>(50);
 
-    const handleNext = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    const [prompt, setPrompt] = useState<string>("");
+    const [generatedImage, setGeneratedImage] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const handleContentStyleClick = (style: string) => {
+        setSelectedContentStyles((prev) =>
+            prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
+        );
     };
 
-    const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    const handleReset = () => {
-        setActiveStep(0);
-    };
-
-    useEffect(() => {
-        if (!hasFetchedPromptId.current) {
-            async function fetchPromptId() {
-                const response = await request.post('/information/create');
-                setPromptId(response?.id || '');
-            }
-            fetchPromptId();
-            hasFetchedPromptId.current = true;
-        }
-    }, []);
-
+    // const handleGenerateImage = async () => {
+    //     setLoading(true);
+    //     try {
+    //         const combinedPrompt = `${prompt} with style: ${selectedContentStyles.join(", ")}`;
+    //         const response = await axios.post(
+    //             "http://localhost:3000/image/generate-replicate",
+    //             { prompt: combinedPrompt }
+    //         );
+            
+    
+    //         const imageUrl = response.data?.output?.[0] || response.data?.url;
+    //         if (!imageUrl) {
+    //             console.log("No image URL returned:", response.data);
+    //         }
+    //         setGeneratedImage(imageUrl);
+            
+    //     } catch (error) {
+    //         console.error("Failed to generate image:", error);
+    //         alert("Error generating image");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+    
     return (
-        <div className={clsx(styles.background)}>
-            <div className={clsx('container', 'd-flex', 'justify-space-between')}>
-                <StepBar
-                    steps={steps}
-                    activeStep={activeStep}
-                    handleNext={handleNext}
-                    handleBack={handleBack}
-                    handleReset={handleReset}
-                />
-                <PromptBody>
-                    {activeStep === 0 && <Literature />}
-                    {activeStep === 1 && <div>Voice Configuration</div>}
-                    {activeStep === 2 && <ImagePrompt promptId={promptId} />}
-                </PromptBody>
+        <div className={clsx(styles.container)}>
+            <div className={clsx(styles.left)}>
+                <h1 className={clsx(styles.title)}>Create a video from text prompt</h1>
+                <textarea
+                    className={clsx(styles.input_text)}
+                    placeholder="Enter your prompt or choose literary theme"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                ></textarea>
+
+                <h2 className={clsx(styles.contentStyle)}>Content Style</h2>
+                <div className={`${styles.style_buttons} content`}>
+                    {contentStyleOptions.map((style) => (
+                        <button
+                            key={style}
+                            onClick={() => handleContentStyleClick(style)}
+                            className={clsx(styles.style_button, {
+                                [styles.activeContent]: selectedContentStyles.includes(style),
+                            })}
+                        >
+                            {style}
+                        </button>
+                    ))}
+                </div>
+
+                <h2 className={clsx(styles.voiceStyle)}>Voice Style</h2>
+                <div className={`${styles.style_buttons} voice`}>
+                    {voiceStyleOptions.map((style) => (
+                        <button
+                            key={style}
+                            onClick={() => setSelectedVoiceStyle(style)}
+                            className={clsx(styles.style_button, {
+                                [styles.activeVoice]: selectedVoiceStyle === style,
+                            })}
+                        >
+                            {style}
+                        </button>
+                    ))}
+                </div>
+
+                <h2 className={clsx(styles.voiceGender)}>Voice Gender</h2>
+                <div className={`${styles.style_buttons} voiceGender`}>
+                    {voiceGenderOptions.map((style) => (
+                        <button
+                            key={style}
+                            onClick={() => setSelectedVoiceGender(style)}
+                            className={clsx(styles.style_button, {
+                                [styles.activeVoiceGender]: selectedVoiceGender === style,
+                            })}
+                        >
+                            {style}
+                        </button>
+                    ))}
+                </div>
+
+                <h2 className={clsx(styles.sliderTitle)}>Voice Controls</h2>
+                <div className={clsx(styles.sliders)}>
+                    <div className={clsx(styles.sliderWrapper)}>
+                        <label className={clsx(styles.sliderLabel)}>Speed</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={speed}
+                            onChange={(e) => setSpeed(Number(e.target.value))}
+                            className={clsx(styles.slider)}
+                        />
+                    </div>
+                    <div className={clsx(styles.sliderWrapper)}>
+                        <label className={clsx(styles.sliderLabel)}>Tone</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={tone}
+                            onChange={(e) => setTone(Number(e.target.value))}
+                            className={clsx(styles.slider)}
+                        />
+                    </div>
+                    <div className={clsx(styles.sliderWrapper)}>
+                        <label className={clsx(styles.sliderLabel)}>Intensity</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={intensity}
+                            onChange={(e) => setIntensity(Number(e.target.value))}
+                            className={clsx(styles.slider)}
+                        />
+                    </div>
+                    <button className={clsx(styles.previewButton)}>
+                        Preview voice
+                        <img src="/voice_recognition.png" alt="Voice Icon" className={clsx(styles.voiceIcon)} />
+                    </button>
+                </div>
+
+
+            </div>
+
+            <div className={clsx(styles.right)}>
+                <div className={clsx(styles.introImageWrapper)}>
+                    {generatedImage ? (
+                        <img src={generatedImage} alt="Generated" className={clsx(styles.previewImage)} />
+                    ) : (
+                        <p>Image will appear here</p>
+                    )}
+                </div>
+
+                <div className={clsx(styles.nextButtonWrapper)}>
+                    <button className={clsx(styles.nextButton)}>
+                        <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
+                    </button>
+                </div>
             </div>
         </div>
     );
-}
+};
 
 export default CreateVideo;
