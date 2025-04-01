@@ -12,6 +12,7 @@ import Login from '../pages/Login';
 import Signup from '../pages/SignUp';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
+import GenerateVoice from '../pages/GenerateVoice';
 
 interface Route {
     path: string;
@@ -34,6 +35,7 @@ const publicRoutes: Route[] = [
     { path: '/reset-password', component: ResetPassword, layout: OutSideLayout, private: true },
     { path: '/literature', component: Literature, layout: OutSideLayout, private: true },
     { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
+    { path: '/voice', component: GenerateVoice, layout: DefaultLayout, private: true },
 ];
 
 // with authentication

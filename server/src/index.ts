@@ -9,6 +9,7 @@ import ScriptRouter from './routers/ScriptGenerateRouter';
 import cookieParser from 'cookie-parser';
 import InformationRouter from './routers/InformationRouter';
 import UserRouter from './routers/UserRouter';
+import voiceRoutes from './routers/VoiceRouter';
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.use(cookieParser());
 
 app.use(express.json({ limit: '10mb' }));
 
+app.use(express.static('public'));
+
 app.get('/', (req: Request, res: Response) => {
     res.send('Express + TypeScript Server');
 });
@@ -37,6 +40,7 @@ app.use('/literature', LiteratureRouter);
 app.use('/script_generate', ScriptRouter);
 app.use('/information', InformationRouter);
 app.use('/user', UserRouter);
+app.use('/voice', voiceRoutes);
 
 mongoose
     .connect(databaseURL)
