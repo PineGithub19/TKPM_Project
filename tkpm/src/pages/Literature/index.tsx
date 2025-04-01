@@ -19,7 +19,11 @@ interface WikipediaResponse {
     };
 }
 
-const Literature = () => {
+interface LiteratureProps {
+    onSelectLiterature?: (content: string, title: string) => void;
+}
+
+const Literature = ({ onSelectLiterature }: LiteratureProps) => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -70,12 +74,18 @@ const Literature = () => {
 
     const handleGenerateScript = () => {
         if (response?.data) {
-            navigate('/generate_scrip', {
-                state: {
-                    content: response.data.fullText,
-                    title: response.data.title,
-                },
-            });
+            if (onSelectLiterature) {
+                // If onSelectLiterature is provided, call it with the content and title
+                onSelectLiterature(response.data.fullText, response.data.title);
+            } else {
+                // Otherwise, use the original navigation behavior
+                navigate('/generate_scrip', {
+                    state: {
+                        content: response.data.fullText,
+                        title: response.data.title,
+                    },
+                });
+            }
         }
     };
 
@@ -126,7 +136,7 @@ const Literature = () => {
                                 Sao chép nội dung
                             </button>
                             <button className="btn btn-success" onClick={handleGenerateScript}>
-                                Tạo kịch bản video
+                                {onSelectLiterature ? 'Chọn tác phẩm này' : 'Tạo kịch bản video'}
                             </button>
                         </div>
 

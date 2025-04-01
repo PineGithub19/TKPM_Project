@@ -20,7 +20,17 @@ interface ScriptConfig {
     duration: string;
 }
 
-const ScriptAutoGenerate = () => {
+interface ScriptAutoGenerateProps {
+    literatureContent?: string;
+    literatureTitle?: string;
+    onComplete?: (segments: string[], title: string) => void;
+}
+
+const ScriptAutoGenerate = ({
+    literatureContent,
+    literatureTitle,
+    onComplete
+}: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [script, setScript] = useState<string>('');
@@ -40,6 +50,7 @@ const ScriptAutoGenerate = () => {
     const [scriptSegments, setScriptSegments] = useState<string[]>([]);
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
+    const [scriptTitle, setScriptTitle] = useState<string>('');
 
     // Danh sách các tùy chọn
     const genreOptions = [
@@ -76,7 +87,17 @@ const ScriptAutoGenerate = () => {
     ];
 
     useEffect(() => {
-        // Lấy dữ liệu từ location state
+        // First check if props are provided (integration mode)
+        if (literatureContent && literatureTitle) {
+            setScriptContent({
+                content: literatureContent,
+                title: literatureTitle
+            });
+            setScriptTitle(literatureTitle);
+            return;
+        }
+        
+        // Otherwise use location state (standalone mode)
         const { content, title } = location.state || {};
 
         if (!content || !title) {
@@ -85,8 +106,9 @@ const ScriptAutoGenerate = () => {
         }
 
         setScriptContent({ content, title });
+        setScriptTitle(title);
         // Không tự động tạo kịch bản nữa, mà để người dùng cấu hình trước
-    }, [location]);
+    }, [location, literatureContent, literatureTitle]);
 
     const handleConfigChange = (field: keyof ScriptConfig, value: string) => {
         setScriptConfig((prev) => ({
@@ -120,6 +142,11 @@ const ScriptAutoGenerate = () => {
                 // Reset segmented script when generating a new script
                 setScriptSegments([]);
                 setShowSegments(false);
+                
+                // Automatically generate segments after script generation
+                if (response.script) {
+                    generateSegments(response.script);
+                }
             } else {
                 setError('Không thể tạo kịch bản');
             }
@@ -128,6 +155,25 @@ const ScriptAutoGenerate = () => {
             console.error('Error generating script:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const generateSegments = async (scriptText: string) => {
+        setSegmentLoading(true);
+        
+        try {
+            const response = (await request.post('/script_generate/split', {
+                script: scriptText
+            })) as ScriptSegmentsResponse | null;
+
+            if (response !== null && response.success) {
+                setScriptSegments(response.segments);
+            }
+        } catch (err) {
+            console.error('Error auto-splitting script:', err);
+            // Don't show error for auto-splitting
+        } finally {
+            setSegmentLoading(false);
         }
     };
 
@@ -152,6 +198,11 @@ const ScriptAutoGenerate = () => {
                 // Reset segmented script when editing script
                 setScriptSegments([]);
                 setShowSegments(false);
+                
+                // Automatically generate segments after script edit
+                if (response.script) {
+                    generateSegments(response.script);
+                }
             } else {
                 setError('Không thể chỉnh sửa kịch bản');
             }
@@ -205,6 +256,37 @@ const ScriptAutoGenerate = () => {
         } catch (err) {
             console.error('Failed to copy segment: ', err);
             alert('Không thể sao chép phân đoạn');
+        }
+    };
+
+    const handleContinue = () => {
+        if (onComplete) {
+            // If no segments are available but we have a script, automatically generate segments
+            if (scriptSegments.length === 0 && (script || editedScript)) {
+                const textToSplit = editedScript || script;
+                
+                setSegmentLoading(true);
+                
+                request.post('/script_generate/split', {
+                    script: textToSplit
+                }).then((response: ScriptSegmentsResponse | null) => {
+                    if (response !== null && response.success) {
+                        // Call onComplete with the generated segments
+                        onComplete(response.segments, scriptTitle);
+                    } else {
+                        // If splitting fails, create a single segment from the full script
+                        onComplete([textToSplit], scriptTitle);
+                    }
+                }).catch(() => {
+                    // If error occurs, use full script as a single segment
+                    onComplete([textToSplit], scriptTitle);
+                }).finally(() => {
+                    setSegmentLoading(false);
+                });
+            } else {
+                // Use already generated segments
+                onComplete(scriptSegments, scriptTitle);
+            }
         }
     };
 
@@ -328,9 +410,19 @@ const ScriptAutoGenerate = () => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Kịch bản video</h2>
-                <button className="btn btn-outline-primary" onClick={() => navigate('/literature')}>
-                    Quay lại
-                </button>
+                {onComplete ? (
+                    <div>
+                        {(script || editedScript) && (
+                            <button className="btn btn-primary" onClick={handleContinue} disabled={segmentLoading}>
+                                {segmentLoading ? 'Đang xử lý...' : 'Tiếp tục'}
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <button className="btn btn-outline-primary" onClick={() => navigate('/literature')}>
+                        Quay lại
+                    </button>
+                )}
             </div>
 
             {loading && (
@@ -373,6 +465,14 @@ const ScriptAutoGenerate = () => {
                             >
                                 Tách thành phân đoạn
                             </button>
+                            {scriptSegments.length > 0 && (
+                                <button 
+                                    className="btn btn-info ms-2" 
+                                    onClick={() => setShowSegments(true)}
+                                >
+                                    Xem phân đoạn ({scriptSegments.length})
+                                </button>
+                            )}
                         </div>
                         <button className="btn btn-secondary" onClick={() => setEditMode(!editMode)}>
                             {editMode ? 'Hủy chỉnh sửa' : 'Chỉnh sửa kịch bản'}

@@ -4,22 +4,28 @@ import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
+import ScriptAutoGenerate from '../ScriptAutoGenerate';
+import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
 
 import * as request from '../../utils/request';
 
 const steps = [
     {
-        label: 'Summarize Literature & Generate Script',
-        description: `Enter a topic and let the AI summarize the literature and generate a script for your Video.`,
+        label: 'Select Literature',
+        description: `Find and select a literary work to use as the basis for your video.`,
     },
     {
-        label: 'Create Voice Configuration',
-        description: 'Choose a voice configuration for your video. You can select the voice, language, and accent.',
+        label: 'Generate Script',
+        description: 'Configure and generate a script based on the selected literature.',
+    },
+    {
+        label: 'Create Voice Narration',
+        description: 'Generate voice narrations for each segment of your script.',
     },
     {
         label: 'Create Images for Video',
-        description: 'Generate images for your video. You can choose the style, resolution, and other parameters.',
+        description: 'Generate images for your video based on the script segments.',
     },
 ];
 
@@ -27,6 +33,10 @@ function CreateVideo() {
     const [promptId, setPromptId] = useState<string>('');
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef(false);
+    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
+    
+    const [scriptSegments, setScriptSegments] = useState<string[]>([]);
+    const [scriptTitle, setScriptTitle] = useState<string>('');
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -38,6 +48,21 @@ function CreateVideo() {
 
     const handleReset = () => {
         setActiveStep(0);
+    };
+
+    const handleLiteratureSelected = (content: string, title: string) => {
+        setSelectedLiterature({ content, title });
+        handleNext(); // Move to the next step (ScriptAutoGenerate)
+    };
+
+    const handleScriptComplete = (segments: string[], title: string) => {
+        setScriptSegments(segments);
+        setScriptTitle(title);
+        handleNext(); // Move to the next step (GenerateVoice)
+    };
+
+    const handleVoiceComplete = () => {
+        handleNext(); // Move to the image generation step
     };
 
     useEffect(() => {
@@ -62,9 +87,34 @@ function CreateVideo() {
                     handleReset={handleReset}
                 />
                 <PromptBody>
-                    {activeStep === 0 && <Literature />}
-                    {activeStep === 1 && <div>Voice Configuration</div>}
-                    {activeStep === 2 && <ImagePrompt promptId={promptId} />}
+                    {activeStep === 0 && (
+                        <div className="create-video-literature-container">
+                            <Literature onSelectLiterature={handleLiteratureSelected} />
+                        </div>
+                    )}
+                    {activeStep === 1 && selectedLiterature && (
+                        <div className="create-video-script-container">
+                            <ScriptAutoGenerate 
+                                literatureContent={selectedLiterature.content} 
+                                literatureTitle={selectedLiterature.title}
+                                onComplete={handleScriptComplete}
+                            />
+                        </div>
+                    )}
+                    {activeStep === 2 && (
+                        <div className="create-video-voice-container">
+                            <GenerateVoice 
+                                scriptSegments={scriptSegments}
+                                scriptTitle={scriptTitle}
+                                onComplete={handleVoiceComplete}
+                            />
+                        </div>
+                    )}
+                    {activeStep === 3 && (
+                        <div className="create-video-image-container">
+                            <ImagePrompt promptId={promptId} />
+                        </div>
+                    )}
                 </PromptBody>
             </div>
         </div>

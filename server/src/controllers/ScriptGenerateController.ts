@@ -46,12 +46,12 @@ class ScriptGenerateController {
 
             // Ánh xạ giá trị duration sang thời lượng thực tế
             const durationMap: Record<string, string> = {
-                'short': '2-3 phút',
-                'standard': '4-5 phút',
-                'long': '7-10 phút',
+                'short': '2-3 minutes',
+                'standard': '4-5 minutes',
+                'long': '7-10 minutes',
             };
 
-            const durationText = durationMap[scriptConfig.duration] || '4-5 phút';
+            const durationText = durationMap[scriptConfig.duration] || '4-5 minutes';
             
             // Khởi tạo chat session với context về văn học Việt Nam
             const chatSession = model.startChat({
