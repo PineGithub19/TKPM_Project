@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
+import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
 import * as request from '../../utils/request';
 import LoadingComponent from '../../components/Loading';
 import CustomizedCheckbox from '../../components/CustomizedCheckbox';
@@ -47,9 +47,9 @@ function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolea
     ) : null;
 }
 
-function ImagePrompt() {
-    const location = useLocation();
-    const promptId = location.state.promptId;
+function ImagePrompt({ promptId }: { promptId: string }) {
+    // const location = useLocation();
+    // const promptId = location.state.promptId;
     const [promptInfo, setPromptInfo] = useState<string>();
     const [imageData, setImageData] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -65,7 +65,7 @@ function ImagePrompt() {
             setIsLoading(true);
             const response = await request.post('/image/text-to-multiple-images', {
                 prompt: promptInfo,
-                promptId: promptId.id,
+                promptId: promptId,
             });
 
             const base64Images = response.imageList;
@@ -99,7 +99,7 @@ function ImagePrompt() {
         const fetchImages = async () => {
             try {
                 setIsLoading(true);
-                const response = await request.get('/image/get-images', { promptId: promptId.id });
+                const response = await request.get('/image/get-images', { promptId: promptId });
                 const base64Images = response.imageList;
                 const imageSources = base64Images.map((base64Image: string) => `data:image/png;base64,${base64Image}`);
 
@@ -164,7 +164,7 @@ function ImagePrompt() {
                     </button>
                 </div>
             </div>
-            <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId.id} />
+            <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId} />
         </div>
     );
 }
