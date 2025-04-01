@@ -1,5 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
-import clsx from 'clsx';
+import React, { useState } from "react";
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
@@ -49,6 +48,7 @@ function CreateVideo() {
 
     const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
 
+
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -59,25 +59,6 @@ function CreateVideo() {
 
     const handleReset = () => {
         setActiveStep(0);
-    };
-
-    const handleLiteratureSelected = (content: string, title: string) => {
-        setSelectedLiterature({ content, title });
-        handleNext(); // Move to the next step (ScriptAutoGenerate)
-    };
-
-    const handleScriptComplete = (segments: string[], title: string) => {
-        setScriptSegments(segments);
-        setScriptTitle(title);
-        handleNext(); // Move to the next step (GenerateVoice)
-    };
-
-    const handleVoiceComplete = () => {
-        handleNext(); // Move to the image generation step
-    };
-
-    const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
-        setCheckedImagesList(images);
     };
 
     useEffect(() => {
@@ -91,9 +72,11 @@ function CreateVideo() {
         }
     }, []);
 
+    
     useEffect(() => {
         if (checkedImagesList.length > 0) console.log(checkedImagesList);
     }, [checkedImagesList]);
+
 
     return (
         <div className={clsx(styles.background)}>
@@ -147,6 +130,6 @@ function CreateVideo() {
             </div>
         </div>
     );
-}
+};
 
 export default CreateVideo;
