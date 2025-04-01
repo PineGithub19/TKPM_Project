@@ -6,7 +6,7 @@ import LoadingComponent from '../../components/Loading';
 import CustomizedCheckbox from '../../components/CustomizedCheckbox';
 import SweetAlert from '../../components/SweetAlert';
 
-function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId: string }) {
+function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
     const handleConfirmAlert = async (blocker: Blocker) => {
         if (blocker.state === 'blocked') {
@@ -47,7 +47,7 @@ function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolea
     ) : null;
 }
 
-function ImagePrompt({ promptId }: { promptId: string }) {
+function ImagePrompt({ promptId }: { promptId?: string }) {
     // const location = useLocation();
     // const promptId = location.state.promptId;
     const [promptInfo, setPromptInfo] = useState<string>();

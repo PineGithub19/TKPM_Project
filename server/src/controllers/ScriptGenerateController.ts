@@ -19,16 +19,40 @@ const generationConfig = {
     responseMimeType: "text/plain",
 };
 
+interface ScriptConfig {
+    genre: string;
+    audience: string;
+    tone: string;
+    duration: string;
+}
+
 class ScriptGenerateController {
     async generateScript(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { content, title } = req.body;
-
+            const { content, title, config } = req.body;
+            
             if (!content || !title) {
                 res.status(400).json({ message: 'Content and title are required' });
                 return;
             }
 
+            // Xử lý cấu hình (nếu có)
+            const scriptConfig: ScriptConfig = config || {
+                genre: 'educational',
+                audience: 'general',
+                tone: 'formal',
+                duration: 'standard',
+            };
+
+            // Ánh xạ giá trị duration sang thời lượng thực tế
+            const durationMap: Record<string, string> = {
+                'short': '2-3 phút',
+                'standard': '4-5 phút',
+                'long': '7-10 phút',
+            };
+
+            const durationText = durationMap[scriptConfig.duration] || '4-5 phút';
+            
             // Khởi tạo chat session với context về văn học Việt Nam
             const chatSession = model.startChat({
                 generationConfig,
@@ -48,27 +72,34 @@ class ScriptGenerateController {
                 ],
             });
 
-            // Tạo prompt cho việc tạo kịch bản
+            // Tạo prompt cho việc tạo kịch bản với cấu hình
             const prompt = `
                 Create a detailed video script for the literary work: "${title}"
                 
                 Content to analyze:
                 ${content}
 
+                Script Configuration:
+                - Genre/Style: ${scriptConfig.genre}
+                - Target Audience: ${scriptConfig.audience}
+                - Tone: ${scriptConfig.tone}
+                - Video Duration: ${durationText}
+
                 Please provide:
-                1. A compelling video title
-                2. Target audience
-                3. Video purpose
-                4. Detailed script with:
+                1. A compelling video title that appeals to ${scriptConfig.audience} audience
+                2. Video purpose
+                3. Detailed script with:
                    - Hook (0:00-0:15)
                    - Introduction (0:15-1:00)
-                   - Main content (1:00-3:00)
-                   - Cultural significance (3:00-4:00)
-                   - Conclusion (4:00-4:30)
-                5. Visual suggestions
-                6. Audio recommendations
-                7. Pacing notes
-                8. Tone guidelines
+                   - Main content (adjust based on ${durationText} duration)
+                   - Cultural significance
+                   - Conclusion
+                4. Visual suggestions that match the ${scriptConfig.genre} style
+                5. Audio recommendations that match the ${scriptConfig.tone} tone
+                6. Pacing notes
+                7. Tone guidelines consistent with ${scriptConfig.tone} presentation
+                
+                Make sure the script is appropriate for ${scriptConfig.audience} audience, using a ${scriptConfig.tone} tone, within a ${durationText} runtime, and presented in a ${scriptConfig.genre} style.
             `;
 
             // Gửi prompt và nhận kết quả
@@ -85,6 +116,89 @@ class ScriptGenerateController {
             res.status(500).json({ 
                 success: false,
                 message: 'Error generating script',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    }
+
+    async splitScript(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { script } = req.body;
+
+            if (!script) {
+                res.status(400).json({ message: 'Script content is required' });
+                return;
+            }
+
+            const chatSession = model.startChat({
+                generationConfig: {
+                    ...generationConfig,
+                    temperature: 0.2, // Lower temperature for more consistent splitting
+                },
+                history: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: "You are a professional video script segmenter. Your job is to break down scripts into segments that can be used to create images for a video." }
+                        ],
+                    },
+                    {
+                        role: "model",
+                        parts: [
+                            { text: "I understand my role as a professional video script segmenter. I'll help break down scripts into meaningful segments that can be paired with images to create an effective video narrative." }
+                        ],
+                    }
+                ],
+            });
+
+            const prompt = `
+                Please analyze the following video script and break it down into 10-15 segments, each representing a key moment or scene that can be visualized with an image.
+
+                Each segment should:
+                1. Be concise (1-3 sentences)
+                2. Describe a visual scene or concept
+                3. Be suitable for generating an image
+                4. When combined with other segments, tell a cohesive story
+
+                The segments should follow the narrative flow of the original script. Try to extract the most visual and important scenes that would make compelling images for a video.
+
+                Original script:
+                ${script}
+
+                Format your response as a list of segments separated by --- (triple dash), with no numbering or additional formatting. Just pure segments, each representing a scene or image to be created.
+            `;
+
+            const result = await chatSession.sendMessage(prompt);
+            const segmentText = result.response.text();
+            
+            // Process the segments
+            const segments = segmentText.split('---')
+                .map(segment => segment.trim())
+                .filter(segment => segment.length > 0);
+
+            // Ensure we have a reasonable number of segments
+            let finalSegments = segments;
+            if (segments.length < 5) {
+                // If too few segments were returned, use a simpler approach
+                finalSegments = script
+                    .split('\n\n')
+                    .filter((para: string) => para.trim().length > 30 && para.trim().length < 500)
+                    .slice(0, 15);
+            } else if (segments.length > 20) {
+                // If too many segments were returned, limit the count
+                finalSegments = segments.slice(0, 20);
+            }
+
+            res.status(200).json({
+                success: true,
+                segments: finalSegments
+            });
+
+        } catch (error) {
+            console.error('Error splitting script:', error);
+            res.status(500).json({ 
+                success: false,
+                message: 'Error splitting script',
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
         }

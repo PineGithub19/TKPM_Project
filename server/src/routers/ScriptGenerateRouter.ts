@@ -10,4 +10,7 @@ router.post('/generate', scriptController.generateScript);
 // Edit existing script
 router.post('/edit', scriptController.editScript);
 
+// Split script into segments for image creation
+router.post('/split', scriptController.splitScript);
+
 export default router; 
