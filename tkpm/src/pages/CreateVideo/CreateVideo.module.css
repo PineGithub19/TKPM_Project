@@ -10,3 +10,7 @@
 .background::-webkit-scrollbar {
     display: none;
 }
+
+.layoutConfig {
+    margin-bottom: 64px;
+}

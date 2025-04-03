@@ -27,16 +27,27 @@ const steps = [
         label: 'Create Images for Video',
         description: 'Generate images for your video based on the script segments.',
     },
+    {
+        label: 'Create Video',
+        description: 'Generate video from previous data. Enjoy your process <3',
+    },
 ];
+
+interface ImagesListComplete {
+    images: string[];
+    segment: string;
+}
 
 function CreateVideo() {
     const [promptId, setPromptId] = useState<string>('');
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef(false);
     const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
-    
-    const [scriptSegments, setScriptSegments] = useState<string[]>([]);
+
+    const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
+
+    const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -65,6 +76,10 @@ function CreateVideo() {
         handleNext(); // Move to the image generation step
     };
 
+    const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
+        setCheckedImagesList(images);
+    };
+
     useEffect(() => {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
@@ -76,9 +91,13 @@ function CreateVideo() {
         }
     }, []);
 
+    useEffect(() => {
+        if (checkedImagesList.length > 0) console.log(checkedImagesList);
+    }, [checkedImagesList]);
+
     return (
         <div className={clsx(styles.background)}>
-            <div className={clsx('container', 'd-flex', 'justify-space-between')}>
+            <div className={clsx('container', 'd-flex', 'justify-space-between', styles.layoutConfig)}>
                 <StepBar
                     steps={steps}
                     activeStep={activeStep}
@@ -94,8 +113,8 @@ function CreateVideo() {
                     )}
                     {activeStep === 1 && selectedLiterature && (
                         <div className="create-video-script-container">
-                            <ScriptAutoGenerate 
-                                literatureContent={selectedLiterature.content} 
+                            <ScriptAutoGenerate
+                                literatureContent={selectedLiterature.content}
                                 literatureTitle={selectedLiterature.title}
                                 onComplete={handleScriptComplete}
                             />
@@ -103,7 +122,7 @@ function CreateVideo() {
                     )}
                     {activeStep === 2 && (
                         <div className="create-video-voice-container">
-                            <GenerateVoice 
+                            <GenerateVoice
                                 scriptSegments={scriptSegments}
                                 scriptTitle={scriptTitle}
                                 onComplete={handleVoiceComplete}
@@ -112,7 +131,16 @@ function CreateVideo() {
                     )}
                     {activeStep === 3 && (
                         <div className="create-video-image-container">
-                            <ImagePrompt promptId={promptId} />
+                            <ImagePrompt
+                                promptId={promptId}
+                                scriptSegments={scriptSegments}
+                                handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                            />
+                        </div>
+                    )}
+                    {activeStep === 4 && (
+                        <div className="create-video-container">
+                            <h1>Create Video Here!</h1>
                         </div>
                     )}
                 </PromptBody>

@@ -58,9 +58,88 @@ class ImageController {
         }
     }
 
+    // async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
+    //     try {
+    //         const { prompt, promptId } = req.body;
+
+    //         if (!prompt) {
+    //             res.status(400).json({ message: 'Prompt is required' });
+    //         }
+
+    //         const payload: {
+    //             prompt: string;
+    //             steps: number;
+    //             width: number;
+    //             height: number;
+    //             cfg_scale: number;
+    //             seed: number;
+    //             sampler_name: string;
+    //             batch_size: number;
+    //         } = {
+    //             prompt,
+    //             steps: 10,
+    //             width: this.DEFAULT_IMAGE_WIDTH,
+    //             height: this.DEFAULT_IMAGE_HEIGHT,
+    //             cfg_scale: 7,
+    //             seed: -1,
+    //             sampler_name: 'Euler a',
+    //             batch_size: 2,
+    //         };
+
+    //         const response = await axios.post(stableDiffusionUrl, payload, {
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+
+    //         if (response.status === 200) {
+    //             const images = response.data.images as Base64URLString[];
+    //             images.forEach((base64Image: string, index: number) => {
+    //                 const imageBuffer = Buffer.from(base64Image, 'base64');
+    //                 fs.writeFileSync(`./lighthouse-${index}.jpeg`, imageBuffer);
+    //             });
+    //             res.status(200).json({ imageList: images });
+
+    //             const imageData: IImageConfig = {
+    //                 style: 'classic',
+    //                 size: 'small',
+    //                 resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
+    //                 color_scheme: 'normal',
+    //                 generated_images: images,
+    //             };
+
+    //             const existedPrompt = await DBServices.getDocumentById(ImageConfigModel, promptId);
+
+    //             if (!existedPrompt) {
+    //                 const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
+    //                 if (imageDataResult) {
+    //                     res.status(200).json({ imageList: imageDataResult.generated_images });
+    //                 } else {
+    //                     res.status(500).send('Error: imageDataResult is null');
+    //                 }
+    //             } else {
+    //                 const previousImages = existedPrompt.generated_images;
+    //                 imageData.generated_images = [...previousImages, ...images];
+
+    //                 const imageDataResult = await DBServices.updateDocument(ImageConfigModel, promptId, imageData);
+    //                 if (imageDataResult) {
+    //                     res.status(200).json({ imageList: imageDataResult.generated_images });
+    //                 } else {
+    //                     res.status(500).send('Error: imageDataResult is null');
+    //                 }
+    //             }
+    //         } else {
+    //             res.status(response.status).send('Failed to generate images');
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         res.status(500).send('Error generating images');
+    //     }
+    // }
+
     async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt, promptId } = req.body;
+            const { prompt } = req.body;
 
             if (!prompt) {
                 res.status(400).json({ message: 'Prompt is required' });
@@ -94,40 +173,7 @@ class ImageController {
 
             if (response.status === 200) {
                 const images = response.data.images as Base64URLString[];
-                // images.forEach((base64Image: string, index: number) => {
-                //     const imageBuffer = Buffer.from(base64Image, 'base64');
-                //     fs.writeFileSync(`./lighthouse-${index}.jpeg`, imageBuffer);
-                // });
-                // res.status(200).json({ imageList: images });
-
-                const imageData: IImageConfig = {
-                    style: 'classic',
-                    size: 'small',
-                    resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
-                    color_scheme: 'normal',
-                    generated_images: images,
-                };
-
-                const existedPrompt = await DBServices.getDocumentById(ImageConfigModel, promptId);
-
-                if (!existedPrompt) {
-                    const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
-                    if (imageDataResult) {
-                        res.status(200).json({ imageList: imageDataResult.generated_images });
-                    } else {
-                        res.status(500).send('Error: imageDataResult is null');
-                    }
-                } else {
-                    const previousImages = existedPrompt.generated_images;
-                    imageData.generated_images = [...previousImages, ...images];
-
-                    const imageDataResult = await DBServices.updateDocument(ImageConfigModel, promptId, imageData);
-                    if (imageDataResult) {
-                        res.status(200).json({ imageList: imageDataResult.generated_images });
-                    } else {
-                        res.status(500).send('Error: imageDataResult is null');
-                    }
-                }
+                res.status(200).json({ imageList: images });
             } else {
                 res.status(response.status).send('Failed to generate images');
             }
