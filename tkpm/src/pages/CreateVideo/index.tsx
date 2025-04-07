@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import styles from './CreateVideo.module.css';
 import clsx from "clsx";
-import axios from "axios";
+// import axios from "axios";
+import { useNavigate } from "react-router-dom"; 
 
 const contentStyleOptions = ["Analytical", "Narrative", "Poetic Illustration", "Classic", "Storytelling", "Dramatic", "Satirical", "Modern"];
 const voiceStyleOptions = ["ElevenLabs", "Google TTS", "Amazon Polly"];
@@ -15,10 +16,11 @@ const CreateVideo: React.FC = () => {
     const [speed, setSpeed] = useState<number>(50);
     const [tone, setTone] = useState<number>(50);
     const [intensity, setIntensity] = useState<number>(50);
+    const navigate = useNavigate();
 
     const [prompt, setPrompt] = useState<string>("");
-    const [generatedImage, setGeneratedImage] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [generatedImage, setGeneratedImage] = useState<string>("");
+    // const [loading, setLoading] = useState<boolean>(false);
 
     const handleContentStyleClick = (style: string) => {
         setSelectedContentStyles((prev) =>
@@ -152,15 +154,11 @@ const CreateVideo: React.FC = () => {
 
             <div className={clsx(styles.right)}>
                 <div className={clsx(styles.introImageWrapper)}>
-                    {generatedImage ? (
-                        <img src={generatedImage} alt="Generated" className={clsx(styles.previewImage)} />
-                    ) : (
-                        <p>Image will appear here</p>
-                    )}
+                    <img src="/anime.png" alt="Anime" className={clsx(styles.previewImage)} />
                 </div>
 
                 <div className={clsx(styles.nextButtonWrapper)}>
-                    <button className={clsx(styles.nextButton)}>
+                    <button className={clsx(styles.nextButton)} onClick={() => navigate('/edit-video')}>
                         <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
                     </button>
                 </div>
