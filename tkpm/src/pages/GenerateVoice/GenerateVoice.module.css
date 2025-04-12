@@ -1,0 +1,374 @@
+/* Container for the entire form */
+.container {
+    background: #2C3E50;
+    padding: 60px;
+    font-family: 'Alata', sans-serif;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    box-sizing: border-box;
+    border: 2px solid #1a2a35;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ffffff;
+}
+
+:global(.ant-tabs .ant-tabs-content-holder) {
+    border-radius: 16px;
+    overflow: hidden; /* Đảm bảo các góc được bo tròn mà không bị cắt */
+  }
+  
+
+.form {
+    margin: 0 auto;
+    background-color: #1f2a38;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    transition: box-shadow 0.3s ease;
+}
+
+.form:hover {
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
+}
+
+.formItem {
+    margin-bottom: 24px;
+}
+
+:global(.ant-form-item-explain-error) {
+    font-size: 24px;
+    color: #ff4d4f;
+    line-height: 1.4;
+    margin-top: 10px;
+}
+  
+
+.formItem label {
+    color: #f0f2f5;
+    font-size: 30px !important;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.customLabel {
+    color: white !important;  /* Đổi màu chữ */
+    font-size: 16px !important;  /* Điều chỉnh kích thước font chữ nếu cần */
+  }
+  
+
+.textArea {
+    width: 100%;
+    padding: 14px;
+    height: 30vh;
+    font-size: 24px;
+    border-radius: 10px;
+    color: black;
+    overflow-y: auto;
+}
+
+.textArea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.textArea::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+}
+
+.textArea::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+.textArea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.textArea:focus {
+    border: 5px solid #5C6BC0;
+    outline: none;
+}
+
+
+
+/* Select input style */
+.formSelect {
+    width: 100%;
+    height: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #2c3e50;
+    border: 2px solid #1a2a35;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.formSelect:focus {
+    border-color: #ecf0f1;
+    background-color: #1a2a35;
+    box-shadow: 0 0 10px rgba(236, 240, 241, 0.5);
+}
+
+.formSelect :global(.ant-select-selector) {
+  height: 50px;
+  font-size: 24px;
+  background-color: #2c3e50;
+  border: 2px solid #1a2a35;
+  border-radius: 10px;
+  font-weight: bold;
+  color: black;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.formSelect :global(
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder
+) {
+  font-size: 24px;
+  color: white;
+  line-height: 50px;
+}
+
+:global(.ant-select-dropdown) {
+    font-size: 24px; /* Cỡ chữ cho toàn dropdown */
+}
+  
+:global(.ant-select-item-option-content) {
+    font-size: 24px; /* Cỡ chữ cho từng option */
+    color: black;
+}
+
+:global(.ant-select-item-option-selected) {
+    background-color: #1a2a35; /* Tùy chỉnh màu khi được chọn */
+}
+
+:global(.ant-select-item-option-active) {
+    background-color: #000000; /* Hover màu */
+}
+
+.boxButton{
+    display: flex;
+    align-items: end;
+    justify-content: center;
+}
+
+.button {
+    width: 270px;
+    height: 60px;
+    padding: 14px;
+    margin-top: 20px;
+    background-color: #1890ff;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.button:hover {
+    background-color: #40a9ff; /* Màu nền sáng hơn khi hover */
+    transform: scale(1.05);    /* Phóng to nhẹ */
+    box-shadow: 0 0 12px rgba(64, 169, 255, 0.6); /* Hiệu ứng glow */
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+.resultWrapper {
+    margin-top: 32px;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #3b4b5b;
+}
+
+.resultHeader {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.resultText {
+    font-size: 14px;
+    color: #bdc3c7;
+    margin-bottom: 8px;
+}
+
+.downloadLink {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 18px;
+    background-color: #1890ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.downloadLink:hover {
+    background-color: #40a9ff;
+}
+
+.audioControl {
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #1c2b3a;
+}
+
+/* Batch Section */
+.batchContainer {
+    margin-top: 40px;
+}
+
+.batchHeader {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ecf0f1;
+}
+
+.batchSubtitle {
+    font-size: 14px;
+    color: #95a5a6;
+    margin-bottom: 16px;
+}
+
+.batchControls {
+    margin-top: 20px;
+}
+
+.progress {
+    margin-top: 16px;
+}
+
+/* Segment Cards */
+.segmentCard {
+    margin-bottom: 20px;
+    background-color: #34495e;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.segmentCard:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.segmentCardHeader {
+    font-weight: bold;
+    font-size: 16px;
+    color: #ecf0f1;
+}
+
+.segmentCardBody {
+    font-size: 14px;
+    color: #bdc3c7;
+    margin-bottom: 15px;
+}
+
+.segmentCardError {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.segmentCardAudio {
+    width: 100%;
+    margin-top: 16px;
+    background-color: #2c3e50;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.segmentCardDownload {
+    margin-top: 12px;
+    text-align: right;
+}
+
+.segmentCardDownload a {
+    padding: 8px 14px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.segmentCardDownload a:hover {
+    background-color: #2980b9;
+}
+
+:global(.custom-tabs .ant-tabs-nav) {
+  background-color: #1a1f2e;
+  padding: 12px 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: flex-start;
+}
+
+:global(.custom-tabs .ant-tabs-nav::before) {
+    display: none !important;
+}
+
+:global(.custom-tabs .ant-tabs-tab) {
+  color: #bbb;
+  font-size: 24px;
+  padding: 10px 20px;
+  margin-left: 12px;
+  border-radius: 8px;
+  background: #273142;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+:global(.custom-tabs .ant-tabs-tab:hover) {
+  background-color: #32425c;
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+:global(.custom-tabs .ant-tabs-tab-active) {
+  background-color: #3a7bd5;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(58, 123, 213, 0.4);
+}
+
+:global(.custom-tabs .ant-tabs-tab-active),
+:global(.custom-tabs .ant-tabs-tab-active > div),
+:global(.custom-tabs .ant-tabs-tab-active > span) {
+  color: white !important;
+}
+
+:global(.custom-tabs .ant-tabs-ink-bar) {
+  background-color: transparent;
+}
+
+:global(.custom-tab-pane) {
+  background-color: #1a1f2e;
+  padding: 32px;
+  border-radius: 0 0 16px 16px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}

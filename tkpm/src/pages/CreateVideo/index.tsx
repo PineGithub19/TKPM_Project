@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
+import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
 import ScriptAutoGenerate from '../ScriptAutoGenerate';
@@ -8,6 +9,8 @@ import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
 
 import * as request from '../../utils/request';
+import clsx from "clsx";
+import axios from "axios";
 
 const steps = [
     {
@@ -61,6 +64,26 @@ function CreateVideo() {
         setActiveStep(0);
     };
 
+    const handleLiteratureSelected = (content: string, title: string) => {
+        setSelectedLiterature({ content, title });
+        handleNext(); // Move to the next step (ScriptAutoGenerate)
+    };
+
+    const handleScriptComplete = (segments: string[], title: string) => {
+        setScriptSegments(segments);
+        setScriptTitle(title);
+        handleNext(); // Move to the next step (GenerateVoice)
+    };
+
+    const handleVoiceComplete = () => {
+        handleNext(); // Move to the image generation step
+    };
+
+    const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
+        setCheckedImagesList(images);
+    };
+
+
     useEffect(() => {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
@@ -79,55 +102,58 @@ function CreateVideo() {
 
 
     return (
-        <div className={clsx(styles.background)}>
-            <div className={clsx('container', 'd-flex', 'justify-space-between', styles.layoutConfig)}>
-                <StepBar
-                    steps={steps}
-                    activeStep={activeStep}
-                    handleNext={handleNext}
-                    handleBack={handleBack}
-                    handleReset={handleReset}
-                />
-                <PromptBody>
-                    {activeStep === 0 && (
-                        <div className="create-video-literature-container">
-                            <Literature onSelectLiterature={handleLiteratureSelected} />
-                        </div>
-                    )}
-                    {activeStep === 1 && selectedLiterature && (
-                        <div className="create-video-script-container">
-                            <ScriptAutoGenerate
-                                literatureContent={selectedLiterature.content}
-                                literatureTitle={selectedLiterature.title}
-                                onComplete={handleScriptComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 2 && (
-                        <div className="create-video-voice-container">
-                            <GenerateVoice
-                                scriptSegments={scriptSegments}
-                                scriptTitle={scriptTitle}
-                                onComplete={handleVoiceComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 3 && (
-                        <div className="create-video-image-container">
-                            <ImagePrompt
-                                promptId={promptId}
-                                scriptSegments={scriptSegments}
-                                handleCheckedImagesListComplete={handleCheckedImagesListComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 4 && (
-                        <div className="create-video-container">
-                            <h1>Create Video Here!</h1>
-                        </div>
-                    )}
-                </PromptBody>
-            </div>
+        <div className={clsx(styles.container)}>
+            <FloatingParticles />
+                <div className={clsx(styles.left)}>
+                    <StepBar
+                        steps={steps}
+                        activeStep={activeStep}
+                        handleNext={handleNext}
+                        handleBack={handleBack}
+                        handleReset={handleReset}
+                    />
+                </div>
+                <div className={clsx(styles.right)}>
+                    <PromptBody>
+                        {activeStep === 0 && (
+                            <div className="create-video-literature-container">
+                                <Literature onSelectLiterature={handleLiteratureSelected} />
+                            </div>
+                        )}
+                        {activeStep === 1 && selectedLiterature && (
+                            <div className="create-video-script-container">
+                                <ScriptAutoGenerate
+                                    literatureContent={selectedLiterature.content}
+                                    literatureTitle={selectedLiterature.title}
+                                    onComplete={handleScriptComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 2 && (
+                            <div className="create-video-voice-container">
+                                <GenerateVoice
+                                    scriptSegments={scriptSegments}
+                                    scriptTitle={scriptTitle}
+                                    onComplete={handleVoiceComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 3 && (
+                            <div className="create-video-image-container">
+                                <ImagePrompt
+                                    promptId={promptId}
+                                    scriptSegments={scriptSegments}
+                                    handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 4 && (
+                            <div className="create-video-container">
+                                <h1>Create Video Here!</h1>
+                            </div>
+                        )}
+                    </PromptBody>
+                </div>
         </div>
     );
 };
