@@ -315,7 +315,6 @@
 
 .rightSide {
     width: 30%;
-    padding: 20px;
     border-radius: 12px;
 }
 
@@ -488,4 +487,94 @@
 .iconAutomaticSubtitles{
     height: 40px;
     width: 40px;
+}
+
+.style_buttons {
+    width: 90%;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.style_button {
+    padding: 10px 30px;
+    border: 1px solid white;
+    background-color: transparent;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 24px;
+}
+
+.style_button:not(.activeContent):not(.activeVoice):not(.activeVoiceGender):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.activeContent {
+    background-color: #8A2BE2;
+    border-color: #FFFFFF;
+    color: white;
+}
+
+.formatContentStyle{
+    display: flex;
+    gap: 40px;
+    margin: 20px 0 5px 20px;
+    flex-direction: column;
+}
+
+.style_button_recreate{
+    padding: 10px 30px;
+    width: 170px;
+    height: 70px;
+    font-weight: bold;
+    background-color: #FF4242;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 24px;   
+}
+
+.style_button_recreate:hover {
+    background-color: #FF6B6B;
+    transform: scale(1.05);
+}
+
+.style_recreate{
+    display: flex;
+    justify-content: center;
+    margin: 0 50px 0 0;
+}
+
+
+.nextButton {
+    background-color: white;
+    color: white;
+    border: 1px solid black;
+    border-radius: 50px;
+    padding: 16px 24px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 60px;
+    width: 60px;
+}
+
+.nextButton:hover {
+    background-color: #FF4242;
+}
+
+.nextIcon {
+    width: 24px;
+    height: 24px;
+}
+
+.nextButtonWrapper {
+    display: flex;
+    justify-content: flex-end;
 }

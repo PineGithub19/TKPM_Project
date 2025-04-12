@@ -3,6 +3,7 @@ import styles from "./EditVideo.module.css";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 
+const contentStyleOptions = ["Analytical", "Narrative", "Modern", "Poetic Illustration", "Classic", "Storytelling", "Dramatic", "Satirical"];
 type IconKeys = "iconStyle" | "iconRatio" | "iconLayout" | "iconDelete" | "iconCutVideo" | "iconCutImage" | "iconAdjust" | "iconSound" | "iconCaption" | "iconPrompt";
 
 const EditVideo: React.FC = () => {
@@ -34,6 +35,8 @@ const EditVideo: React.FC = () => {
     const [iconRotateColor, setIconRotateColor] = useState("/iconRotateWhite.png");
 
     const [caption, setCaption] = useState<string>("");
+    const [newPrompt, setnewPrompt] = useState<string>("");
+    const [selectedContentStyles, setSelectedContentStyles] = useState<string[]>([]);
 
     const ratioMap: { [key: string]: number } = {
         "16:9": 16 / 9,
@@ -207,6 +210,12 @@ const EditVideo: React.FC = () => {
         }, 400);
     };
 
+    const handleContentStyleClick = (style: string) => {
+        setSelectedContentStyles((prev) =>
+            prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
+        );
+    };
+
     useEffect(() => {
         const updateSize = () => {
             if (introImageRef.current) {
@@ -262,6 +271,9 @@ const EditVideo: React.FC = () => {
                                     alt="Preview"
                                     className={`${styles.previewImage} ${flippedVertically ? styles.flipped : ""} ${rotated ? styles.rotated : ""}`}
                                 />
+                                <button className={styles.pauseButton}>
+                                    <img src="/pause.png" alt="Pause" className={styles.pauseIcon} />
+                                </button>
                             </div>
                         </div>
 
@@ -302,7 +314,39 @@ const EditVideo: React.FC = () => {
                             </div>
                         ) : selectedIcon === "iconPrompt" ? (
                             <div className={styles.soundAndSpeed}>
-
+                                <div className={styles.captionEdit}>
+                                    <div className={styles.captionText}>
+                                        <textarea
+                                            className={clsx(styles.input_text)}
+                                            placeholder="Enter new prompt"
+                                            value={newPrompt}
+                                            onChange={(e) => setnewPrompt(e.target.value)}
+                                        ></textarea>
+                                    </div>
+                                    <div className={styles.contentStyle}>
+                                        <span className={styles.titleCaption}>Content Style</span>
+                                        <div className={styles.formatContentStyle}>
+                                            <div className={`${styles.style_buttons} content`}>
+                                                {contentStyleOptions.map((style) => (
+                                                    <button
+                                                        key={style}
+                                                        onClick={() => handleContentStyleClick(style)}
+                                                        className={clsx(styles.style_button, {
+                                                            [styles.activeContent]: selectedContentStyles.includes(style),
+                                                        })}
+                                                    >
+                                                        {style}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className={styles.style_recreate}>
+                                                <button className={styles.style_button_recreate}>
+                                                    Recreate
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ) : selectedIcon === "iconSound" ? (
                             <div className={styles.soundAndSpeed}>
@@ -405,9 +449,8 @@ const EditVideo: React.FC = () => {
                                 }
                             </div>
                         )}
+                        </div>
                     </div>
-
-            </div>
 
             <div className={styles.timeline}>
                 <div className={styles.leftTimeline}>
@@ -439,6 +482,13 @@ const EditVideo: React.FC = () => {
                                 </div>
                             );
                         })}
+                    </div>
+                </div>
+                <div className={clsx(styles.rightSide)}>
+                    <div className={clsx(styles.nextButtonWrapper)}>
+                        <button className={clsx(styles.nextButton)} onClick={() => navigate('/export-video')}>
+                            <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
+                        </button>
                     </div>
                 </div>
             </div>
