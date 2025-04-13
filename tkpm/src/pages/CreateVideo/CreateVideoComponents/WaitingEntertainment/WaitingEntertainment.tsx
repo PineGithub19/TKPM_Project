@@ -7,7 +7,7 @@ const entries = [
   { quote: "“Ngồi chờ AI mà không chill là dở.”", emoji: "☕", author: "Gemini Bản Ổn Định", theme: "./quote1.jpeg" },
   { quote: "“Đời như văn học, chỉ khác là ít happy ending.”", emoji: "📖", author: "Siri 5.1 Tích Hợp", theme: "./quote2.jpeg" },
   { quote: "“Đợi chút nha, video đang được nấu bằng deep learning.”", emoji: "🍳", author: "GPT-4 Plus Pro Max", theme: "./quote3.jpeg" },
-  { quote: "“Đọc văn học giúp ta bớt đần.”", emoji: "📚", author: "Bing AI Thần Thánh", theme: "./quote4.jpeg" },
+  { quote: "“Đọc văn học giúp ta thông minh hơn.”", emoji: "📚", author: "Bing AI Thần Thánh", theme: "./quote4.jpeg" },
   { quote: "“AI đang suy nghĩ thay bạn... nhưng crush bạn lại nghĩ về người khác.”", emoji: "🤖💔", author: "DeepMind Ultra Gen 7", theme: "./quote5.jpeg" },
   { quote: "“Lên level AI là đi lên tầng thượng.”", emoji: "🕹️", author: "Claude Pro Max Bản Đặc Biệt", theme: "./quote6.jpeg" },
   { quote: "“Không có gì khó, chỉ có điều không dễ”", emoji: "💡", author: "Cortana 2.0 Phiên Bản Ráp Lại", theme: "./quote7.jpeg" },
