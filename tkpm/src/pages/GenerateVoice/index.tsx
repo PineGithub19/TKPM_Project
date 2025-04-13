@@ -138,7 +138,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
     };
 
     const renderSingleVoiceGenerator = () => (
-        <Form layout="vertical" onFinish={() => {}} className={styles.form}>
+        <Form layout="vertical" onFinish={onFinish} className={styles.form}>
           <Form.Item name="text" rules={[{ required: true, message: 'Vui lòng nhập văn bản!' }]} className={styles.formItem}>
             <label className={styles.customLabel}>Văn bản</label>
             <Input.TextArea className={styles.textArea} placeholder="Nhập văn bản cần chuyển thành giọng nói" />
@@ -186,20 +186,73 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
 
     const renderBatchVoiceGenerator = () => (
     <div className={styles.batchContainer}>
-        <h2 className={styles.batchHeader}>Tạo Giọng Nói Hàng Loạt</h2>
-        <p className={styles.batchSubtitle}>Tạo giọng nói cho {voiceSegments.length} phân đoạn kịch bản</p>
+        <div>
+            <h2 className={styles.batchHeader}>{scriptTitle || 'Tạo Giọng Nói Hàng Loạt'}</h2>
+            <p className={styles.batchSubtitle}>Tạo giọng nói cho {voiceSegments.length} phân đoạn kịch bản</p>
+        </div>
+
+        <div className="row mb-4">
+            <div className="col-md-6">
+                <label style={{ fontSize: '20px', fontWeight: '600', marginBottom: '0.5rem', display: 'inline-block', marginRight: '10px' }}>Giọng điệu:</label>
+                <Select className={styles.formSelect}                         value={currentTone}
+                    onChange={setCurrentTone}
+                    disabled={batchProcessing} placeholder="Chọn giọng điệu">
+                    <Option className={styles.option} value="formal">Trang trọng</Option>
+                    <Option className={styles.option} value="epic">Hùng tráng</Option>
+                    <Option className={styles.option} value="humorous">Hài hước</Option>
+                </Select>
+            </div>
+
+            <div className="col-md-6">
+                <label style={{ fontSize: '20px', fontWeight: '600', marginBottom: '0.5rem', display: 'inline-block' }}>Ngôn ngữ:</label>
+                <Select className={styles.formSelect}  value={currentLanguage} onChange={setCurrentLanguage} disabled={batchProcessing} placeholder="Chọn ngôn ngữ">
+                    <Option className={styles.option} value="vi">Tiếng Việt</Option>
+                    <Option className={styles.option} value="en">Tiếng Anh</Option>
+                </Select>
+            </div>
+        </div>
+
 
         <div className={styles.batchControls}>
-        <Button type="primary" size="large" disabled={loading || voiceSegments.length === 0}>
-            Tạo Giọng Nói Cho Tất Cả Phân Đoạn
-        </Button>
+            <Button type="primary" size="large" className={styles.generateAllButton} onClick={generateAllVoices} disabled={batchProcessing  || voiceSegments.length === 0}>
+                Tạo Giọng Nói Cho Tất Cả Phân Đoạn
+            </Button>
+            {onComplete && (
+                <Button type="default" onClick={handleComplete} size="large" style={{ backgroundColor: '#D2691E', color: 'white', border: 'none', padding: '23px 20px 23px 20px', margin: '0 0 0 20px', fontSize: '20px', fontWeight: 'bold'}}>
+                    Tiếp Tục
+                </Button>
+            )}
 
-        {loading && <Progress percent={progress} status="active" className={styles.progress} />}
+            {batchProcessing && (
+                <div className="mb-4">
+                    <Progress percent={progress} status="active" className={styles.progress} />
+                    <p className="text-center">Đang xử lý phân đoạn...</p>
+                </div>
+            )}
         </div>
 
         <div>
         {voiceSegments.map((segment, index) => (
-            <Card key={index} className={styles.segmentCard} title={`Phân đoạn #${index + 1}`} extra={<Button>Chọn</Button>}>
+            <Card key={index} className={styles.segmentCard} title={`Phân đoạn #${index + 1}`}                         extra={
+                <Button
+                    type="link"
+                    onClick={() => generateVoiceForSegment(segment)}
+                    disabled={segment.status === 'loading' || batchProcessing}
+                    style={{
+                        color: 'white',
+                        backgroundColor: '#28A745',
+                        border: '2px solid #28A745',
+                        borderRadius: '8px',
+                        padding: '20px 20px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '20px',
+                    }}
+                >
+                    {segment.status === 'success' ? 'Tạo lại' : 'Tạo giọng nói'}
+                </Button>
+            } style={{ padding: '0', border: '1px solid white', }}>
+            {/* extra={<Button style={{ fontSize: 16, padding: '20px 30px 20px 30px', backgroundColor: '#ff6600', color: 'white', border: 'none', fontWeight: 'bold', textTransform: 'uppercase', boxShadow: 'none',}}>Chọn</Button>} */}
             <div className={styles.segmentCardBody}>{segment.text}</div>
 
             {segment.status === 'loading' && (
@@ -215,7 +268,9 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
 
             {segment.status === 'success' && segment.audioUrl && (
                 <div className={styles.segmentCardAudio}>
-                <audio controls src={segment.audioUrl} />
+                    <audio controls src={segment.audioUrl} className="w-100 mb-2">
+                        Trình duyệt của bạn không hỗ trợ phát audio.
+                    </audio>
                 <div className={styles.segmentCardDownload}>
                     <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`}>
                     Tải xuống
@@ -231,19 +286,14 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
 
     return (
     <div className={styles.container}>
-<Tabs
-  activeKey={activeTab}
-  onChange={setActiveTab}
-  className="custom-tabs"
->
-  <TabPane tab="Tạo Đơn Lẻ" key="single" className="custom-tab-pane">
-    {renderSingleVoiceGenerator()}
-  </TabPane>
-  <TabPane tab="Tạo Hàng Loạt" key="batch" className="custom-tab-pane">
-    {renderBatchVoiceGenerator()}
-  </TabPane>
-</Tabs>
-
+        <Tabs activeKey={activeTab} onChange={setActiveTab} className="custom-tabs">
+        <TabPane tab="Tạo Đơn Lẻ" key="single" className="custom-tab-pane">
+            {renderSingleVoiceGenerator()}
+        </TabPane>
+        <TabPane tab="Tạo Hàng Loạt" key="batch" className="custom-tab-pane">
+            {renderBatchVoiceGenerator()}
+        </TabPane>
+        </Tabs>
     </div>
     );
 };
