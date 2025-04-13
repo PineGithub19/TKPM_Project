@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message, Tabs, Card, Spin, Progress } from 'antd';
 import { post } from '../../utils/request';
+import styles from './GenerateVoice.module.css';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -137,179 +138,162 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
     };
 
     const renderSingleVoiceGenerator = () => (
-        <Form layout="vertical" onFinish={onFinish} className="max-w-2xl">
-            <Form.Item label="Văn bản" name="text" rules={[{ required: true, message: 'Vui lòng nhập văn bản!' }]}>
-                <Input.TextArea rows={4} placeholder="Nhập văn bản cần chuyển thành giọng nói" />
-            </Form.Item>
-
-            <Form.Item label="Giọng điệu" name="tone" initialValue="formal">
-                <Select placeholder="Chọn giọng điệu">
-                    <Option value="formal">Trang trọng</Option>
-                    <Option value="epic">Hùng tráng</Option>
-                    <Option value="humorous">Hài hước</Option>
-                </Select>
-            </Form.Item>
-
-            <Form.Item label="Ngôn ngữ" name="language" initialValue="vi">
-                <Select>
-                    <Option value="vi">Tiếng Việt</Option>
-                    <Option value="en">Tiếng Anh</Option>
-                </Select>
-            </Form.Item>
-
-            <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                    Tạo Giọng Nói
-                </Button>
-            </Form.Item>
-
-            {audioUrl && (
-                <div className="mt-6">
-                    <h2 className="text-xl font-semibold mb-2">Kết quả:</h2>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">URL: {audioUrl}</p>
-                        <a
-                            href={audioUrl}
-                            download
-                            className="inline-block mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        >
-                            Tải xuống
-                        </a>
-                    </div>
-                    <audio controls src={audioUrl} className="w-full">
-                        Trình duyệt của bạn không hỗ trợ phát audio.
-                    </audio>
-                </div>
-            )}
+        <Form layout="vertical" onFinish={onFinish} className={styles.form}>
+          <Form.Item name="text" rules={[{ required: true, message: 'Vui lòng nhập văn bản!' }]} className={styles.formItem}>
+            <label className={styles.customLabel}>Văn bản</label>
+            <Input.TextArea className={styles.textArea} placeholder="Nhập văn bản cần chuyển thành giọng nói" />
+          </Form.Item>
+    
+          <Form.Item name="tone" initialValue="formal" className={styles.formItem}>
+            <label className={styles.customLabel}>Giọng điệu</label>
+            <Select className={styles.formSelect} placeholder="Chọn giọng điệu">
+              <Option className={styles.option} value="formal">Trang trọng</Option>
+              <Option className={styles.option} value="epic">Hùng tráng</Option>
+              <Option className={styles.option} value="humorous">Hài hước</Option>
+            </Select>
+          </Form.Item>
+    
+          <Form.Item name="language" initialValue="vi" className={styles.formItem}>
+            <label className={styles.customLabel}>Ngôn ngữ</label>
+            <Select className={styles.formSelect} placeholder="Chọn ngôn ngữ">
+              <Option className={styles.option} value="vi">Tiếng Việt</Option>
+              <Option className={styles.option} value="en">Tiếng Anh</Option>
+            </Select>
+          </Form.Item>
+    
+          <Form.Item className={styles.boxButton}>
+            <Button type="primary" htmlType="submit" loading={loading} className={styles.button}>
+              Tạo Giọng Nói
+            </Button>
+          </Form.Item>
+    
+          {audioUrl && (
+            <div className={styles.resultWrapper}>
+              <h2 className={styles.resultHeader}>Kết quả:</h2>
+              <div>
+                <p className={styles.resultText}>URL: {audioUrl}</p>
+                <a href={audioUrl} download className={styles.downloadLink}>
+                  Tải xuống
+                </a>
+              </div>
+              <audio controls src={audioUrl} className={styles.audioControl}>
+                Trình duyệt của bạn không hỗ trợ phát audio.
+              </audio>
+            </div>
+          )}
         </Form>
     );
 
     const renderBatchVoiceGenerator = () => (
-        <div className="batch-voice-generator">
-            <div className="mb-4">
-                <h2 className="text-xl font-bold mb-2">{scriptTitle || 'Tạo Giọng Nói Hàng Loạt'}</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                    Tạo giọng nói cho {voiceSegments.length} phân đoạn kịch bản
-                </p>
+    <div className={styles.batchContainer}>
+        <div>
+            <h2 className={styles.batchHeader}>{scriptTitle || 'Tạo Giọng Nói Hàng Loạt'}</h2>
+            <p className={styles.batchSubtitle}>Tạo giọng nói cho {voiceSegments.length} phân đoạn kịch bản</p>
+        </div>
 
-                <div className="batch-controls mb-4">
-                    <div className="row mb-3">
-                        <div className="col-md-6">
-                            <label className="form-label">Giọng điệu:</label>
-                            <Select
-                                className="w-100"
-                                value={currentTone}
-                                onChange={setCurrentTone}
-                                disabled={batchProcessing}
-                            >
-                                <Option value="formal">Trang trọng</Option>
-                                <Option value="epic">Hùng tráng</Option>
-                                <Option value="humorous">Hài hước</Option>
-                            </Select>
-                        </div>
+        <div className="row mb-4">
+            <div className="col-md-6">
+                <label style={{ fontSize: '20px', fontWeight: '600', marginBottom: '0.5rem', display: 'inline-block', marginRight: '10px' }}>Giọng điệu:</label>
+                <Select className={styles.formSelect}                         value={currentTone}
+                    onChange={setCurrentTone}
+                    disabled={batchProcessing} placeholder="Chọn giọng điệu">
+                    <Option className={styles.option} value="formal">Trang trọng</Option>
+                    <Option className={styles.option} value="epic">Hùng tráng</Option>
+                    <Option className={styles.option} value="humorous">Hài hước</Option>
+                </Select>
+            </div>
 
-                        <div className="col-md-6">
-                            <label className="form-label">Ngôn ngữ:</label>
-                            <Select
-                                className="w-100"
-                                value={currentLanguage}
-                                onChange={setCurrentLanguage}
-                                disabled={batchProcessing}
-                            >
-                                <Option value="vi">Tiếng Việt</Option>
-                                <Option value="en">Tiếng Anh</Option>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <Button
-                            type="primary"
-                            onClick={generateAllVoices}
-                            disabled={batchProcessing || voiceSegments.length === 0}
-                            size="large"
-                        >
-                            Tạo Giọng Nói Cho Tất Cả Phân Đoạn
-                        </Button>
-
-                        {onComplete && (
-                            <Button type="default" onClick={handleComplete} size="large">
-                                Tiếp Tục
-                            </Button>
-                        )}
-                    </div>
-
-                    {batchProcessing && (
-                        <div className="mb-4">
-                            <Progress percent={progress} status="active" />
-                            <p className="text-center">Đang xử lý phân đoạn...</p>
-                        </div>
-                    )}
-                </div>
-
-                <div className="segments-list">
-                    {voiceSegments.map((segment, index) => (
-                        <Card
-                            key={index}
-                            className="mb-3"
-                            title={`Phân đoạn #${index + 1}`}
-                            extra={
-                                <Button
-                                    type="link"
-                                    onClick={() => generateVoiceForSegment(segment)}
-                                    disabled={segment.status === 'loading' || batchProcessing}
-                                >
-                                    {segment.status === 'success' ? 'Tạo lại' : 'Tạo giọng nói'}
-                                </Button>
-                            }
-                        >
-                            <p className="mb-3">{segment.text}</p>
-
-                            {segment.status === 'loading' && (
-                                <div className="text-center py-3">
-                                    <Spin />
-                                    <p className="mt-2">Đang tạo giọng nói...</p>
-                                </div>
-                            )}
-
-                            {segment.status === 'error' && (
-                                <div className="py-2 text-danger">Lỗi khi tạo giọng nói. Vui lòng thử lại.</div>
-                            )}
-
-                            {segment.status === 'success' && segment.audioUrl && (
-                                <div className="py-2">
-                                    <audio controls src={segment.audioUrl} className="w-100 mb-2">
-                                        Trình duyệt của bạn không hỗ trợ phát audio.
-                                    </audio>
-                                    <div className="text-right">
-                                        <a
-                                            href={segment.audioUrl}
-                                            download={`segment-${index + 1}.mp3`}
-                                            className="btn btn-sm btn-outline-primary"
-                                        >
-                                            Tải xuống
-                                        </a>
-                                    </div>
-                                </div>
-                            )}
-                        </Card>
-                    ))}
-                </div>
+            <div className="col-md-6">
+                <label style={{ fontSize: '20px', fontWeight: '600', marginBottom: '0.5rem', display: 'inline-block' }}>Ngôn ngữ:</label>
+                <Select className={styles.formSelect}  value={currentLanguage} onChange={setCurrentLanguage} disabled={batchProcessing} placeholder="Chọn ngôn ngữ">
+                    <Option className={styles.option} value="vi">Tiếng Việt</Option>
+                    <Option className={styles.option} value="en">Tiếng Anh</Option>
+                </Select>
             </div>
         </div>
+
+
+        <div className={styles.batchControls} style={{display: 'flex', alignContent: 'start !important'}}>
+            <Button type="primary" size="large" className={styles.generateAllButton} onClick={generateAllVoices} disabled={batchProcessing  || voiceSegments.length === 0}>
+                Tạo Giọng Nói Cho Tất Cả Phân Đoạn
+            </Button>
+            {onComplete && (
+                <Button type="default" onClick={handleComplete} size="large" style={{ backgroundColor: '#D2691E', color: 'white', border: 'none', padding: '23px 20px 23px 20px', margin: '0 0 0 20px', fontSize: '20px', fontWeight: 'bold'}}>
+                    Tiếp Tục
+                </Button>
+            )}
+            {batchProcessing && (
+                <div className="row mb-4 progressBar" style={{ margin: 0, padding: 0, width: '100%', display: 'flex', gap: 10}}>
+                    <Progress percent={progress} status="active" className={styles.progress} style={{width: '200px'}} />
+                    {/* <p className="text-center" style={{margin: 0}}>Đang xử lý phân đoạn...</p> */}
+                </div>
+            )}
+        </div>
+
+        <div>
+        {voiceSegments.map((segment, index) => (
+            <Card key={index} className={styles.segmentCard} title={`Phân đoạn #${index + 1}`}                         extra={
+                <Button
+                    type="link"
+                    onClick={() => generateVoiceForSegment(segment)}
+                    disabled={segment.status === 'loading' || batchProcessing}
+                    style={{
+                        color: 'white',
+                        backgroundColor: '#28A745',
+                        border: '2px solid #28A745',
+                        borderRadius: '8px',
+                        padding: '20px 20px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '20px',
+                    }}
+                >
+                    {segment.status === 'success' ? 'Tạo lại' : 'Tạo giọng nói'}
+                </Button>
+            } style={{ padding: '0', border: '1px solid white', }}>
+            {/* extra={<Button style={{ fontSize: 16, padding: '20px 30px 20px 30px', backgroundColor: '#ff6600', color: 'white', border: 'none', fontWeight: 'bold', textTransform: 'uppercase', boxShadow: 'none',}}>Chọn</Button>} */}
+            <div className={styles.segmentCardBody}>{segment.text}</div>
+
+            {segment.status === 'loading' && (
+                <div className="text-center py-3">
+                <Spin />
+                <p>Đang tạo giọng nói...</p>
+                </div>
+            )}
+
+            {segment.status === 'error' && (
+                <div className={styles.segmentCardError}>Lỗi khi tạo giọng nói. Vui lòng thử lại.</div>
+            )}
+
+            {segment.status === 'success' && segment.audioUrl && (
+                <div className={styles.segmentCardAudio}>
+                    <audio controls src={segment.audioUrl} className="w-100 mb-2">
+                        Trình duyệt của bạn không hỗ trợ phát audio.
+                    </audio>
+                <div className={styles.segmentCardDownload}>
+                    <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`}>
+                    Tải xuống
+                    </a>
+                </div>
+                </div>
+            )}
+            </Card>
+        ))}
+        </div>
+    </div>
     );
 
     return (
-        <div className="p-4">
-            <Tabs activeKey={activeTab} onChange={setActiveTab}>
-                <TabPane tab="Tạo Đơn Lẻ" key="single">
-                    {renderSingleVoiceGenerator()}
-                </TabPane>
-                <TabPane tab="Tạo Hàng Loạt" key="batch">
-                    {renderBatchVoiceGenerator()}
-                </TabPane>
-            </Tabs>
-        </div>
+    <div className={styles.container}>
+        <Tabs activeKey={activeTab} onChange={setActiveTab} className="custom-tabs">
+        <TabPane tab="Tạo Đơn Lẻ" key="single" className="custom-tab-pane">
+            {renderSingleVoiceGenerator()}
+        </TabPane>
+        <TabPane tab="Tạo Hàng Loạt" key="batch" className="custom-tab-pane">
+            {renderBatchVoiceGenerator()}
+        </TabPane>
+        </Tabs>
+    </div>
     );
 };
 

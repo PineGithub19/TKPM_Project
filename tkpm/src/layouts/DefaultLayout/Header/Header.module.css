@@ -1,5 +1,7 @@
 .headerContainer {
     padding: 8px 32px;
+    background-color: #373f58;
+    color: white;
 }
 
 .image {
