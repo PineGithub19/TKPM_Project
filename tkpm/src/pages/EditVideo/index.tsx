@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./EditVideo.module.css";
 import { useNavigate } from "react-router-dom";
+import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
 import clsx from "clsx";
 
 const contentStyleOptions = ["Analytical", "Narrative", "Modern", "Poetic Illustration", "Classic", "Storytelling", "Dramatic", "Satirical"];
@@ -234,6 +235,7 @@ const EditVideo: React.FC = () => {
 
     return (
         <div className={styles.container}>
+            <FloatingParticles />
             <div className={styles.header}>
                 <div className={styles.left}>
                     <button onClick={() => navigate('/create-video')} className={styles.backButton}>

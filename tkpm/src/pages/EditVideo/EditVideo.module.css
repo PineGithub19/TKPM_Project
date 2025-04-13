@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
 
 .container {
+    position: relative;
     background: linear-gradient(to top right, #011321 10%, #102632 88%);
     min-height: 100vh;
     padding: 40px;
@@ -23,6 +24,7 @@
 }
 
 .left {
+    position: relative;
     display: flex;
     align-items: center;
     width: 70%;
@@ -59,6 +61,7 @@
 }
 
 .right {
+    position: relative;
     width: 30%;
 }
 
@@ -76,6 +79,7 @@
 }
 
 .leftPanel {
+    position: relative;
     display: flex;
     align-items: center;
     width: 70%;
@@ -143,6 +147,7 @@
 }
 
 .rightPanel {
+    position: relative;
     width: 30%;
     overflow-y: auto;
     max-height: 100%;
@@ -224,6 +229,7 @@
 }
 
 .leftTimeline {
+    position: relative;
     width: 70%;
     height: 100%;
     display: flex;
@@ -248,6 +254,7 @@
 }
 
 .rightTimeline {
+    position: relative;
     width: 30%;
     height: 100%;
     display: flex;
@@ -265,6 +272,7 @@
 }
 
 .leftSide {
+    position: relative;
     width: 70%;
     height: 100%;
     padding: 20px;
@@ -314,6 +322,7 @@
 }
 
 .rightSide {
+    position: relative;
     width: 30%;
     border-radius: 12px;
 }
