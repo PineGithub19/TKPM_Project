@@ -225,7 +225,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
             {batchProcessing && (
                 <div className="row mb-4 progressBar" style={{ margin: 0, padding: 0, width: '100%', display: 'flex', gap: 10}}>
                     <Progress percent={progress} status="active" className={styles.progress} style={{width: '200px'}} />
-                    <p className="text-center" style={{margin: 0}}>Đang xử lý phân đoạn...</p>
+                    {/* <p className="text-center" style={{margin: 0}}>Đang xử lý phân đoạn...</p> */}
                 </div>
             )}
         </div>

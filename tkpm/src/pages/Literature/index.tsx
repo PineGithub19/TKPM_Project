@@ -1,7 +1,8 @@
 import { useState } from 'react';
-// import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import * as request from '../../utils/request';
+import clsx from 'clsx';
+import styles from './Literature.module.css';
 
 interface WikipediaResponse {
     success: boolean;
@@ -41,11 +42,8 @@ const Literature = ({ onSelectLiterature }: LiteratureProps) => {
         setError(null);
 
         try {
-            // const response = await axios.get<WikipediaResponse>(
-            //     `http://localhost:3000/literature/wikipedia?query=${encodeURIComponent(query)}`,
-            // );
             const response = (await request.get(
-                `/literature/wikipedia?query=${encodeURIComponent(query)}`,
+                `/literature/wikipedia?query=${encodeURIComponent(query)}`
             )) as WikipediaResponse | null;
 
             if (response !== null && response.success) {
@@ -75,11 +73,9 @@ const Literature = ({ onSelectLiterature }: LiteratureProps) => {
     const handleGenerateScript = () => {
         if (response?.data) {
             if (onSelectLiterature) {
-                // If onSelectLiterature is provided, call it with the content and title
                 onSelectLiterature(response.data.fullText, response.data.title);
             } else {
-                // Otherwise, use the original navigation behavior
-                navigate('/generate_scrip', {
+                navigate('/generate_script', {
                     state: {
                         content: response.data.fullText,
                         title: response.data.title,
@@ -89,25 +85,30 @@ const Literature = ({ onSelectLiterature }: LiteratureProps) => {
         }
     };
 
+    const cleanTitle = (title: string) => {
+        return title.replace(/<[^>]+>/g, '');
+    };
+
     return (
-        <div className="container mt-4">
-            <h2>Tìm kiếm tác phẩm văn học</h2>
-            <div className="input-group mb-3">
+        <div className={clsx(styles.container)}>
+            <h2 className={clsx(styles.title)}>Tìm kiếm tác phẩm văn học</h2>
+
+            <div className={clsx(styles.inputGroup)}>
                 <input
                     type="text"
-                    className="form-control"
+                    className={clsx(styles.input)}
                     placeholder="Nhập tên tác phẩm..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && searchWikipedia()}
                 />
-                <button className="btn btn-primary" onClick={searchWikipedia}>
+                <button className={clsx(styles.searchButton)} onClick={searchWikipedia}>
                     Tìm kiếm
                 </button>
             </div>
 
             {loading && (
-                <div className="text-center">
+                <div className={clsx(styles.spinner)}>
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
@@ -115,40 +116,42 @@ const Literature = ({ onSelectLiterature }: LiteratureProps) => {
             )}
 
             {error && (
-                <div className="alert alert-danger" role="alert">
+                <div className={clsx(styles.errorAlert)} role="alert">
                     {error}
                 </div>
             )}
 
             {response?.data && (
-                <div className="card">
-                    <div className="card-body">
-                        <h3 className="card-title">{response.data.displayTitle}</h3>
-
-                        <div className="mb-3">
+                <div className={clsx(styles.card)}>
+                    <div className={clsx(styles.cardBody)}>
+                        <h3 className={clsx(styles.cardTitle)}>{cleanTitle(response.data.displayTitle)}</h3>
+                        <div className={clsx(styles.buttonsContainer)}>
                             <button
-                                className="btn btn-secondary me-2"
+                                className={clsx(styles.toggleContentButton)}
                                 onClick={() => setShowFullContent(!showFullContent)}
                             >
                                 {showFullContent ? 'Xem tóm tắt' : 'Xem toàn bộ nội dung'}
                             </button>
-                            <button className="btn btn-primary me-2" onClick={handleCopy}>
+                            <button className={clsx(styles.copyButton)} onClick={handleCopy}>
                                 Sao chép nội dung
                             </button>
-                            <button className="btn btn-success" onClick={handleGenerateScript}>
+                            <button className={clsx(styles.generateScriptButton)} onClick={handleGenerateScript}>
                                 {onSelectLiterature ? 'Chọn tác phẩm này' : 'Tạo kịch bản video'}
                             </button>
                         </div>
 
                         {showFullContent ? (
-                            <div className="content" dangerouslySetInnerHTML={{ __html: response.data.fullText }} />
+                            <div
+                                className={clsx(styles.content)}
+                                dangerouslySetInnerHTML={{ __html: response.data.fullText }}
+                            />
                         ) : (
                             <div>
                                 {response.data.sections.map((section, index) => (
-                                    <div key={index} className="mb-4">
-                                        <h4>{section.title}</h4>
+                                    <div key={index} className={clsx(styles.section)}>
+                                        <h4 className={clsx(styles.sectionTitle)}>{section.title}</h4>
                                         <div
-                                            className="content"
+                                            className={clsx(styles.sectionContent)}
                                             dangerouslySetInnerHTML={{ __html: section.content }}
                                         />
                                     </div>
