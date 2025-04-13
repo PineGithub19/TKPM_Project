@@ -213,7 +213,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
         </div>
 
 
-        <div className={styles.batchControls}>
+        <div className={styles.batchControls} style={{display: 'flex', alignContent: 'start !important'}}>
             <Button type="primary" size="large" className={styles.generateAllButton} onClick={generateAllVoices} disabled={batchProcessing  || voiceSegments.length === 0}>
                 Tạo Giọng Nói Cho Tất Cả Phân Đoạn
             </Button>
@@ -222,11 +222,10 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
                     Tiếp Tục
                 </Button>
             )}
-
             {batchProcessing && (
-                <div className="mb-4">
-                    <Progress percent={progress} status="active" className={styles.progress} />
-                    <p className="text-center">Đang xử lý phân đoạn...</p>
+                <div className="row mb-4 progressBar" style={{ margin: 0, padding: 0, width: '100%', display: 'flex', gap: 10}}>
+                    <Progress percent={progress} status="active" className={styles.progress} style={{width: '200px'}} />
+                    <p className="text-center" style={{margin: 0}}>Đang xử lý phân đoạn...</p>
                 </div>
             )}
         </div>

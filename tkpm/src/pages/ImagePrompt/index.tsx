@@ -5,6 +5,7 @@ import * as request from '../../utils/request';
 import LoadingComponent from '../../components/Loading';
 import CustomizedCheckbox from '../../components/CustomizedCheckbox';
 import SweetAlert from '../../components/SweetAlert';
+import styles from './ImagePrompt.module.css';
 import { Button, Card } from 'antd';
 
 interface ImagesSegment {
@@ -241,7 +242,7 @@ function ImagePrompt({
     };
 
     return (
-        <div className="p-4">
+        <div>
             <div className={clsx('container', 'd-flex', 'flex-column', 'h-100', 'w-100')}>
                 <div className={clsx('d-flex', 'flex-column', 'align-items-start')}>
                     <p className="mb-4">
@@ -299,14 +300,14 @@ function ImagePrompt({
                             </button>
                         </div>
                     </div>
-                    <div className="segments-list">
+                    <div className={styles.segmentsList}>
                         {imageData.map((dataItem, imageSegmentIndex) => (
                             <Card
                                 key={imageSegmentIndex}
-                                className="mb-3"
+                                className={styles.segmentCard}
                                 title={`Phân đoạn #${imageSegmentIndex + 1}`}
                                 extra={
-                                    <>
+                                    <div className={styles.segmentCardActions}>
                                         <Button
                                             type="link"
                                             onClick={() => handleCustomizedGeneration(dataItem)}
@@ -315,6 +316,7 @@ function ImagePrompt({
                                                 batchProcessing ||
                                                 customizedGenerationClick
                                             }
+                                            className={styles.segmentCardButton}
                                         >
                                             Customized Generation
                                         </Button>
@@ -326,37 +328,37 @@ function ImagePrompt({
                                                 batchProcessing ||
                                                 customizedGenerationClick
                                             }
+                                            className={styles.segmentCardButton}
                                         >
                                             {dataItem.status === 'success' ? 'Re-generate' : 'Generate Images'}
                                         </Button>
-                                    </>
+                                    </div>
                                 }
                             >
-                                <p className="mb-3">{dataItem.text}</p>
+                                <p className={styles.segmentCardBody}>{dataItem.text}</p>
+
                                 {dataItem.status === 'loading' && (
                                     <div className="text-center py-3">
                                         <LoadingComponent />
-                                        <p className="mt-2">Images are generated...</p>
+                                        <p className={styles.segmentCardLoading}>Images are being generated...</p>
                                     </div>
                                 )}
+
                                 {dataItem.status === 'error' && (
-                                    <div className="py-2 text-danger">
-                                        Errors occur while generating images. Please try again.
+                                    <div className={styles.segmentCardError}>
+                                        Errors occurred while generating images. Please try again.
                                     </div>
                                 )}
+
                                 {dataItem.status === 'success' && (
-                                    <div className={clsx('d-flex', 'flex-wrap', 'justify-content-start', 'mb-4')}>
+                                    <div className={styles.segmentCardImageGrid}>
                                         {dataItem.images.length > 0 &&
                                             dataItem.images.map((imageItem, imageItemIndex) => (
-                                                <div
-                                                    key={imageItemIndex}
-                                                    className={clsx('d-flex', 'flex-column', 'align-items-center')}
-                                                >
+                                                <div key={imageItemIndex} className={styles.segmentCardImageItem}>
                                                     <img
-                                                        key={imageItemIndex}
                                                         src={imageItem}
                                                         alt={`image-${imageItemIndex}`}
-                                                        className={clsx('rounded', 'm-2', 'img-thumbnail')}
+                                                        className={styles.segmentCardImage}
                                                     />
                                                     <CustomizedCheckbox
                                                         isChecked={selectedImages.some(
