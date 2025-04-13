@@ -13,4 +13,13 @@ router.post('/generate', async (req, res) => {
   }
 });
 
+router.post('/generate-srt', async (req, res) => {
+  try {
+    const voicePath = await voiceController.generateSRTVoice(req.body);
+    res.json({ success: true, path: voicePath });
+  } catch (e: any) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 export default router;

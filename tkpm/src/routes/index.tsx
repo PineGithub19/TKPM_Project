@@ -13,6 +13,7 @@ import Signup from '../pages/SignUp';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import GenerateVoice from '../pages/GenerateVoice';
+import SRTVoice from '../pages/SRTGenerateVoicePage';
 
 interface Route {
     path: string;
@@ -36,6 +37,7 @@ const publicRoutes: Route[] = [
     { path: '/literature', component: Literature, layout: OutSideLayout, private: true },
     { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
     { path: '/voice', component: GenerateVoice, layout: DefaultLayout, private: true },
+    { path: '/srt-voice', component: SRTVoice, layout: DefaultLayout, private: true},
 ];
 
 // with authentication
