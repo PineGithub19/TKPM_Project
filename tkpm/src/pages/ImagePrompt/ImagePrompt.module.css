@@ -1,0 +1,97 @@
+.segmentsList {
+    max-height: 55vh; /* bạn có thể điều chỉnh cao hơn hoặc nhỏ hơn tùy layout */
+    overflow-y: auto;
+    padding-right: 8px; /* tránh che nội dung bởi scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #95a5a6 transparent; /* cho Firefox */
+}
+
+/* Tuỳ chọn thêm cho đẹp scrollbar (Chrome, Edge) */
+.segmentsList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.segmentsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.segmentsList::-webkit-scrollbar-thumb {
+    background-color: #95a5a6;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+
+.segmentCard {
+    margin-bottom: 20px;
+    background-color: #34495e9b;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+    border: 1px solid white;
+}
+
+.segmentCard:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.segmentCardBody {
+    font-size: 20px;
+    color: #d9e0e4;
+    margin-bottom: 15px;
+}
+
+.segmentCardLoading {
+    font-size: 20px;
+    color: #ecf0f1;
+    margin-top: 10px;
+}
+
+.segmentCardError {
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.segmentCardActions {
+    display: flex;
+    gap: 12px;
+}
+
+.segmentCardButton {
+    color: white !important;
+    background-color: #28A745;
+    border: 2px solid #28A745;
+    border-radius: 8px;
+    padding: 20px 16px;
+    font-weight: bold;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.segmentCardButton:hover {
+    background-color: #28A745 !important;
+}
+
+.segmentCardImageGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.segmentCardImageItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.segmentCardImage {
+    border-radius: 8px;
+    border: 2px solid white;
+    max-width: 150px;
+    height: auto;
+}

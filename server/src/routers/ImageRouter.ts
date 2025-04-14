@@ -7,5 +7,6 @@ const router = express.Router();
 router.get('/get-images', imageController.getImages);
 router.post('/text-to-multiple-images', imageController.handleTextToMultipleImages);
 router.post('/image-to-text', imageController.handleImageToText);
+router.post('/image-storage', imageController.saveImageToLocal);
 
 export default router;

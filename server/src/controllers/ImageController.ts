@@ -35,6 +35,7 @@ class ImageController {
         this.handleTextToMultipleImages = this.handleTextToMultipleImages.bind(this);
         this.handleImageToText = this.handleImageToText.bind(this);
         this.getImages = this.getImages.bind(this);
+        this.saveImageToLocal = this.saveImageToLocal.bind(this);
     }
 
     async getImages(req: Request, res: Response, next: NextFunction) {
@@ -58,111 +59,27 @@ class ImageController {
         }
     }
 
-    // async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
-    //     try {
-    //         const { prompt, promptId } = req.body;
-
-    //         if (!prompt) {
-    //             res.status(400).json({ message: 'Prompt is required' });
-    //         }
-
-    //         const payload: {
-    //             prompt: string;
-    //             steps: number;
-    //             width: number;
-    //             height: number;
-    //             cfg_scale: number;
-    //             seed: number;
-    //             sampler_name: string;
-    //             batch_size: number;
-    //         } = {
-    //             prompt,
-    //             steps: 10,
-    //             width: this.DEFAULT_IMAGE_WIDTH,
-    //             height: this.DEFAULT_IMAGE_HEIGHT,
-    //             cfg_scale: 7,
-    //             seed: -1,
-    //             sampler_name: 'Euler a',
-    //             batch_size: 2,
-    //         };
-
-    //         const response = await axios.post(stableDiffusionUrl, payload, {
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         });
-
-    //         if (response.status === 200) {
-    //             const images = response.data.images as Base64URLString[];
-    //             images.forEach((base64Image: string, index: number) => {
-    //                 const imageBuffer = Buffer.from(base64Image, 'base64');
-    //                 fs.writeFileSync(`./lighthouse-${index}.jpeg`, imageBuffer);
-    //             });
-    //             res.status(200).json({ imageList: images });
-
-    //             const imageData: IImageConfig = {
-    //                 style: 'classic',
-    //                 size: 'small',
-    //                 resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
-    //                 color_scheme: 'normal',
-    //                 generated_images: images,
-    //             };
-
-    //             const existedPrompt = await DBServices.getDocumentById(ImageConfigModel, promptId);
-
-    //             if (!existedPrompt) {
-    //                 const imageDataResult = await DBServices.createDocument(ImageConfigModel, imageData);
-    //                 if (imageDataResult) {
-    //                     res.status(200).json({ imageList: imageDataResult.generated_images });
-    //                 } else {
-    //                     res.status(500).send('Error: imageDataResult is null');
-    //                 }
-    //             } else {
-    //                 const previousImages = existedPrompt.generated_images;
-    //                 imageData.generated_images = [...previousImages, ...images];
-
-    //                 const imageDataResult = await DBServices.updateDocument(ImageConfigModel, promptId, imageData);
-    //                 if (imageDataResult) {
-    //                     res.status(200).json({ imageList: imageDataResult.generated_images });
-    //                 } else {
-    //                     res.status(500).send('Error: imageDataResult is null');
-    //                 }
-    //             }
-    //         } else {
-    //             res.status(response.status).send('Failed to generate images');
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         res.status(500).send('Error generating images');
-    //     }
-    // }
-
     async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt } = req.body;
+            const { prompt, configuration } = req.body;
 
             if (!prompt) {
                 res.status(400).json({ message: 'Prompt is required' });
+                return;
             }
 
-            const payload: {
-                prompt: string;
-                steps: number;
-                width: number;
-                height: number;
-                cfg_scale: number;
-                seed: number;
-                sampler_name: string;
-                batch_size: number;
-            } = {
+            const payload = {
                 prompt,
-                steps: 10,
-                width: this.DEFAULT_IMAGE_WIDTH,
-                height: this.DEFAULT_IMAGE_HEIGHT,
-                cfg_scale: 7,
-                seed: -1,
-                sampler_name: 'Euler a',
-                batch_size: 2,
+                steps: configuration?.steps || 10,
+                width: configuration?.width || this.DEFAULT_IMAGE_WIDTH,
+                height: configuration?.height || this.DEFAULT_IMAGE_HEIGHT,
+                cfg_scale: configuration?.cfg_scale || 7,
+                seed: configuration?.seed || -1,
+                sampler_name: configuration?.sampler_name || 'Euler a',
+                batch_size: configuration?.batch_size || 2,
+                override_settings: {
+                    sd_model_checkpoint: configuration?.model || 'dreamshaper_8.safetensors',
+                },
             };
 
             const response = await axios.post(stableDiffusionUrl, payload, {
@@ -211,6 +128,87 @@ class ImageController {
         } catch (error) {
             console.error('Error generating text:', error);
             res.status(500).send('Error generating text');
+        }
+    }
+
+    async saveImageToLocal(req: Request, res: Response, next: NextFunction) {
+        const { images, promptId } = req.body;
+
+        if (!images || !Array.isArray(images)) {
+            res.status(400).json({ message: 'Images array is required' });
+            return;
+        }
+
+        try {
+            // Ensure the directory exists
+            const publicDir = 'public';
+            const imagesDir = 'public/images';
+
+            if (!fs.existsSync(publicDir)) {
+                fs.mkdirSync(publicDir);
+            }
+            if (!fs.existsSync(imagesDir)) {
+                fs.mkdirSync(imagesDir);
+            }
+
+            const savedPaths: string[] = [];
+
+            // Process each image
+            images.forEach((base64Image: string, index: number) => {
+                // Remove the data URL prefix if it exists
+                const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+
+                // Generate a unique filename using timestamp
+                const timestamp = new Date().getTime();
+                const filename = `image_${timestamp}_${index}.png`;
+                const filepath = `${imagesDir}/${filename}`;
+
+                // Convert base64 to buffer and save
+                const imageBuffer = Buffer.from(base64Data, 'base64');
+                fs.writeFileSync(filepath, imageBuffer);
+
+                savedPaths.push(`/images/${filename}`);
+            });
+
+            // Update or create image config in database
+            if (promptId) {
+                const currentImageData = await DBServices.getDocumentById(ImageConfigModel, promptId);
+
+                if (currentImageData) {
+                    // Update existing document with $set to ensure the array is updated
+                    const updateData = {
+                        style: currentImageData.style,
+                        size: currentImageData.size,
+                        resolution: currentImageData.resolution,
+                        color_scheme: currentImageData.color_scheme,
+                        generated_images: savedPaths,
+                    };
+
+                    await DBServices.updateDocument(ImageConfigModel, promptId, updateData);
+                } else {
+                    // Create new document
+                    const newDocument = {
+                        style: 'classic',
+                        size: 'small',
+                        resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
+                        color_scheme: 'normal',
+                        generated_images: savedPaths,
+                    };
+                    const response = await DBServices.createDocument(ImageConfigModel, newDocument);
+                    console.log('Created document:', response);
+                }
+            }
+
+            res.status(200).json({
+                message: 'Images saved successfully',
+                paths: savedPaths,
+            });
+        } catch (error) {
+            console.error('Error saving images:', error);
+            res.status(500).json({
+                message: 'Error saving images',
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
         }
     }
 }

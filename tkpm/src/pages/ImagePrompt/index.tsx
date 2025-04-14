@@ -1,11 +1,12 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useState } from 'react';
 import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
+import styles from './ImagePrompt.module.css';
 import * as request from '../../utils/request';
 import LoadingComponent from '../../components/Loading';
 import CustomizedCheckbox from '../../components/CustomizedCheckbox';
 import SweetAlert from '../../components/SweetAlert';
-import { Button, Card } from 'antd';
+import { Button, Card, Tabs } from 'antd';
 
 interface ImagesSegment {
     text: string;
@@ -17,6 +18,8 @@ interface ImagesListComplete {
     images: string[];
     segment: string;
 }
+
+const { TabPane } = Tabs;
 
 function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
@@ -81,6 +84,18 @@ function ImagePrompt({
     const [batchProcessing, setBatchProcessing] = useState<boolean>(false);
     const [customizedGenerationClick, setCustomizedGenerationClick] = useState<boolean>(false);
     const [currentSegment, setCurrentSegment] = useState<ImagesSegment | null>(null);
+    const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<string>('1');
+    const [imageConfig, setImageConfig] = useState({
+        steps: 10,
+        width: 256,
+        height: 256,
+        cfg_scale: 7,
+        seed: -1,
+        sampler_name: 'Euler a',
+        batch_size: 2,
+        model: 'dreamshaper_8.safetensors',
+    });
 
     useEffect(() => {
         console.log(scriptSegments.length);
@@ -95,6 +110,10 @@ function ImagePrompt({
         }
     }, [scriptSegments]);
 
+    const handleTabChange = (key: string) => {
+        setActiveTab(key);
+    };
+
     const handleGenerateImagesForSegments = async () => {
         try {
             setIsLoading(true);
@@ -107,6 +126,7 @@ function ImagePrompt({
             for (const segment of scriptSegments) {
                 const response = await request.post('/image/text-to-multiple-images', {
                     prompt: segment,
+                    configuration: imageConfig,
                 });
 
                 const base64Images = response.imageList;
@@ -162,7 +182,7 @@ function ImagePrompt({
 
             const response = await request.post('/image/text-to-multiple-images', {
                 prompt: enhancedPrompt,
-                // promptId: promptId,
+                configuration: imageConfig,
             });
 
             const base64Images = response.imageList;
@@ -190,15 +210,23 @@ function ImagePrompt({
         }
     };
 
-    const handleSelectImage = (imageSegmentIndex: number, imageId: number) => {
+    const handleSelectImage = (imageSegmentIndex: number, imageId: number, limit: number = 1) => {
         const index = selectedImages.findIndex(
             (image) => image.segmentId === imageSegmentIndex && image.id === imageId,
         );
+
         if (index === -1) {
-            setSelectedImages([
-                ...selectedImages,
-                { segmentId: imageSegmentIndex, id: imageId, path: imageData[imageSegmentIndex].images[imageId] },
-            ]);
+            // Count how many images are already selected for this segment
+            const selectedForSegment = selectedImages.filter((img) => img.segmentId === imageSegmentIndex).length;
+
+            // If limit is -1, allow unlimited selections
+            // Otherwise, check if we've reached the limit for this segment
+            if (limit === -1 || selectedForSegment < limit) {
+                setSelectedImages([
+                    ...selectedImages,
+                    { segmentId: imageSegmentIndex, id: imageId, path: imageData[imageSegmentIndex].images[imageId] },
+                ]);
+            }
         } else {
             const newSelectedImages = selectedImages.filter(
                 (image) => !(image.segmentId === imageSegmentIndex && image.id === imageId),
@@ -213,8 +241,6 @@ function ImagePrompt({
         setPromptInfo('');
     };
 
-    const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
-
     const handleCreateVideo = async () => {
         setIsFinishedVideo(true);
 
@@ -228,6 +254,11 @@ function ImagePrompt({
             return acc;
         }, {} as Record<string, string[]>);
 
+        await request.post('/image/image-storage', {
+            images: selectedImages.map((item) => item.path),
+            promptId: promptId,
+        });
+
         // Convert to ImagesListComplete format
         const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(([segment, images]) => ({
             segment,
@@ -238,9 +269,88 @@ function ImagePrompt({
         if (handleCheckedImagesListComplete) {
             handleCheckedImagesListComplete(result);
         }
+
+        // Switch to the configuration tab after saving
+        setActiveTab('1');
     };
 
-    return (
+    const handleConfigChange = (key: string, value: number | string) => {
+        setImageConfig((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
+    const renderImagesConfiguration = () => (
+        <div className="p-4">
+            <div className="container">
+                <h4 className="mb-4">Image Generation Settings</h4>
+                <div className="row g-3">
+                    <div className="col-md-6">
+                        <label className="form-label">Steps (1-150)</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={imageConfig.steps}
+                            min={1}
+                            max={150}
+                            onChange={(e) => handleConfigChange('steps', parseInt(e.target.value))}
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">CFG Scale (1-30)</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={imageConfig.cfg_scale}
+                            min={1}
+                            max={30}
+                            onChange={(e) => handleConfigChange('cfg_scale', parseInt(e.target.value))}
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Batch Size (1-10)</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={imageConfig.batch_size}
+                            min={1}
+                            max={10}
+                            onChange={(e) => handleConfigChange('batch_size', parseInt(e.target.value))}
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Style</label>
+                        <select
+                            className="form-select"
+                            value={imageConfig.model}
+                            onChange={(e) => handleConfigChange('model', e.target.value)}
+                        >
+                            <option value="dreamshaper_8.safetensors">Reality</option>
+                            <option value="toonyou_beta6.safetensors">Cartoon (Anime)</option>
+                        </select>
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label">Sampler</label>
+                        <select
+                            className="form-select"
+                            value={imageConfig.sampler_name}
+                            onChange={(e) => handleConfigChange('sampler_name', e.target.value)}
+                        >
+                            <option value="Euler a">Euler a (Recommended)</option>
+                            <option value="Euler">Euler</option>
+                            <option value="DPM++ 2M">DPM++ 2M</option>
+                            <option value="DPM++ SDE">DPM++ SDE</option>
+                            <option value="UniPC">UniPC</option>
+                            <option value="DDIM">DDIM</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderImagesForVideo = () => (
         <div className="p-4">
             <div className={clsx('container', 'd-flex', 'flex-column', 'h-100', 'w-100')}>
                 <div className={clsx('d-flex', 'flex-column', 'align-items-start')}>
@@ -299,14 +409,14 @@ function ImagePrompt({
                             </button>
                         </div>
                     </div>
-                    <div className="segments-list">
+                    <div className={styles.segmentsList}>
                         {imageData.map((dataItem, imageSegmentIndex) => (
                             <Card
                                 key={imageSegmentIndex}
-                                className="mb-3"
+                                className={styles.segmentCard}
                                 title={`Phân đoạn #${imageSegmentIndex + 1}`}
                                 extra={
-                                    <>
+                                    <div className={styles.segmentCardActions}>
                                         <Button
                                             type="link"
                                             onClick={() => handleCustomizedGeneration(dataItem)}
@@ -315,6 +425,7 @@ function ImagePrompt({
                                                 batchProcessing ||
                                                 customizedGenerationClick
                                             }
+                                            className={styles.segmentCardButton}
                                         >
                                             Customized Generation
                                         </Button>
@@ -326,37 +437,37 @@ function ImagePrompt({
                                                 batchProcessing ||
                                                 customizedGenerationClick
                                             }
+                                            className={styles.segmentCardButton}
                                         >
                                             {dataItem.status === 'success' ? 'Re-generate' : 'Generate Images'}
                                         </Button>
-                                    </>
+                                    </div>
                                 }
                             >
-                                <p className="mb-3">{dataItem.text}</p>
+                                <p className={styles.segmentCardBody}>{dataItem.text}</p>
+
                                 {dataItem.status === 'loading' && (
                                     <div className="text-center py-3">
                                         <LoadingComponent />
-                                        <p className="mt-2">Images are generated...</p>
+                                        <p className={styles.segmentCardLoading}>Images are being generated...</p>
                                     </div>
                                 )}
+
                                 {dataItem.status === 'error' && (
-                                    <div className="py-2 text-danger">
-                                        Errors occur while generating images. Please try again.
+                                    <div className={styles.segmentCardError}>
+                                        Errors occurred while generating images. Please try again.
                                     </div>
                                 )}
+
                                 {dataItem.status === 'success' && (
-                                    <div className={clsx('d-flex', 'flex-wrap', 'justify-content-start', 'mb-4')}>
+                                    <div className={styles.segmentCardImageGrid}>
                                         {dataItem.images.length > 0 &&
                                             dataItem.images.map((imageItem, imageItemIndex) => (
-                                                <div
-                                                    key={imageItemIndex}
-                                                    className={clsx('d-flex', 'flex-column', 'align-items-center')}
-                                                >
+                                                <div key={imageItemIndex} className={styles.segmentCardImageItem}>
                                                     <img
-                                                        key={imageItemIndex}
                                                         src={imageItem}
                                                         alt={`image-${imageItemIndex}`}
-                                                        className={clsx('rounded', 'm-2', 'img-thumbnail')}
+                                                        className={styles.segmentCardImage}
                                                     />
                                                     <CustomizedCheckbox
                                                         isChecked={selectedImages.some(
@@ -365,7 +476,7 @@ function ImagePrompt({
                                                                 item.id === imageItemIndex,
                                                         )}
                                                         onClick={() =>
-                                                            handleSelectImage(imageSegmentIndex, imageItemIndex)
+                                                            handleSelectImage(imageSegmentIndex, imageItemIndex, 1)
                                                         }
                                                     />
                                                 </div>
@@ -379,6 +490,17 @@ function ImagePrompt({
                 <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId} />
             </div>
         </div>
+    );
+
+    return (
+        <Tabs activeKey={activeTab} onChange={handleTabChange}>
+            <TabPane tab="Images Configuration" key="1">
+                {renderImagesConfiguration()}
+            </TabPane>
+            <TabPane tab="Images Generation" key="2">
+                {renderImagesForVideo()}
+            </TabPane>
+        </Tabs>
     );
 }
 

@@ -1,0 +1,183 @@
+.container {
+    background: #2C3E50;
+    padding: 60px;
+    font-family: 'Alata', sans-serif;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    box-sizing: border-box;
+    border: 2px solid #1a2a35;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ffffff;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.inputGroup {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.input {
+    flex: 1;
+    padding: 16px 24px; /* Tăng padding cho input */
+    font-size: 18px; /* Tăng kích thước font */
+    border-radius: 8px;
+    border: 1px solid white;
+    background-color: transparent;
+    color: white;
+}
+
+.searchButton {
+    padding: 16px 24px; /* Tăng padding cho button */
+    font-size: 18px; /* Tăng kích thước font */
+    background-color: #FF510C;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.searchButton:hover {
+    background-color: #FF4242;
+}
+
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.errorAlert {
+    margin-top: 20px;
+    background-color: rgba(255, 0, 0, 0.1);
+    color: red;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 18px; /* Tăng kích thước font cho lỗi */
+}
+
+.card {
+    background-color: #1c2f40;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 25px;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardTitle {
+    font-size: 28px; /* Tăng kích thước font cho tiêu đề card */
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.buttonsContainer {
+    margin-bottom: 30px;
+}
+
+.toggleContentButton,
+.copyButton,
+.generateScriptButton {
+    margin-right: 15px;
+    padding: 16px 28px; /* Tăng padding cho các button */
+    font-size: 18px; /* Tăng kích thước font cho các button */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.toggleContentButton {
+    background-color: #8A2BE2;
+    color: white;
+    border: 1px solid white;
+}
+
+.toggleContentButton:hover {
+    background-color: #7a1bcd;
+}
+
+.copyButton {
+    background-color: #3baf7c;
+    color: white;
+    border: 1px solid white;
+}
+
+.copyButton:hover {
+    background-color: #319f65;
+}
+
+.generateScriptButton {
+    background-color: #FF510C;
+    color: white;
+    border: 1px solid white;
+}
+
+.generateScriptButton:hover {
+    background-color: #FF4242;
+}
+
+.content {
+    margin-top: 25px;
+    font-size: 18px; /* Tăng kích thước font cho nội dung */
+    line-height: 1.6;
+    color: white;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.sectionTitle {
+    font-size: 24px; /* Tăng kích thước font cho tiêu đề phần */
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.sectionContent {
+    font-size: 18px; /* Tăng kích thước font cho nội dung phần */
+    line-height: 1.6;
+    color: white;
+}
+
+.card {
+    background-color: #182938;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.card::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.card::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}

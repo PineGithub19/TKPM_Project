@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 // import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as request from '../../utils/request';
+import styles from './ScriptAutoGenerate.module.css';
+import clsx from 'clsx';
 
 interface ScriptResponse {
     success: boolean;
@@ -291,16 +293,16 @@ const ScriptAutoGenerate = ({
     };
 
     const renderConfigForm = () => (
-        <div className="card mb-4">
-            <div className="card-header">
-                <h4>Cấu hình kịch bản</h4>
+        <div className={clsx(styles.card, styles.mb4)}>
+            <div className={clsx(styles.cardHeader)}>
+                <h4 className={clsx(styles.cardTitle)}>Cấu hình kịch bản</h4>
             </div>
-            <div className="card-body">
-                <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Thể loại:</label>
+            <div className={clsx(styles.cardBody)}>
+                <div className={clsx(styles.inputGroup)}>
+                    <div className={clsx(styles.formGroup)}>
+                        <label className={clsx(styles.formLabel)}>Thể loại:</label>
                         <select 
-                            className="form-select" 
+                            className={clsx(styles.formSelect)} 
                             value={scriptConfig.genre}
                             onChange={(e) => handleConfigChange('genre', e.target.value)}
                         >
@@ -311,11 +313,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Đối tượng:</label>
+    
+                    <div className={clsx(styles.formGroup)}>
+                        <label className={clsx(styles.formLabel)}>Đối tượng:</label>
                         <select 
-                            className="form-select" 
+                            className={clsx(styles.formSelect)} 
                             value={scriptConfig.audience}
                             onChange={(e) => handleConfigChange('audience', e.target.value)}
                         >
@@ -326,11 +328,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Giọng điệu:</label>
+    
+                    <div className={clsx(styles.formGroup)}>
+                        <label className={clsx(styles.formLabel)}>Giọng điệu:</label>
                         <select 
-                            className="form-select" 
+                            className={clsx(styles.formSelect)} 
                             value={scriptConfig.tone}
                             onChange={(e) => handleConfigChange('tone', e.target.value)}
                         >
@@ -341,11 +343,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label">Độ dài:</label>
+    
+                    <div className={clsx(styles.formGroup)}>
+                        <label className={clsx(styles.formLabel)}>Độ dài:</label>
                         <select 
-                            className="form-select" 
+                            className={clsx(styles.formSelect)} 
                             value={scriptConfig.duration}
                             onChange={(e) => handleConfigChange('duration', e.target.value)}
                         >
@@ -357,10 +359,10 @@ const ScriptAutoGenerate = ({
                         </select>
                     </div>
                 </div>
-
-                <div className="d-grid">
+    
+                <div className={clsx(styles.buttonGrid)}>
                     <button 
-                        className="btn btn-primary" 
+                        className={clsx(styles.primaryButton)} 
                         onClick={handleGenerateWithConfig}
                         disabled={loading}
                     >
@@ -372,33 +374,33 @@ const ScriptAutoGenerate = ({
     );
 
     const renderScriptSegments = () => (
-        <div className="card mb-4">
-            <div className="card-header d-flex justify-content-between align-items-center">
-                <h5>Các phân đoạn kịch bản</h5>
+        <div className={clsx(styles.card, styles.mb4)}>
+            <div className={clsx(styles.cardHeader, styles.segmentHeader)}>
+                <h5 className={clsx(styles.cardTitle)}>Các phân đoạn kịch bản</h5>
                 <button 
-                    className="btn btn-sm btn-outline-secondary"
+                    className={clsx(styles.backBtn)}
                     onClick={() => setShowSegments(false)}
                 >
                     Quay lại kịch bản đầy đủ
                 </button>
             </div>
-            <div className="card-body">
-                <p className="text-muted mb-3">
+            <div className={clsx(styles.cardBody)}>
+                <p className={clsx(styles.textMuted)}>
                     Mỗi phân đoạn dưới đây có thể được sử dụng để tạo một bức ảnh hoặc cảnh trong video
                 </p>
                 {scriptSegments.map((segment, index) => (
-                    <div key={index} className="card mb-3">
-                        <div className="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h6 className="mb-0">Phân đoạn #{index + 1}</h6>
+                    <div key={index} className={clsx(styles.card, styles.mb3)}>
+                        <div className={clsx(styles.segmentCardHeader)}>
+                            <h6 className={clsx(styles.cardSegmentTitle)}>Phân đoạn #{index + 1}</h6>
                             <button 
-                                className="btn btn-sm btn-outline-primary"
+                                className={clsx(styles.primaryButton, styles.btnSm, styles.copyBtn)}
                                 onClick={() => handleCopySegment(segment, index)}
                             >
                                 Sao chép
                             </button>
                         </div>
-                        <div className="card-body">
-                            <p className="mb-0">{segment}</p>
+                        <div className={clsx(styles.cardBody)}>
+                            <p className={clsx(styles.textMuted)}>{segment}</p>
                         </div>
                     </div>
                 ))}
@@ -407,26 +409,26 @@ const ScriptAutoGenerate = ({
     );
 
     return (
-        <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Kịch bản video</h2>
+        <div className={clsx(styles.container)}>
+            <div className={clsx(styles.header)}>
+                <h2 className={clsx(styles.title)}>Kịch bản video</h2>
                 {onComplete ? (
-                    <div>
+                    <div className={clsx(styles.actionButtonContainer)}>
                         {(script || editedScript) && (
-                            <button className="btn btn-primary" onClick={handleContinue} disabled={segmentLoading}>
+                            <button className={clsx(styles.primaryButton)} onClick={handleContinue} disabled={segmentLoading}>
                                 {segmentLoading ? 'Đang xử lý...' : 'Tiếp tục'}
                             </button>
                         )}
                     </div>
                 ) : (
-                    <button className="btn btn-outline-primary" onClick={() => navigate('/literature')}>
+                    <button className={clsx(styles.secondaryButton)} onClick={() => navigate('/literature')}>
                         Quay lại
                     </button>
                 )}
             </div>
 
             {loading && (
-                <div className="text-center">
+                <div className={clsx(styles.spinner)}>
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
@@ -434,7 +436,7 @@ const ScriptAutoGenerate = ({
             )}
 
             {segmentLoading && (
-                <div className="text-center">
+                <div className={clsx(styles.spinner)}>
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
@@ -443,7 +445,7 @@ const ScriptAutoGenerate = ({
             )}
 
             {error && (
-                <div className="alert alert-danger" role="alert">
+                <div className={clsx(styles.errorAlert)}>
                     {error}
                 </div>
             )}
@@ -453,65 +455,57 @@ const ScriptAutoGenerate = ({
 
             {!loading && !error && !configMode && !showSegments && (
                 <>
-                    <div className="d-flex justify-content-between mb-4">
-                        <div>
-                            <button className="btn btn-secondary me-2" onClick={() => setConfigMode(true)}>
-                                Thay đổi cấu hình
-                            </button>
+                    <div className={clsx(styles.buttonGroup)}>
+                        <button className={clsx(styles.secondaryButton)} onClick={() => setConfigMode(true)}>
+                            Thay đổi cấu hình
+                        </button>
+                        <button 
+                            className={clsx(styles.successButton)} 
+                            onClick={handleSplitScript}
+                            disabled={!script && !editedScript}
+                        >
+                            Tách thành phân đoạn
+                        </button>
+                        {scriptSegments.length > 0 && (
                             <button 
-                                className="btn btn-success" 
-                                onClick={handleSplitScript}
-                                disabled={!script && !editedScript}
+                                className={clsx(styles.infoButton)} 
+                                onClick={() => setShowSegments(true)}
                             >
-                                Tách thành phân đoạn
+                                Xem phân đoạn ({scriptSegments.length})
                             </button>
-                            {scriptSegments.length > 0 && (
-                                <button 
-                                    className="btn btn-info ms-2" 
-                                    onClick={() => setShowSegments(true)}
-                                >
-                                    Xem phân đoạn ({scriptSegments.length})
-                                </button>
-                            )}
-                        </div>
-                        <button className="btn btn-secondary" onClick={() => setEditMode(!editMode)}>
-                            {editMode ? 'Hủy chỉnh sửa' : 'Chỉnh sửa kịch bản'}
+                        )}
+                        <button className={clsx(styles.primaryButton)} onClick={handleCopy}>
+                            Sao chép kịch bản
                         </button>
                     </div>
-
-                    {editMode ? (
-                        <div className="mb-4">
+                    {editMode && (
+                        <div className={clsx(styles.editSection)}>
                             <h4>Chỉnh sửa kịch bản</h4>
-                            <div className="form-group">
-                                <label htmlFor="editInstructions">Hướng dẫn chỉnh sửa:</label>
+                            <div className={clsx(styles.formGroup)}>
+                                <label htmlFor="editInstructions" className={clsx(styles.formLabel)}>Hướng dẫn chỉnh sửa:</label>
                                 <textarea
                                     id="editInstructions"
-                                    className="form-control"
+                                    className={clsx(styles.formControl)}
                                     rows={3}
                                     value={editInstructions}
                                     onChange={(e) => setEditInstructions(e.target.value)}
                                 />
                             </div>
-                            <button className="btn btn-primary mt-2" onClick={handleEdit}>
+                            <button className={clsx(styles.primaryButton)} onClick={handleEdit}>
                                 Áp dụng chỉnh sửa
                             </button>
                         </div>
-                    ) : null}
-
-                    <div className="card">
-                        <div className="card-header">
-                            <h5>Kịch bản đã tạo</h5>
+                    )}
+                    <div className={clsx(styles.card)}>
+                        <div className={clsx(styles.cardHeader)}>
+                            <h5 className={clsx(styles.cardTitle)}>Kịch bản đã tạo</h5>
                         </div>
-                        <div className="card-body">
-                            <pre className="whitespace-pre-wrap">{editedScript || script}</pre>
+                        <div className={clsx(styles.cardBody)}>
+                            <pre className={clsx(styles.preWrap)}>{editedScript || script}</pre>
                         </div>
                     </div>
 
-                    <div className="mt-4">
-                        <button className="btn btn-primary" onClick={handleCopy}>
-                            Sao chép kịch bản
-                        </button>
-                    </div>
+
                 </>
             )}
 

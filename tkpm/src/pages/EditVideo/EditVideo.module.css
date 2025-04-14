@@ -1,0 +1,589 @@
+@import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
+
+.container {
+    position: relative;
+    background: linear-gradient(to top right, #011321 10%, #102632 88%);
+    min-height: 100vh;
+    padding: 40px;
+    font-family: 'Alata', sans-serif;
+    min-height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3%;
+    width: 100%;
+    padding: 0 16px;
+}
+
+.left {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 70%;
+    color: white;
+    font-size: 30px;
+}
+
+.backButton {
+    background-color: white;
+    color: white;
+    border-radius: 50px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 60px;
+    width: 60px;
+}
+
+.backButton:hover {
+    background-color: #FF4242;
+    border: 1px solid black;
+}
+
+.arrowIcon {
+    width: 24px;
+    height: 24px;
+}
+
+.title {
+    font-size: 24px;
+    margin: 0 0 5px 20px;
+}
+
+.right {
+    position: relative;
+    width: 30%;
+}
+
+.editCategory {
+    font-size: 30px;
+    color: white;
+    margin-left: 20px;
+}
+
+.body {
+    display: flex;
+    width: 100%;
+    height: 60vh;
+    margin-top: 20px;
+}
+
+.leftPanel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 70%;
+    color: white;
+    font-size: 30px;
+    justify-content: center;
+}
+
+.introImageWrapper {
+    position: relative;
+    background-color: #0a1a2f;
+    border: 5px solid black;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    width: 90%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pauseButton {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.pauseButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.pauseIcon {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+
+.previewImage {
+    width: 100%;
+    height: 100%;
+    object-fit: unset;
+    transition: transform 0.4s ease, width 0.4s ease, height 0.4s ease;
+}
+
+.flipped {
+    transform: scaleX(-1);
+}
+
+.rotated {
+    transform: rotate(90deg);
+}
+
+.flipped.rotated {
+    transform: scaleX(-1) rotate(90deg);
+}
+
+.rightPanel {
+    position: relative;
+    width: 30%;
+    overflow-y: auto;
+    max-height: 100%;
+    padding-right: 10px;
+}
+
+.rightPanel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rightPanel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+}
+
+.ratioGrid  {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.imageGrid { 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-height: 650px;
+}
+
+
+.imageStyleItem {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, border 0.2s;
+}
+
+.imageStyleItem:nth-child(1), .imageStyleItem:nth-child(2){
+    margin-top: 5px;
+}
+
+.imageStyleItem:hover {
+    transform: scale(1.05);
+    border-radius: 12px;
+}
+
+.styleImage {
+    width: 90%;
+    height: 150px;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    object-fit: cover;
+    transition: border 0.1s;
+}
+
+.selected .styleImageInImages {
+    border: 3px solid #00FF00;
+}
+
+
+.imageText {
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 20px;
+}
+
+.selected .imageText {
+    color: #00FF00;
+}
+
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 15vh;
+    margin-top: 20px;
+    border-radius: 12px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.leftTimeline {
+    position: relative;
+    width: 70%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.timelineTrack {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    font-size: 18px;
+    color: white;
+    opacity: 0.7;
+}
+
+.timelineMarker {
+    min-width: 30px;
+    text-align: center;
+}
+
+.rightTimeline {
+    position: relative;
+    width: 30%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.editVideoList {
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    gap: 20px;
+    height: 10%;
+}
+
+.leftSide {
+    position: relative;
+    width: 70%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.functionIcon {
+    width: 90%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categoryTitle {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.iconItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.iconItem:hover {
+    transform: scale(1.05);
+}
+
+.icon {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.iconLabel {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    text-align: center;
+}
+
+.rightSide {
+    position: relative;
+    width: 30%;
+    border-radius: 12px;
+}
+
+.arrowIconToImageStyle {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 10px;
+}
+
+.backToImageStyle{
+    background-color: transparent;
+    border: none;
+}
+
+.backToImageStyle:hover .arrowIconToImageStyle {
+    filter: brightness(1.5); /* Làm sáng icon khi hover */
+    transform: scale(1.1); /* Phóng to nhẹ */
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.imageItem {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, border 0.2s;
+}
+
+.imageItem:nth-child(1), .imageItem:nth-child(2){
+    margin-top: 5px;
+}
+
+.imageItem:hover {
+    transform: scale(1.05);
+    border-radius: 12px;
+}
+
+.styleImageInImages{
+    width: 90%;
+    height: 150px;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    object-fit: cover;
+    transition: border 0.1s;
+    margin-bottom: 50px;
+}
+
+.selectedRatioText {
+    color: #00FF00;
+    margin-top: 8px;
+    font-size: 20px;
+}
+
+.soundControl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.soundIcon {
+    width: 50px;
+    height: 50px;
+    margin: 10px 0 0 10px;
+}
+
+.volumeSlider {
+    width: 550px;
+    margin: 10px 0 0 10px;
+}
+
+.soundAndSpeed{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.imageEdit{
+    display: flex;
+    gap: 40px;
+}
+
+.captionEdit{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.captionText {
+    position: relative !important;
+}
+
+.input_text {
+    width: 90%;
+    height: 200px;
+    padding: 12px 40px;
+    margin: 10px 0 0 15px;
+    border: 1px solid white;
+    background-color: transparent;
+    color: white;
+    border-radius: 20px;
+    font-size: 30px;
+    resize: none;
+    overflow-y: auto;
+    line-height: 1.5;
+    box-sizing: border-box;
+    text-align: left;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.input_text::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 30px;
+}
+
+.input_text::-webkit-scrollbar {
+    width: 6px;
+}
+
+.input_text::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.input_text::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.input_text:focus {
+    border-color: #8A2BE2;
+    outline: none;
+}
+
+.iconCheck {
+    position: absolute;
+    bottom: 20px;
+    right: 70px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.captionStyle{
+    height: 130px;
+    margin-top: 10px;
+}
+
+.titleCaption{
+    color: white;
+    font-size: 30px;
+    margin: 0 0 5px 20px;
+}
+
+.formatStyle{
+    display: flex;
+    gap: 40px;
+    margin: 20px 0 5px 20px;
+}
+
+.iconFormat{
+    height: 60px;
+    width: 60px;
+    cursor: pointer;
+}
+
+.titleAutomatic{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.iconAutomaticSubtitles{
+    height: 40px;
+    width: 40px;
+}
+
+.style_buttons {
+    width: 90%;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.style_button {
+    padding: 10px 30px;
+    border: 1px solid white;
+    background-color: transparent;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 24px;
+}
+
+.style_button:not(.activeContent):not(.activeVoice):not(.activeVoiceGender):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.activeContent {
+    background-color: #8A2BE2;
+    border-color: #FFFFFF;
+    color: white;
+}
+
+.formatContentStyle{
+    display: flex;
+    gap: 40px;
+    margin: 20px 0 5px 20px;
+    flex-direction: column;
+}
+
+.style_button_recreate{
+    padding: 10px 30px;
+    width: 170px;
+    height: 70px;
+    font-weight: bold;
+    background-color: #FF4242;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    font-size: 24px;   
+}
+
+.style_button_recreate:hover {
+    background-color: #FF6B6B;
+    transform: scale(1.05);
+}
+
+.style_recreate{
+    display: flex;
+    justify-content: center;
+    margin: 0 50px 0 0;
+}
+
+
+.nextButton {
+    background-color: white;
+    color: white;
+    border: 1px solid black;
+    border-radius: 50px;
+    padding: 16px 24px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 60px;
+    width: 60px;
+}
+
+.nextButton:hover {
+    background-color: #FF4242;
+}
+
+.nextIcon {
+    width: 24px;
+    height: 24px;
+}
+
+.nextButtonWrapper {
+    display: flex;
+    justify-content: flex-end;
+}

@@ -1,14 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
-import clsx from 'clsx';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
+import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
 import ScriptAutoGenerate from '../ScriptAutoGenerate';
 import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
-
+import WaitingEntertainment from "./CreateVideoComponents/WaitingEntertainment/WaitingEntertainment";
 import * as request from '../../utils/request';
+import clsx from "clsx";
+import axios from "axios";
 
 const steps = [
     {
@@ -80,6 +82,7 @@ function CreateVideo() {
         setCheckedImagesList(images);
     };
 
+
     useEffect(() => {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
@@ -96,15 +99,23 @@ function CreateVideo() {
     }, [checkedImagesList]);
 
     return (
-        <div className={clsx(styles.background)}>
-            <div className={clsx('container', 'd-flex', 'justify-space-between', styles.layoutConfig)}>
-                <StepBar
-                    steps={steps}
-                    activeStep={activeStep}
-                    handleNext={handleNext}
-                    handleBack={handleBack}
-                    handleReset={handleReset}
-                />
+        <div className={clsx(styles.container)}>
+            <FloatingParticles />
+            <div className={clsx(styles.left)}>
+                <div className={clsx(styles.otherThing)}>
+                    <WaitingEntertainment />
+                </div>
+                <div className={clsx(styles.stepBar)}>
+                    <StepBar
+                        steps={steps}
+                        activeStep={activeStep}
+                        handleNext={handleNext}
+                        handleBack={handleBack}
+                        handleReset={handleReset}
+                    />
+                </div>
+            </div>
+            <div className={clsx(styles.right)}>
                 <PromptBody>
                     {activeStep === 0 && (
                         <div className="create-video-literature-container">
@@ -147,6 +158,6 @@ function CreateVideo() {
             </div>
         </div>
     );
-}
+};
 
 export default CreateVideo;
