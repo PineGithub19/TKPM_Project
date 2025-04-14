@@ -1,14 +1,35 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./EditVideo.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
 import clsx from "clsx";
+
+interface ImagesListComplete {
+    images: string[];
+    localImages: string[];
+    segment: string;
+}
+
+interface LocationState {
+    scriptSegments?: string[];
+    checkedImagesList?: ImagesListComplete[];
+    voices_list?: string[];
+}
 
 const contentStyleOptions = ["Analytical", "Narrative", "Modern", "Poetic Illustration", "Classic", "Storytelling", "Dramatic", "Satirical"];
 type IconKeys = "iconStyle" | "iconRatio" | "iconLayout" | "iconDelete" | "iconCutVideo" | "iconCutImage" | "iconAdjust" | "iconSound" | "iconCaption" | "iconPrompt";
 
 const EditVideo: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const state = location.state as LocationState;
+    
+    // Access the passed data
+    const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []);
+    const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>(state?.checkedImagesList || []);
+    const [voices_list, setVoicesList] = useState<string[]>(state?.voices_list || []);
+
+    const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number>(0);
 
     const [selectedIcon, setSelectedIcon] = useState<IconKeys>("iconStyle");
     const [selectedRatio, setSelectedRatio] = useState<string>("16:9");
@@ -38,6 +59,22 @@ const EditVideo: React.FC = () => {
     const [caption, setCaption] = useState<string>("");
     const [newPrompt, setnewPrompt] = useState<string>("");
     const [selectedContentStyles, setSelectedContentStyles] = useState<string[]>([]);
+
+    // Use first image from checkedImagesList if available
+    const [selectedImage, setSelectedImage] = useState<string | null>(
+        checkedImagesList.length > 0 && checkedImagesList[0].localImages.length > 0 
+            ? checkedImagesList[0].localImages[0] 
+            : "/anime.png"
+    );
+
+    // Log data from CreateVideo if needed
+    useEffect(() => {
+        console.log("Received from CreateVideo:", { 
+            scriptSegments, 
+            checkedImagesList, 
+            voices_list 
+        });
+    }, [scriptSegments, checkedImagesList, voices_list]);
 
     const ratioMap: { [key: string]: number } = {
         "16:9": 16 / 9,
@@ -80,16 +117,22 @@ const EditVideo: React.FC = () => {
         }
     }
 
-    const images = [
-        { name: "Sketch Art", src: "/anime1.png"},
-        { name: "Watercolor", src: "/anime2.png"},
-        { name: "Pixel Art", src: "/anime3.png"},
-        { name: "Cyberpunk", src: "/anime.png"},
-        { name: "Painting", src: "/anime5.png"},
-        { name: "Anime", src: "/anime6.png"},
-        { name: "Fantasy", src: "/anime7.png"},
-        { name: "Cartoon", src: "/anime8.png"},
-    ];    
+    // Generate image list from checkedImagesList if available
+    const images = checkedImagesList.length > 0 
+        ? checkedImagesList.slice(0, 8).map((item, index) => ({
+            name: `Image ${index + 1}`,
+            src: item.localImages[0] || `/anime${index + 1}.png`
+        }))
+        : [
+            { name: "Sketch Art", src: "/anime1.png"},
+            { name: "Watercolor", src: "/anime2.png"},
+            { name: "Pixel Art", src: "/anime3.png"},
+            { name: "Cyberpunk", src: "/anime.png"},
+            { name: "Painting", src: "/anime5.png"},
+            { name: "Anime", src: "/anime6.png"},
+            { name: "Fantasy", src: "/anime7.png"},
+            { name: "Cartoon", src: "/anime8.png"},
+        ];  
 
     const [iconsState, setIconsState] = useState<{ [key in IconKeys]: string }>({
         iconStyle: "styleRed",
@@ -115,8 +158,6 @@ const EditVideo: React.FC = () => {
         { name: "3:2", src: "/ratio_3_2_white.png" }
     ];
 
-    const [selectedImage, setSelectedImage] = useState<string | null>("/anime.png");
-
     const handleIconClick = (iconName: IconKeys) => {
         setIconsState((prevState) => {
             const newIconsState = { ...prevState };
@@ -141,7 +182,7 @@ const EditVideo: React.FC = () => {
         });
     
         // Thay đổi selectedIcon nếu không phải iconDelete và iconCutVideo
-        if (iconName !== "iconDelete" && iconName !== "iconCutVideo") {
+        if (iconName !== "iconDelete") {
             setSelectedIcon(iconName);
         }
     };
@@ -215,6 +256,50 @@ const EditVideo: React.FC = () => {
         setSelectedContentStyles((prev) =>
             prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
         );
+    };
+
+    // Function to swap segments with previous index
+    const handleSwapLeft = (index: number) => {
+        if (index > 0) {
+            // Swap in scriptSegments
+            const newScriptSegments = [...scriptSegments];
+            [newScriptSegments[index], newScriptSegments[index - 1]] = [newScriptSegments[index - 1], newScriptSegments[index]];
+            setScriptSegments(newScriptSegments);
+
+            // Swap in checkedImagesList
+            const newCheckedImagesList = [...checkedImagesList];
+            [newCheckedImagesList[index], newCheckedImagesList[index - 1]] = [newCheckedImagesList[index - 1], newCheckedImagesList[index]];
+            setCheckedImagesList(newCheckedImagesList);
+
+            // Swap in voices_list
+            const newVoicesList = [...voices_list];
+            [newVoicesList[index], newVoicesList[index - 1]] = [newVoicesList[index - 1], newVoicesList[index]];
+            setVoicesList(newVoicesList);
+
+            setSelectedSegmentIndex(index - 1);
+        }
+    };
+
+    // Function to swap segments with next index
+    const handleSwapRight = (index: number) => {
+        if (index < scriptSegments.length - 1) {
+            // Swap in scriptSegments
+            const newScriptSegments = [...scriptSegments];
+            [newScriptSegments[index], newScriptSegments[index + 1]] = [newScriptSegments[index + 1], newScriptSegments[index]];
+            setScriptSegments(newScriptSegments);
+
+            // Swap in checkedImagesList
+            const newCheckedImagesList = [...checkedImagesList];
+            [newCheckedImagesList[index], newCheckedImagesList[index + 1]] = [newCheckedImagesList[index + 1], newCheckedImagesList[index]];
+            setCheckedImagesList(newCheckedImagesList);
+
+            // Swap in voices_list
+            const newVoicesList = [...voices_list];
+            [newVoicesList[index], newVoicesList[index + 1]] = [newVoicesList[index + 1], newVoicesList[index]];
+            setVoicesList(newVoicesList);
+
+            setSelectedSegmentIndex(index + 1);
+        }
     };
 
     useEffect(() => {
@@ -456,11 +541,104 @@ const EditVideo: React.FC = () => {
 
             <div className={styles.timeline}>
                 <div className={styles.leftTimeline}>
-                    <div className={styles.timelineTrack}>
-                        {finalTimeline.map((marker, index) => (
-                            <span key={index} className={styles.timelineMarker}>{marker}</span>
-                        ))}
-                    </div>
+                    {selectedIcon === "iconCutVideo" ? (
+                        <div className={styles.timelineTracks}>
+                            {/* Script Track */}
+                            <div className={styles.timelineTrack}>
+                                <div className={styles.trackLabel}>Script</div>
+                                <div className={styles.trackContent}>
+                                    {scriptSegments.map((segment, index) => (
+                                        <div 
+                                            key={`script-${index}`}
+                                            className={clsx(styles.segment, {
+                                                [styles.selectedSegment]: index === selectedSegmentIndex
+                                            })}
+                                            onClick={() => setSelectedSegmentIndex(index)}
+                                        >
+                                            <div className={styles.segmentContent}>
+                                                {segment.substring(0, 30)}...
+                                            </div>
+                                            <div className={styles.segmentControls}>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSwapLeft(index);
+                                                    }}
+                                                    disabled={index === 0}
+                                                    className={styles.swapButton}
+                                                >
+                                                    ←
+                                                </button>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSwapRight(index);
+                                                    }}
+                                                    disabled={index === scriptSegments.length - 1}
+                                                    className={styles.swapButton}
+                                                >
+                                                    →
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Images Track */}
+                            <div className={styles.timelineTrack}>
+                                <div className={styles.trackLabel}>Images</div>
+                                <div className={styles.trackContent}>
+                                    {checkedImagesList.map((imageData, index) => (
+                                        <div 
+                                            key={`image-${index}`}
+                                            className={clsx(styles.segment, {
+                                                [styles.selectedSegment]: index === selectedSegmentIndex
+                                            })}
+                                            onClick={() => setSelectedSegmentIndex(index)}
+                                        >
+                                            <div className={styles.segmentContent}>
+                                                <img 
+                                                    src={imageData.localImages[0]} 
+                                                    alt={`Segment ${index}`}
+                                                    className={styles.segmentImage}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Voice Track */}
+                            <div className={styles.timelineTrack}>
+                                <div className={styles.trackLabel}>Voice</div>
+                                <div className={styles.trackContent}>
+                                    {voices_list.map((voice, index) => (
+                                        <div 
+                                            key={`voice-${index}`}
+                                            className={clsx(styles.segment, {
+                                                [styles.selectedSegment]: index === selectedSegmentIndex
+                                            })}
+                                            onClick={() => setSelectedSegmentIndex(index)}
+                                        >
+                                            <div className={styles.segmentContent}>
+                                                <div className={styles.voiceWaveform}>
+                                                    {/* Placeholder for voice waveform visualization */}
+                                                    ♪ Voice {index + 1}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={styles.timelineTrack}>
+                            {finalTimeline.map((marker, index) => (
+                                <span key={index} className={styles.timelineMarker}>{marker}</span>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 <div className={styles.rightTimeline}>
                 </div>

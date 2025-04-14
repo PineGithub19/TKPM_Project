@@ -84,11 +84,14 @@ function CreateVideo() {
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef(false);
     const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
+    const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
 
     const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
 
     const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
+
+    const [voices_list, setVoicesList] = useState<string[]>([]) // string array of voice
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -102,6 +105,10 @@ function CreateVideo() {
         setActiveStep(0);
     };
 
+    const handleFinish = () => {
+        setIsFinishedVideo(true);
+    };
+
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
         handleNext(); // Move to the next step (ScriptAutoGenerate)
@@ -113,8 +120,10 @@ function CreateVideo() {
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
-    const handleVoiceComplete = () => {
+    const handleVoiceComplete = (voices: string[]) => {
+        setVoicesList(voices);
         handleNext(); // Move to the image generation step
+        
     };
 
     const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
@@ -151,6 +160,10 @@ function CreateVideo() {
                             handleNext={handleNext}
                             handleBack={handleBack}
                             handleReset={handleReset}
+                            scriptSegments={scriptSegments}
+                            checkedImagesList={checkedImagesList}
+                            voices_list={voices_list}
+                            onFinish={handleFinish}
                         />
                     </div>
                 </div>
@@ -191,7 +204,7 @@ function CreateVideo() {
                     </PromptBody>
                 </div>
             </div>
-            <ImportantAlert isFinishedVideo={false} promptId={promptId} />
+            <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId} />
         </>
     );
 }

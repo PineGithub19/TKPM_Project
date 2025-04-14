@@ -6,8 +6,14 @@ import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import StepConnector from '@mui/material/StepConnector';
+// import StepConnector from '@mui/material/StepConnector';
+import { useNavigate } from 'react-router-dom';
 
+interface ImagesListComplete {
+    images: string[];
+    localImages: string[];
+    segment: string;
+}
 
 function StepBar({
     steps,
@@ -15,13 +21,36 @@ function StepBar({
     handleNext,
     handleBack,
     handleReset,
+    scriptSegments,
+    checkedImagesList,
+    voices_list,
+    onFinish,
 }: {
     steps: { label: string; description: string }[];
     activeStep: number;
     handleNext: () => void;
     handleBack: () => void;
     handleReset: () => void;
+    scriptSegments?: string[];
+    checkedImagesList?: ImagesListComplete[];
+    voices_list?: string[];
+    onFinish?: () => void;
 }) {
+    const navigate = useNavigate();
+
+    const handleFinish = () => {
+        if (onFinish) {
+            onFinish();
+        }
+        navigate('/edit-video', {
+            state: {
+                scriptSegments,
+                checkedImagesList,
+                voices_list
+            }
+        });
+    };
+
     return (
         <Box
         sx={{
@@ -84,7 +113,7 @@ function StepBar({
                             <Box sx={{ mb: 3 }}>
                                 <Button
                                     variant="contained"
-                                    onClick={handleNext}
+                                    onClick={index === steps.length - 1 ? handleFinish : handleNext}
                                     sx={{
                                         mt: 1,
                                         mr: 1,
@@ -136,7 +165,21 @@ function StepBar({
                         color: '#BDC3C7',
                     }}
                 >
-                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>🎉 All steps completed - you’re finished!</Typography>
+                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>🎉 All steps completed - you're finished!</Typography>
+                    <Button
+                        onClick={handleFinish}
+                        sx={{
+                            textTransform: 'none',
+                            backgroundColor: '#E74C3C',
+                            color: '#fff',
+                            fontSize: '1.2rem',
+                            padding: '15px 30px',
+                            marginRight: '15px',
+                            '&:hover': { backgroundColor: '#C0392B' },
+                        }}
+                    >
+                        Proceed to Edit Video
+                    </Button>
                     <Button
                         onClick={handleReset}
                         sx={{

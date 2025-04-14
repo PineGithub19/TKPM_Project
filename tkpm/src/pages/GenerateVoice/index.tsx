@@ -23,7 +23,7 @@ interface VoiceSegment {
 interface GenerateVoiceProps {
     scriptSegments?: string[];
     scriptTitle?: string;
-    onComplete?: () => void;
+    onComplete?: (voices: string[]) => void;
 }
 
 const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scriptTitle = '', onComplete }) => {
@@ -133,7 +133,12 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
 
     const handleComplete = () => {
         if (onComplete) {
-            onComplete();
+            let list_voice: string[] = [];
+            voiceSegments.forEach(voice => {
+                if (voice.status === "success" && voice.audioUrl) list_voice.push(voice.audioUrl);
+            })
+
+            onComplete(list_voice);
         }
     };
 
