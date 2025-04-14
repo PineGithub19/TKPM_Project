@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
@@ -7,10 +7,11 @@ import Literature from '../Literature';
 import ScriptAutoGenerate from '../ScriptAutoGenerate';
 import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
-import WaitingEntertainment from "./CreateVideoComponents/WaitingEntertainment/WaitingEntertainment";
+import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import * as request from '../../utils/request';
-import clsx from "clsx";
-import axios from "axios";
+import clsx from 'clsx';
+import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
+import SweetAlert from '../../components/SweetAlert';
 
 const steps = [
     {
@@ -38,6 +39,47 @@ const steps = [
 interface ImagesListComplete {
     images: string[];
     segment: string;
+}
+
+function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
+    const [isAlerted, setIsAlerted] = useState<boolean>(false);
+    const handleConfirmAlert = async (blocker: Blocker) => {
+        if (blocker.state === 'blocked') {
+            try {
+                await request.del('/information/delete', { promptId: promptId });
+            } catch (error) {
+                console.log(error);
+            } finally {
+                blocker.proceed?.();
+                setIsAlerted(false);
+            }
+        }
+    };
+
+    const shouldBlock = useCallback<BlockerFunction>(
+        ({ currentLocation, nextLocation }) => {
+            return isFinishedVideo === false && currentLocation.pathname !== nextLocation.pathname;
+        },
+        [isFinishedVideo],
+    );
+
+    const blocker = useBlocker(shouldBlock);
+
+    useEffect(() => {
+        if (blocker.state === 'blocked' && isFinishedVideo === false) {
+            // blocker.reset();
+            setIsAlerted(blocker.state === 'blocked');
+        }
+    }, [blocker, isFinishedVideo]);
+
+    return isAlerted ? (
+        <SweetAlert
+            title="Wanna leave this page?"
+            text="Your video has not been created yet. Your changes won't be saved."
+            icon="question"
+            onConfirm={() => handleConfirmAlert(blocker)}
+        />
+    ) : null;
 }
 
 function CreateVideo() {
@@ -82,7 +124,6 @@ function CreateVideo() {
         setCheckedImagesList(images);
     };
 
-
     useEffect(() => {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
@@ -99,65 +140,68 @@ function CreateVideo() {
     }, [checkedImagesList]);
 
     return (
-        <div className={clsx(styles.container)}>
-            <FloatingParticles />
-            <div className={clsx(styles.left)}>
-                <div className={clsx(styles.otherThing)}>
-                    <WaitingEntertainment />
+        <>
+            <div className={clsx(styles.container, 'mb-4')}>
+                <FloatingParticles />
+                <div className={clsx(styles.left)}>
+                    <div className={clsx(styles.otherThing)}>
+                        <WaitingEntertainment />
+                    </div>
+                    <div className={clsx(styles.stepBar)}>
+                        <StepBar
+                            steps={steps}
+                            activeStep={activeStep}
+                            handleNext={handleNext}
+                            handleBack={handleBack}
+                            handleReset={handleReset}
+                        />
+                    </div>
                 </div>
-                <div className={clsx(styles.stepBar)}>
-                    <StepBar
-                        steps={steps}
-                        activeStep={activeStep}
-                        handleNext={handleNext}
-                        handleBack={handleBack}
-                        handleReset={handleReset}
-                    />
+                <div className={clsx(styles.right)}>
+                    <PromptBody>
+                        {activeStep === 0 && (
+                            <div className="create-video-literature-container">
+                                <Literature onSelectLiterature={handleLiteratureSelected} />
+                            </div>
+                        )}
+                        {activeStep === 1 && selectedLiterature && (
+                            <div className="create-video-script-container">
+                                <ScriptAutoGenerate
+                                    literatureContent={selectedLiterature.content}
+                                    literatureTitle={selectedLiterature.title}
+                                    onComplete={handleScriptComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 2 && (
+                            <div className="create-video-voice-container">
+                                <GenerateVoice
+                                    scriptSegments={scriptSegments}
+                                    scriptTitle={scriptTitle}
+                                    onComplete={handleVoiceComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 3 && (
+                            <div className="create-video-image-container">
+                                <ImagePrompt
+                                    promptId={promptId}
+                                    scriptSegments={scriptSegments}
+                                    handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 4 && (
+                            <div className="create-video-container">
+                                <h1>Create Video Here!</h1>
+                            </div>
+                        )}
+                    </PromptBody>
                 </div>
             </div>
-            <div className={clsx(styles.right)}>
-                <PromptBody>
-                    {activeStep === 0 && (
-                        <div className="create-video-literature-container">
-                            <Literature onSelectLiterature={handleLiteratureSelected} />
-                        </div>
-                    )}
-                    {activeStep === 1 && selectedLiterature && (
-                        <div className="create-video-script-container">
-                            <ScriptAutoGenerate
-                                literatureContent={selectedLiterature.content}
-                                literatureTitle={selectedLiterature.title}
-                                onComplete={handleScriptComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 2 && (
-                        <div className="create-video-voice-container">
-                            <GenerateVoice
-                                scriptSegments={scriptSegments}
-                                scriptTitle={scriptTitle}
-                                onComplete={handleVoiceComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 3 && (
-                        <div className="create-video-image-container">
-                            <ImagePrompt
-                                promptId={promptId}
-                                scriptSegments={scriptSegments}
-                                handleCheckedImagesListComplete={handleCheckedImagesListComplete}
-                            />
-                        </div>
-                    )}
-                    {activeStep === 4 && (
-                        <div className="create-video-container">
-                            <h1>Create Video Here!</h1>
-                        </div>
-                    )}
-                </PromptBody>
-            </div>
-        </div>
+            <ImportantAlert isFinishedVideo={false} promptId={promptId} />
+        </>
     );
-};
+}
 
 export default CreateVideo;
