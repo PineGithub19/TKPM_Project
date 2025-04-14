@@ -5,11 +5,11 @@ import styles from './CustomizedCheckbox.module.css';
 const CustomizedCheckbox: React.FC<{ isChecked: boolean; onClick: () => void }> = ({ onClick, isChecked }) => {
     return (
         <button
-            className={clsx(styles['checkbox-wrapper-12'])}
+            className={clsx(styles['checkbox-wrapper-12'], 'mt-2')}
             onClick={onClick}
             style={{ padding: '0px', border: 'none', background: 'transparent' }}
         >
-            <div className={styles.cbx}>
+            <div className={clsx(styles.cbx)}>
                 <input id="cbx-12" type="checkbox" checked={isChecked} readOnly />
                 <label htmlFor="cbx-12"></label>
                 <svg width="15" height="14" viewBox="0 0 15 14" fill="none">

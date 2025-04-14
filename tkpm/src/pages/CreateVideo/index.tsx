@@ -30,14 +30,11 @@ const steps = [
         label: 'Create Images for Video',
         description: 'Generate images for your video based on the script segments.',
     },
-    {
-        label: 'Create Video',
-        description: 'Generate video from previous data. Enjoy your process <3',
-    },
 ];
 
 interface ImagesListComplete {
     images: string[];
+    localImages: string[];
     segment: string;
 }
 
@@ -189,11 +186,6 @@ function CreateVideo() {
                                     scriptSegments={scriptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                                 />
-                            </div>
-                        )}
-                        {activeStep === 4 && (
-                            <div className="create-video-container">
-                                <h1>Create Video Here!</h1>
                             </div>
                         )}
                     </PromptBody>

@@ -129,16 +129,16 @@ class ImageController {
                                 model: 'mm_sd_v14.ckpt',
                                 format: ['GIF'],
                                 enable: true,
-                                video_length: 16,
-                                fps: 8,
-                                loop_number: 0,
+                                video_length: configuration?.video_length || 16,
+                                fps: configuration?.fps || 8,
+                                loop_number: configuration?.loop_number || 0,
                                 closed_loop: 'R+P',
                                 batch_size: 16,
                                 stride: 1,
                                 overlap: -1,
                                 interp: 'Off',
                                 interp_x: 10,
-                                latent_power: 1,
+                                latent_power: configuration?.latent_power || 1,
                                 latent_scale: 32,
                             },
                         ],
@@ -198,7 +198,7 @@ class ImageController {
     }
 
     async saveImageToLocal(req: Request, res: Response, next: NextFunction) {
-        const { images, promptId } = req.body;
+        const { generationType, images, promptId } = req.body;
 
         if (!images || !Array.isArray(images)) {
             res.status(400).json({ message: 'Images array is required' });
@@ -226,14 +226,15 @@ class ImageController {
 
                 // Generate a unique filename using timestamp
                 const timestamp = new Date().getTime();
-                const filename = `image_${timestamp}_${index}.png`;
+                const filename =
+                    generationType === 'static' ? `image_${timestamp}_${index}.png` : `image_${timestamp}_${index}.gif`;
                 const filepath = `${imagesDir}/${filename}`;
 
                 // Convert base64 to buffer and save
                 const imageBuffer = Buffer.from(base64Data, 'base64');
                 fs.writeFileSync(filepath, imageBuffer);
 
-                savedPaths.push(`/images/${filename}`);
+                savedPaths.push(`http://localhost:${process.env.PORT}/images/${filename}`);
             });
 
             // Update or create image config in database

@@ -1,11 +1,9 @@
 import clsx from 'clsx';
-import { useCallback, useEffect, useState } from 'react';
-import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import styles from './ImagePrompt.module.css';
 import * as request from '../../utils/request';
 import LoadingComponent from '../../components/Loading';
 import CustomizedCheckbox from '../../components/CustomizedCheckbox';
-import SweetAlert from '../../components/SweetAlert';
 import { Button, Card, Tabs } from 'antd';
 
 interface ImagesSegment {
@@ -16,51 +14,11 @@ interface ImagesSegment {
 
 interface ImagesListComplete {
     images: string[];
+    localImages: string[];
     segment: string;
 }
 
 const { TabPane } = Tabs;
-
-function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
-    const [isAlerted, setIsAlerted] = useState<boolean>(false);
-    const handleConfirmAlert = async (blocker: Blocker) => {
-        if (blocker.state === 'blocked') {
-            try {
-                await request.del('/information/delete', { promptId: promptId });
-            } catch (error) {
-                console.log(error);
-            } finally {
-                blocker.proceed?.();
-                setIsAlerted(false);
-            }
-        }
-    };
-
-    const shouldBlock = useCallback<BlockerFunction>(
-        ({ currentLocation, nextLocation }) => {
-            return isFinishedVideo === false && currentLocation.pathname !== nextLocation.pathname;
-        },
-        [isFinishedVideo],
-    );
-
-    const blocker = useBlocker(shouldBlock);
-
-    useEffect(() => {
-        if (blocker.state === 'blocked' && isFinishedVideo === false) {
-            // blocker.reset();
-            setIsAlerted(blocker.state === 'blocked');
-        }
-    }, [blocker, isFinishedVideo]);
-
-    return isAlerted ? (
-        <SweetAlert
-            title="Wanna leave this page?"
-            text="Your video has not been created yet. Your changes won't be saved."
-            icon="question"
-            onConfirm={() => handleConfirmAlert(blocker)}
-        />
-    ) : null;
-}
 
 function ImagePrompt({
     promptId,
@@ -84,7 +42,6 @@ function ImagePrompt({
     const [batchProcessing, setBatchProcessing] = useState<boolean>(false);
     const [customizedGenerationClick, setCustomizedGenerationClick] = useState<boolean>(false);
     const [currentSegment, setCurrentSegment] = useState<ImagesSegment | null>(null);
-    const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>('1');
     const [imageConfig, setImageConfig] = useState({
         steps: 10,
@@ -252,9 +209,7 @@ function ImagePrompt({
         setPromptInfo('');
     };
 
-    const handleCreateVideo = async () => {
-        setIsFinishedVideo(true);
-
+    const handleFinishImagesGeneration = async () => {
         // Group selected images by segment
         const selectedImagesBySegment = selectedImages.reduce((acc, image) => {
             const segment = imageData[image.segmentId].text;
@@ -265,16 +220,38 @@ function ImagePrompt({
             return acc;
         }, {} as Record<string, string[]>);
 
-        await request.post('/image/image-storage', {
-            images: selectedImages.map((item) => item.path),
+        const base64Paths = selectedImages.map((item) => item.path);
+
+        const localImagesInformationResponse = await request.post('/image/image-storage', {
+            generationType: generationType,
+            images: base64Paths,
             promptId: promptId,
         });
 
-        // Convert to ImagesListComplete format
-        const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(([segment, images]) => ({
-            segment,
-            images,
-        }));
+        const localImagePaths: string[] = localImagesInformationResponse.paths;
+
+        // Create a map from base64 path to local path
+        const base64ToLocalPathMap = new Map<string, string>();
+        base64Paths.forEach((base64Path, index) => {
+            if (localImagePaths[index]) {
+                base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
+            }
+        });
+
+        // Convert to ImagesListComplete format, including localImages
+        const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
+            ([segment, segmentBase64Images]) => {
+                const segmentLocalImages = segmentBase64Images
+                    .map((base64Path) => base64ToLocalPathMap.get(base64Path))
+                    .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
+
+                return {
+                    segment,
+                    images: segmentBase64Images, // Keep original base64 images
+                    localImages: segmentLocalImages, // Add the resolved local paths
+                };
+            },
+        );
 
         // Pass the result to parent component
         if (handleCheckedImagesListComplete) {
@@ -492,7 +469,7 @@ function ImagePrompt({
                             <button
                                 className={clsx('btn', 'btn-success', 'float-right', 'me-2')}
                                 disabled={isLoading || selectedImages.length === 0}
-                                onClick={handleCreateVideo}
+                                onClick={handleFinishImagesGeneration}
                             >
                                 Next Step
                             </button>
@@ -576,7 +553,6 @@ function ImagePrompt({
                         ))}
                     </div>
                 </div>
-                <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId} />
             </div>
         </div>
     );
