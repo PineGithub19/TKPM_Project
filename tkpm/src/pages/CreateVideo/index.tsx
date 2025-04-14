@@ -10,7 +10,7 @@ import ImagePrompt from '../ImagePrompt';
 import WaitingEntertainment from "./CreateVideoComponents/WaitingEntertainment/WaitingEntertainment";
 import * as request from '../../utils/request';
 import clsx from "clsx";
-import axios from "axios";
+// import axios from "axios";
 
 const steps = [
     {
