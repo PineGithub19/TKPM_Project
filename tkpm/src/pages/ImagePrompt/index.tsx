@@ -95,7 +95,13 @@ function ImagePrompt({
         sampler_name: 'Euler a',
         batch_size: 2,
         model: 'dreamshaper_8.safetensors',
+        fps: 8,
+        video_length: 16,
+        loop_number: 0,
+        latent_power: 1,
     });
+
+    const [generationType, setGenerationType] = useState<'static' | 'motion'>('static');
 
     useEffect(() => {
         console.log(scriptSegments.length);
@@ -122,9 +128,12 @@ function ImagePrompt({
             // Set all segments to loading state
             setImageData((prev) => prev.map((item) => ({ ...item, status: 'loading' })));
 
+            const endpoint =
+                generationType === 'static' ? '/image/text-to-multiple-images' : '/image/text-to-animation';
+
             // Generate images for all segments
             for (const segment of scriptSegments) {
-                const response = await request.post('/image/text-to-multiple-images', {
+                const response = await request.post(endpoint, {
                     prompt: segment,
                     configuration: imageConfig,
                 });
@@ -180,7 +189,9 @@ function ImagePrompt({
                 ? `${segment}, ${additionalPrompt}, (high quality:1.4), (detailed:1.2), (sharp focus:1.1), 4k, masterpiece`
                 : `${segment}, (high quality:1.4), (detailed:1.2), (sharp focus:1.1), 4k, masterpiece`;
 
-            const response = await request.post('/image/text-to-multiple-images', {
+            const endpoint =
+                generationType === 'static' ? '/image/text-to-multiple-images' : '/image/text-to-animation';
+            const response = await request.post(endpoint, {
                 prompt: enhancedPrompt,
                 configuration: imageConfig,
             });
@@ -285,7 +296,41 @@ function ImagePrompt({
         <div className="p-4">
             <div className="container">
                 <h4 className="mb-4">Image Generation Settings</h4>
+
+                <div className="mb-4">
+                    <label className="form-label">Generation Type</label>
+                    <div className="d-flex gap-3">
+                        <div className="form-check">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="generationType"
+                                id="staticType"
+                                checked={generationType === 'static'}
+                                onChange={() => setGenerationType('static')}
+                            />
+                            <label className="form-check-label" htmlFor="staticType">
+                                Static Image
+                            </label>
+                        </div>
+                        <div className="form-check">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="generationType"
+                                id="motionType"
+                                checked={generationType === 'motion'}
+                                onChange={() => setGenerationType('motion')}
+                            />
+                            <label className="form-check-label" htmlFor="motionType">
+                                Motion Image (GIF)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="row g-3">
+                    {/* Common Settings */}
                     <div className="col-md-6">
                         <label className="form-label">Steps (1-150)</label>
                         <input
@@ -298,7 +343,7 @@ function ImagePrompt({
                         />
                     </div>
                     <div className="col-md-6">
-                        <label className="form-label">CFG Scale (1-30)</label>
+                        <label className="form-label">Strictness (1-30)</label>
                         <input
                             type="number"
                             className="form-control"
@@ -306,17 +351,6 @@ function ImagePrompt({
                             min={1}
                             max={30}
                             onChange={(e) => handleConfigChange('cfg_scale', parseInt(e.target.value))}
-                        />
-                    </div>
-                    <div className="col-md-6">
-                        <label className="form-label">Batch Size (1-10)</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            value={imageConfig.batch_size}
-                            min={1}
-                            max={10}
-                            onChange={(e) => handleConfigChange('batch_size', parseInt(e.target.value))}
                         />
                     </div>
                     <div className="col-md-6">
@@ -345,6 +379,61 @@ function ImagePrompt({
                             <option value="DDIM">DDIM</option>
                         </select>
                     </div>
+
+                    {/* Static Image Settings */}
+                    {generationType === 'static' && (
+                        <div className="col-md-6">
+                            <label className="form-label">The number of images (1-10)</label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                value={imageConfig.batch_size}
+                                min={1}
+                                max={10}
+                                onChange={(e) => handleConfigChange('batch_size', parseInt(e.target.value))}
+                            />
+                        </div>
+                    )}
+
+                    {/* Motion Image Settings */}
+                    {generationType === 'motion' && (
+                        <>
+                            <div className="col-md-6">
+                                <label className="form-label">Animation Speed (FPS)</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={imageConfig.fps}
+                                    min={6}
+                                    max={12}
+                                    onChange={(e) => handleConfigChange('fps', parseInt(e.target.value))}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <label className="form-label">Animation Length (Frames)</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={imageConfig.video_length}
+                                    min={16}
+                                    max={32}
+                                    onChange={(e) => handleConfigChange('video_length', parseInt(e.target.value))}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <label className="form-label">Motion Strength ({imageConfig.latent_power})</label>
+                                <input
+                                    type="range"
+                                    className="form-range"
+                                    value={imageConfig.latent_power}
+                                    min={0.5}
+                                    max={2.0}
+                                    step={0.1}
+                                    onChange={(e) => handleConfigChange('latent_power', parseFloat(e.target.value))}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

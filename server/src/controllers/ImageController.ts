@@ -70,6 +70,7 @@ class ImageController {
 
             const payload = {
                 prompt,
+                // Standard
                 steps: configuration?.steps || 10,
                 width: configuration?.width || this.DEFAULT_IMAGE_WIDTH,
                 height: configuration?.height || this.DEFAULT_IMAGE_HEIGHT,
@@ -77,6 +78,7 @@ class ImageController {
                 seed: configuration?.seed || -1,
                 sampler_name: configuration?.sampler_name || 'Euler a',
                 batch_size: configuration?.batch_size || 2,
+                // Model
                 override_settings: {
                     sd_model_checkpoint: configuration?.model || 'dreamshaper_8.safetensors',
                 },
@@ -97,6 +99,70 @@ class ImageController {
         } catch (error) {
             console.error(error);
             res.status(500).send('Error generating images');
+        }
+    }
+
+    async handleTextToAnimation(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { prompt, configuration } = req.body;
+
+            if (!prompt) {
+                res.status(400).json({ message: 'Prompt is required' });
+                return;
+            }
+
+            const payload = {
+                prompt,
+                // Standard params
+                steps: configuration?.steps || 20,
+                cfg_scale: configuration?.cfg_scale || 7,
+                width: configuration?.width || 512,
+                height: configuration?.height || 512,
+                override_settings: {
+                    sd_model_checkpoint: configuration?.model || 'dreamshaper_8.safetensors',
+                },
+                // AnimatedDiff specific
+                alwayson_scripts: {
+                    AnimateDiff: {
+                        args: [
+                            {
+                                model: 'mm_sd_v14.ckpt',
+                                format: ['GIF'],
+                                enable: true,
+                                video_length: 16,
+                                fps: 8,
+                                loop_number: 0,
+                                closed_loop: 'R+P',
+                                batch_size: 16,
+                                stride: 1,
+                                overlap: -1,
+                                interp: 'Off',
+                                interp_x: 10,
+                                latent_power: 1,
+                                latent_scale: 32,
+                            },
+                        ],
+                    },
+                },
+            };
+
+            // Different endpoint for AnimatedDiff
+            const response = await axios.post(stableDiffusionUrl, payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                // AnimatedDiff returns a single GIF file
+                const images = response.data.images as Base64URLString[];
+                res.status(200).json({ imageList: images });
+            } else {
+                res.status(response.status).send('Failed to generate animation');
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error generating animation');
         }
     }
 
