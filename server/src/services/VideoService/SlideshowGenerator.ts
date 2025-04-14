@@ -136,7 +136,7 @@ class SlideshowGenerator {
     ): Promise<void> {
         const inputImage = typeof imageInfo === 'string' ? imageInfo : imageInfo.path;
         const imgInfo = typeof imageInfo === 'string' ? { path: inputImage } : imageInfo;
-
+        const isGif = inputImage.endsWith('.gif');
         const audioPath = imgInfo.audioPath || '';
         const subtitle = imgInfo.subtitle || '';
         const {
@@ -203,7 +203,7 @@ class SlideshowGenerator {
             }
 
             // Ken Burns effect
-            if (kenBurns) {
+            if (kenBurns && !isGif) {
                 let zoomFilter = '';
                 switch (kenBurnsDirection) {
                     case 'leftToRight':
@@ -234,7 +234,15 @@ class SlideshowGenerator {
             // Combine all filters and label [v]
             const filterComplex = `[0:v]${filters.join(',')}[v]`;
 
-            const ffmpegCommand = ffmpeg().input(inputImage).inputOptions(['-loop', '1']);
+            // const ffmpegCommand = ffmpeg().input(inputImage).inputOptions(['-loop', '1']);
+
+            const ffmpegCommand = ffmpeg().input(inputImage);
+
+            if (isGif) {
+                ffmpegCommand.inputOptions(['-ignore_loop', '0']);
+            } else {
+                ffmpegCommand.inputOptions(['-loop', '1']);
+            }
 
             if (audioPath) {
                 ffmpegCommand.input(audioPath);
@@ -753,7 +761,6 @@ const user_config: Partial<SlideshowConfig> = {
 
 export default SlideshowGenerator;
 ////////New config
-
 // {
 //     "config":
 //     {
