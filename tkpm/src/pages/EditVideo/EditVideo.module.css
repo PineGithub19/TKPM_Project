@@ -261,6 +261,10 @@
     padding: 8px;
 }
 
+.timelineMarker {
+    margin: auto;
+}
+
 .trackLabel {
     width: 60px;
     color: #E74C3C;
@@ -463,8 +467,8 @@
 }
 
 .backToImageStyle:hover .arrowIconToImageStyle {
-    filter: brightness(1.5);
-    transform: scale(1.1);
+    filter: brightness(1.5); /* Làm sáng icon khi hover */
+    transform: scale(1.1); /* Phóng to nhẹ */
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -710,4 +714,23 @@
 .nextButtonWrapper {
     display: flex;
     justify-content: flex-end;
+}
+
+.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loader {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid white;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

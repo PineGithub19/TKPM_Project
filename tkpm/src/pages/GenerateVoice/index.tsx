@@ -23,7 +23,7 @@ interface VoiceSegment {
 interface GenerateVoiceProps {
     scriptSegments?: string[];
     scriptTitle?: string;
-    onComplete?: (voices: string[]) => void;
+    onComplete?: (voices: string[], segmentsScript: string[]) => void;
 }
 
 const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scriptTitle = '', onComplete }) => {
@@ -35,19 +35,37 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
     const [currentLanguage, setCurrentLanguage] = useState<string>('vi');
     const [batchProcessing, setBatchProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [translatedSegments, setTranslatedSegments] = useState<string[]>([]);
 
     useEffect(() => {
-        // Initialize voice segments from script segments
+        const translateSegments = async () => {
+            try {
+                const response = await post('/script_generate/edit', {
+                    originalScript: scriptSegments.join('\n\n'),
+                    editInstructions: 'Translate to Vietnamese',
+                });
+
+                if (response.success) {
+                    const translatedSegments = response.script.split('\n\n');
+                    setTranslatedSegments(translatedSegments);
+                    setVoiceSegments(
+                        translatedSegments.map((text: string, index: number) => ({
+                            text,
+                            audioUrl: null,
+                            status: 'idle',
+                            index,
+                        })),
+                    );
+                } else {
+                    message.error('Failed to translate script segments.');
+                }
+            } catch (error) {
+                message.error('Error translating script segments.');
+            }
+        };
+
         if (scriptSegments && scriptSegments.length > 0) {
-            setActiveTab('batch');
-            setVoiceSegments(
-                scriptSegments.map((text, index) => ({
-                    text,
-                    audioUrl: null,
-                    status: 'idle',
-                    index,
-                })),
-            );
+            translateSegments();
         }
     }, [scriptSegments]);
 
@@ -138,7 +156,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({ scriptSegments = [], scri
                 if (voice.status === "success" && voice.audioUrl) list_voice.push(voice.audioUrl);
             })
 
-            onComplete(list_voice);
+            onComplete(list_voice, translatedSegments);
         }
     };
 

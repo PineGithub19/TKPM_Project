@@ -221,45 +221,69 @@ function ImagePrompt({
         }, {} as Record<string, string[]>);
 
         const base64Paths = selectedImages.map((item) => item.path);
-
-        const localImagesInformationResponse = await request.post('/image/image-storage', {
-            generationType: generationType,
-            images: base64Paths,
-            promptId: promptId,
-        });
-
-        const localImagePaths: string[] = localImagesInformationResponse.paths;
-
-        // Create a map from base64 path to local path
-        const base64ToLocalPathMap = new Map<string, string>();
-        base64Paths.forEach((base64Path, index) => {
-            if (localImagePaths[index]) {
-                base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
+        const localImagePaths: string[] = [];
+        
+        try {
+            // Generate a unique upload session ID
+            const uploadSessionId = Date.now().toString();
+            
+            // Split images into batches of 5 for upload
+            const batchSize = 5;
+            const totalBatches = Math.ceil(base64Paths.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                const startIdx = i * batchSize;
+                const endIdx = Math.min(startIdx + batchSize, base64Paths.length);
+                const batchImages = base64Paths.slice(startIdx, endIdx);
+                
+                const batchResponse = await request.post('/image/image-storage-batch', {
+                    generationType: generationType,
+                    images: batchImages,
+                    promptId: promptId,
+                    batchIndex: i,
+                    totalBatches: totalBatches,
+                    uploadSessionId: uploadSessionId
+                });
+                
+                // Collect paths from each batch response
+                if (batchResponse && batchResponse.paths) {
+                    localImagePaths.push(...batchResponse.paths);
+                }
             }
-        });
-
-        // Convert to ImagesListComplete format, including localImages
-        const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
-            ([segment, segmentBase64Images]) => {
-                const segmentLocalImages = segmentBase64Images
-                    .map((base64Path) => base64ToLocalPathMap.get(base64Path))
-                    .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
-
-                return {
-                    segment,
-                    images: segmentBase64Images, // Keep original base64 images
-                    localImages: segmentLocalImages, // Add the resolved local paths
-                };
-            },
-        );
-
-        // Pass the result to parent component
-        if (handleCheckedImagesListComplete) {
-            handleCheckedImagesListComplete(result);
+            
+            // Create a map from base64 path to local path
+            const base64ToLocalPathMap = new Map<string, string>();
+            base64Paths.forEach((base64Path, index) => {
+                if (localImagePaths[index]) {
+                    base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
+                }
+            });
+            
+            // Convert to ImagesListComplete format, including localImages
+            const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
+                ([segment, segmentBase64Images]) => {
+                    const segmentLocalImages = segmentBase64Images
+                        .map((base64Path) => base64ToLocalPathMap.get(base64Path))
+                        .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
+                        
+                    return {
+                        segment,
+                        images: segmentBase64Images, // Keep original base64 images
+                        localImages: segmentLocalImages, // Add the resolved local paths
+                    };
+                },
+            );
+            
+            // Pass the result to parent component
+            if (handleCheckedImagesListComplete) {
+                handleCheckedImagesListComplete(result);
+            }
+            
+            // Switch to the configuration tab after saving
+            setActiveTab('1');
+        } catch (error) {
+            console.error('Error saving images:', error);
         }
-
-        // Switch to the configuration tab after saving
-        setActiveTab('1');
     };
 
     const handleConfigChange = (key: string, value: number | string) => {

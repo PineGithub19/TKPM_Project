@@ -23,12 +23,12 @@ const steps = [
         description: 'Configure and generate a script based on the selected literature.',
     },
     {
-        label: 'Create Voice Narration',
-        description: 'Generate voice narrations for each segment of your script.',
-    },
-    {
         label: 'Create Images for Video',
         description: 'Generate images for your video based on the script segments.',
+    },
+    {
+        label: 'Create Voice Narration',
+        description: 'Generate voice narrations for each segment of your script.',
     },
 ];
 
@@ -116,12 +116,14 @@ function CreateVideo() {
 
     const handleScriptComplete = (segments: string[], title: string) => {
         setScriptSegments(segments);
+        console.log("check scripts: ", scriptSegments);
         setScriptTitle(title);
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
-    const handleVoiceComplete = (voices: string[]) => {
+    const handleVoiceComplete = (voices: string[], scripts: string[]) => {
         setVoicesList(voices);
+        setScriptSegments(scripts);
         handleNext(); // Move to the image generation step
         
     };
@@ -184,20 +186,20 @@ function CreateVideo() {
                             </div>
                         )}
                         {activeStep === 2 && (
-                            <div className="create-video-voice-container">
-                                <GenerateVoice
-                                    scriptSegments={scriptSegments}
-                                    scriptTitle={scriptTitle}
-                                    onComplete={handleVoiceComplete}
-                                />
-                            </div>
-                        )}
-                        {activeStep === 3 && (
                             <div className="create-video-image-container">
                                 <ImagePrompt
                                     promptId={promptId}
                                     scriptSegments={scriptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 3 && (
+                            <div className="create-video-voice-container">
+                                <GenerateVoice
+                                    scriptSegments={scriptSegments}
+                                    scriptTitle={scriptTitle}
+                                    onComplete={handleVoiceComplete}
                                 />
                             </div>
                         )}

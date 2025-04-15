@@ -23,7 +23,7 @@ const EditVideo: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const state = location.state as LocationState;
-    
+
     // Access the passed data
     const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []);
     const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>(state?.checkedImagesList || []);
@@ -47,13 +47,13 @@ const EditVideo: React.FC = () => {
     const [exposure, setExposure] = useState(50);
     const [temperature, setTemperature] = useState(50);
     const [saturation, setSaturation] = useState(50);
-    const [blur, setBlur] = useState(50);
+    const [blur, setBlur] = useState(0);
     const [vignette, setVignette] = useState(50);
     const [clarity, setClarity] = useState(50);
 
     const [flippedVertically, setFlippedVertically] = useState(false);
     const [rotated, setRotated] = useState(false);
-    const [iconFlipColor, setIconFlipColor] = useState("/iconFlipVerticalWhite.png"); 
+    const [iconFlipColor, setIconFlipColor] = useState("/iconFlipVerticalWhite.png");
     const [iconRotateColor, setIconRotateColor] = useState("/iconRotateWhite.png");
 
     const [caption, setCaption] = useState<string>("");
@@ -62,17 +62,17 @@ const EditVideo: React.FC = () => {
 
     // Use first image from checkedImagesList if available
     const [selectedImage, setSelectedImage] = useState<string | null>(
-        checkedImagesList.length > 0 && checkedImagesList[0].localImages.length > 0 
-            ? checkedImagesList[0].localImages[0] 
+        checkedImagesList.length > 0 && checkedImagesList[0].localImages.length > 0
+            ? checkedImagesList[0].localImages[0]
             : "/anime.png"
     );
 
     // Log data from CreateVideo if needed
     useEffect(() => {
-        console.log("Received from CreateVideo:", { 
-            scriptSegments, 
-            checkedImagesList, 
-            voices_list 
+        console.log("Received from CreateVideo:", {
+            scriptSegments,
+            checkedImagesList,
+            voices_list
         });
     }, [scriptSegments, checkedImagesList, voices_list]);
 
@@ -91,14 +91,14 @@ const EditVideo: React.FC = () => {
     const timelineMarkers: string[] = [];
     timelineMarkers.push("1s");
     const numMarkers = 4;
-    const interval = Math.floor(videoDuration / (numMarkers - 1)); 
+    const interval = Math.floor(videoDuration / (numMarkers - 1));
     let currentTime = interval;
     for (let i = 1; i < numMarkers - 1; i++) {
         timelineMarkers.push(`${currentTime}s`);
         currentTime += interval;
     }
     timelineMarkers.push(`${videoDuration}s`);
-    
+
     const convertToTimeFormat = (seconds: number): string => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
@@ -118,21 +118,21 @@ const EditVideo: React.FC = () => {
     }
 
     // Generate image list from checkedImagesList if available
-    const images = checkedImagesList.length > 0 
+    const images = checkedImagesList.length > 0
         ? checkedImagesList.slice(0, 8).map((item, index) => ({
             name: `Image ${index + 1}`,
             src: item.localImages[0] || `/anime${index + 1}.png`
         }))
         : [
-            { name: "Sketch Art", src: "/anime1.png"},
-            { name: "Watercolor", src: "/anime2.png"},
-            { name: "Pixel Art", src: "/anime3.png"},
-            { name: "Cyberpunk", src: "/anime.png"},
-            { name: "Painting", src: "/anime5.png"},
-            { name: "Anime", src: "/anime6.png"},
-            { name: "Fantasy", src: "/anime7.png"},
-            { name: "Cartoon", src: "/anime8.png"},
-        ];  
+            { name: "Sketch Art", src: "/anime1.png" },
+            { name: "Watercolor", src: "/anime2.png" },
+            { name: "Pixel Art", src: "/anime3.png" },
+            { name: "Cyberpunk", src: "/anime.png" },
+            { name: "Painting", src: "/anime5.png" },
+            { name: "Anime", src: "/anime6.png" },
+            { name: "Fantasy", src: "/anime7.png" },
+            { name: "Cartoon", src: "/anime8.png" },
+        ];
 
     const [iconsState, setIconsState] = useState<{ [key in IconKeys]: string }>({
         iconStyle: "styleRed",
@@ -161,9 +161,9 @@ const EditVideo: React.FC = () => {
     const handleIconClick = (iconName: IconKeys) => {
         setIconsState((prevState) => {
             const newIconsState = { ...prevState };
-    
+
             // Logic cho việc thay đổi màu sắc của icon
-            if (iconName !== "iconDelete" && iconName !== "iconCutVideo") {
+            if (iconName !== "iconDelete") {
                 Object.keys(prevState).forEach((key) => {
                     if (key === iconName) {
                         if (prevState[key as IconKeys].includes("Red")) return;
@@ -177,10 +177,10 @@ const EditVideo: React.FC = () => {
                     }
                 });
             }
-    
+
             return newIconsState;
         });
-    
+
         // Thay đổi selectedIcon nếu không phải iconDelete và iconCutVideo
         if (iconName !== "iconDelete") {
             setSelectedIcon(iconName);
@@ -311,12 +311,125 @@ const EditVideo: React.FC = () => {
                 setWidth(newHeight * ratioMap[selectedRatio]); // Cập nhật width theo height
             }
         };
-    
+
         setTimeout(updateSize, 100); // Delay để đảm bảo lấy đúng kích thước
-    
+
         window.addEventListener("resize", updateSize);
         return () => window.removeEventListener("resize", updateSize);
     }, [selectedRatio]);
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+    const handleCreateVideo = async () => {
+        setLoading(true);
+        try {
+            // Create config object from current state
+            const images = scriptSegments.map((segment, index) => {
+                const imageObj: any = {
+                    path: checkedImagesList[index]?.localImages[0] || "http://localhost:3000/videos/images/i1.jpg",
+                    subtitle: segment
+                };
+
+                // Add audioPath if available
+                if (voices_list[index]) {
+                    imageObj.audioPath = voices_list[index];
+                }
+
+
+                // Add effects if any adjustments were made
+                if (brightness !== 50 || contrast !== 50 || exposure !== 50 ||
+                    temperature !== 50 || saturation !== 50 || blur > 0 ||
+                    vignette !== 50 || clarity !== 50 || rotated || flippedVertically) {
+
+                    imageObj.effects = {};
+
+                    // Chỉ thêm các effect có giá trị khác mặc định
+                    if (brightness !== 50) {
+                        imageObj.effects.brightness = (brightness - 50) / 50; // Convert to -1 to 1 range
+                    }
+
+                    if (contrast !== 50) {
+                        imageObj.effects.contrast = contrast / 50;  // Convert to 0 to 2 range
+                    }
+
+                    // if (saturation !== 50) {
+                    //     imageObj.effects.saturation = saturation / 50; // Convert to 0 to 2 range
+                    // }
+
+                    imageObj.fade = true;
+                    // Add rotation if applied
+                    if (rotated) {
+                        imageObj.effects.rotate = 180;
+                    }
+                    if (blur > 0) {
+                        imageObj.effects.blur = blur / 10; // Convert to 0 to 5 range
+                    }
+                }
+
+                return imageObj;
+            });
+
+            console.log("CHECK IMAGES IN EDITVIDEO BEFORE CALL API CREATE VIDEO: ", images);
+            const config = {
+                images,
+                resolution: getResolutionFromRatio(selectedRatio),
+                videoDuration: 5,
+                backgroundMusic: "http://localhost:3000/video/audios/background.mp3",
+                backgroundMusicVolume: volume / 100,
+                cleanupTemp: false
+            };
+
+            // Call API to create video
+            const response = await fetch('http://localhost:3000/video/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ config }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create video');
+            }
+
+            const data = await response.json();
+            setVideoUrl(data.videoUrl);
+
+            // Navigate to export video with the video URL
+            if (response.status === 200)
+                navigate('/export-video', { state: { videoUrl: data.videoUrl } });
+        } catch (error) {
+            console.error('Error creating video:', error);
+            alert('Failed to create video. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Helper function to get resolution based on ratio
+    const getResolutionFromRatio = (ratio: string): { width: number, height: number } => {
+        switch (ratio) {
+            case "16:9":
+                return { width: 1920, height: 1080 };
+            case "1:1":
+                return { width: 1080, height: 1080 };
+            case "9:16":
+                return { width: 1080, height: 1920 };
+            case "4:5":
+                return { width: 1080, height: 1350 };
+            case "3:4":
+                return { width: 1080, height: 1440 };
+            case "4:3":
+                return { width: 1440, height: 1080 };
+            case "21:9":
+                return { width: 2560, height: 1080 };
+            case "3:2":
+                return { width: 1620, height: 1080 };
+            default:
+                return { width: 1920, height: 1080 };
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -349,183 +462,183 @@ const EditVideo: React.FC = () => {
                     )}
                 </div>
 
+            </div>
+            <div className={styles.body}>
+                <div className={styles.leftPanel}>
+                    <div ref={introImageRef} className={styles.introImageWrapper} style={{ width }}>
+                        <img
+                            src={selectedImage || "/anime.png"}
+                            alt="Preview"
+                            className={`${styles.previewImage} ${flippedVertically ? styles.flipped : ""} ${rotated ? styles.rotated : ""}`}
+                        />
+                        <button className={styles.pauseButton}>
+                            <img src="/pause.png" alt="Pause" className={styles.pauseIcon} />
+                        </button>
+                    </div>
                 </div>
-                    <div className={styles.body}>
-                        <div className={styles.leftPanel}>
-                            <div ref={introImageRef} className={styles.introImageWrapper} style={{ width }}>
-                                <img
-                                    src={selectedImage || "/anime.png"}
-                                    alt="Preview"
-                                    className={`${styles.previewImage} ${flippedVertically ? styles.flipped : ""} ${rotated ? styles.rotated : ""}`}
-                                />
-                                <button className={styles.pauseButton}>
-                                    <img src="/pause.png" alt="Pause" className={styles.pauseIcon} />
-                                </button>
+
+                <div className={styles.rightPanel}>
+                    {selectedIcon === "iconLayout" ? (
+                        <div className={styles.soundAndSpeed}>
+
+                        </div>
+                    ) : selectedIcon === "iconCaption" ? (
+                        <div className={styles.captionEdit}>
+                            <div className={styles.captionText}>
+                                <textarea
+                                    className={clsx(styles.input_text)}
+                                    placeholder="Enter caption"
+                                    value={caption}
+                                    onChange={(e) => setCaption(e.target.value)}
+                                ></textarea>
+                                <img src="/iconCheck.png" alt="Check Icon" className={styles.iconCheck} />
+                            </div>
+                            <div className={styles.captionStyle}>
+                                <span className={styles.titleCaption}>Caption Style</span>
+                                <div className={styles.formatStyle}>
+                                    <img src="/iconBold.png" alt="Bold Icon" className={styles.iconFormat} />
+                                    <img src="/iconItalic.png" alt="Italic Icon" className={styles.iconFormat} />
+                                    <img src="/iconUnderline.png" alt="Underline Icon" className={styles.iconFormat} />
+                                </div>
+                            </div>
+                            <div className={styles.captionStyle}>
+                                <div className={styles.titleAutomatic}>
+                                    <span className={styles.titleCaption}>Automatic subtitles</span>
+                                    <img src="/iconStar.png" alt="Automatic Subtitles Icon" className={styles.iconAutomaticSubtitles} />
+                                </div>
+
+                                <div className={styles.formatStyle}>
+                                    <img src="/iconAutomaticSubtitles.png" alt="Automatic Subtitles Icon" className={styles.iconFormat} />
+                                </div>
                             </div>
                         </div>
-
-                        <div className={styles.rightPanel}>
-                        {selectedIcon === "iconLayout" ? (
-                            <div className={styles.soundAndSpeed}>
-
-                            </div>
-                        ) : selectedIcon === "iconCaption" ? (
+                    ) : selectedIcon === "iconPrompt" ? (
+                        <div className={styles.soundAndSpeed}>
                             <div className={styles.captionEdit}>
                                 <div className={styles.captionText}>
                                     <textarea
                                         className={clsx(styles.input_text)}
-                                        placeholder="Enter caption"
-                                        value={caption}
-                                        onChange={(e) => setCaption(e.target.value)}
+                                        placeholder="Enter new prompt"
+                                        value={newPrompt}
+                                        onChange={(e) => setnewPrompt(e.target.value)}
                                     ></textarea>
-                                    <img src="/iconCheck.png" alt="Check Icon" className={styles.iconCheck}/>
                                 </div>
-                                <div className={styles.captionStyle}>
-                                    <span className={styles.titleCaption}>Caption Style</span>
-                                    <div className={styles.formatStyle}>
-                                        <img src="/iconBold.png" alt="Bold Icon" className={styles.iconFormat}/>
-                                        <img src="/iconItalic.png" alt="Italic Icon" className={styles.iconFormat}/>
-                                        <img src="/iconUnderline.png" alt="Underline Icon" className={styles.iconFormat}/>
-                                    </div>
-                                </div>
-                                <div className={styles.captionStyle}>
-                                    <div className={styles.titleAutomatic}>
-                                        <span className={styles.titleCaption}>Automatic subtitles</span>
-                                        <img src="/iconStar.png" alt="Automatic Subtitles Icon" className={styles.iconAutomaticSubtitles}/>
-                                    </div>
-                                    
-                                    <div className={styles.formatStyle}>
-                                        <img src="/iconAutomaticSubtitles.png" alt="Automatic Subtitles Icon" className={styles.iconFormat}/>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : selectedIcon === "iconPrompt" ? (
-                            <div className={styles.soundAndSpeed}>
-                                <div className={styles.captionEdit}>
-                                    <div className={styles.captionText}>
-                                        <textarea
-                                            className={clsx(styles.input_text)}
-                                            placeholder="Enter new prompt"
-                                            value={newPrompt}
-                                            onChange={(e) => setnewPrompt(e.target.value)}
-                                        ></textarea>
-                                    </div>
-                                    <div className={styles.contentStyle}>
-                                        <span className={styles.titleCaption}>Content Style</span>
-                                        <div className={styles.formatContentStyle}>
-                                            <div className={`${styles.style_buttons} content`}>
-                                                {contentStyleOptions.map((style) => (
-                                                    <button
-                                                        key={style}
-                                                        onClick={() => handleContentStyleClick(style)}
-                                                        className={clsx(styles.style_button, {
-                                                            [styles.activeContent]: selectedContentStyles.includes(style),
-                                                        })}
-                                                    >
-                                                        {style}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className={styles.style_recreate}>
-                                                <button className={styles.style_button_recreate}>
-                                                    Recreate
+                                <div className={styles.contentStyle}>
+                                    <span className={styles.titleCaption}>Content Style</span>
+                                    <div className={styles.formatContentStyle}>
+                                        <div className={`${styles.style_buttons} content`}>
+                                            {contentStyleOptions.map((style) => (
+                                                <button
+                                                    key={style}
+                                                    onClick={() => handleContentStyleClick(style)}
+                                                    className={clsx(styles.style_button, {
+                                                        [styles.activeContent]: selectedContentStyles.includes(style),
+                                                    })}
+                                                >
+                                                    {style}
                                                 </button>
-                                            </div>
+                                            ))}
+                                        </div>
+                                        <div className={styles.style_recreate}>
+                                            <button className={styles.style_button_recreate}>
+                                                Recreate
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ) : selectedIcon === "iconSound" ? (
-                            <div className={styles.soundAndSpeed}>
-                                <div className={styles.soundControl}>
-                                    <img src="/iconVolumn.png" alt="Listen Icon" className={styles.soundIcon} />
-                                    <input type="range" min="0" max="100" value={volume} onChange={handleVolumeChange}
-                                        className={styles.volumeSlider} />
-                                </div>
-
-                                <div className={styles.soundControl}>
-                                    <img src="/iconSpeed.png" alt="Speed Icon" className={styles.soundIcon} />
-                                    <input type="range" min="0" max="100" value={speed} onChange={handleSpeedChange}
-                                        className={styles.volumeSlider} />
-                                </div>
+                        </div>
+                    ) : selectedIcon === "iconSound" ? (
+                        <div className={styles.soundAndSpeed}>
+                            <div className={styles.soundControl}>
+                                <img src="/iconVolumn.png" alt="Listen Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={volume} onChange={handleVolumeChange}
+                                    className={styles.volumeSlider} />
                             </div>
-                        ) : selectedIcon === "iconCutImage" ? (
-                            <div className={styles.imageEdit}>
-                                <img
-                                    src={iconFlipColor}
-                                    alt="Flip Vertical Icon"
-                                    className={styles.soundIcon}
-                                    onClick={handleFlipVerticalClick}
-                                />
-                                <img
-                                    src={iconRotateColor}
-                                    alt="Rotate Icon"
-                                    className={styles.soundIcon}
-                                    onClick={handleRotateClick}
-                                />
+
+                            <div className={styles.soundControl}>
+                                <img src="/iconSpeed.png" alt="Speed Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={speed} onChange={handleSpeedChange}
+                                    className={styles.volumeSlider} />
                             </div>
-                        ) : selectedIcon === "iconAdjust" ? (
-                                <div className={styles.soundAndSpeed}>
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconBrightness.png" alt="Brightness Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={brightness} onChange={handleBrightnessChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                        </div>
+                    ) : selectedIcon === "iconCutImage" ? (
+                        <div className={styles.imageEdit}>
+                            <img
+                                src={iconFlipColor}
+                                alt="Flip Vertical Icon"
+                                className={styles.soundIcon}
+                                onClick={handleFlipVerticalClick}
+                            />
+                            <img
+                                src={iconRotateColor}
+                                alt="Rotate Icon"
+                                className={styles.soundIcon}
+                                onClick={handleRotateClick}
+                            />
+                        </div>
+                    ) : selectedIcon === "iconAdjust" ? (
+                        <div className={styles.soundAndSpeed}>
+                            <div className={styles.soundControl}>
+                                <img src="/iconBrightness.png" alt="Brightness Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={brightness} onChange={handleBrightnessChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconContrast.png" alt="Contrast Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={contrast} onChange={handleContrastChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconContrast.png" alt="Contrast Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={contrast} onChange={handleContrastChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconExposure.png" alt="Exposure Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={exposure} onChange={handleExposureChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconExposure.png" alt="Exposure Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={exposure} onChange={handleExposureChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconTemperature.png" alt="Temperature Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={temperature} onChange={handleTemperatureChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconTemperature.png" alt="Temperature Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={temperature} onChange={handleTemperatureChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconSaturation.png" alt="Saturation Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={saturation} onChange={handleSaturationChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconSaturation.png" alt="Saturation Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={saturation} onChange={handleSaturationChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconBlur.png" alt="Blur Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={blur} onChange={handleBlurChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconBlur.png" alt="Blur Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={blur} onChange={handleBlurChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconVignette.png" alt="Vignette Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={vignette} onChange={handleVignetteChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
+                            <div className={styles.soundControl}>
+                                <img src="/iconVignette.png" alt="Vignette Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={vignette} onChange={handleVignetteChange}
+                                    className={styles.volumeSlider} />
+                            </div>
 
-                                    <div className={styles.soundControl}>
-                                        <img src="/iconClarity.png" alt="Clarity Icon" className={styles.soundIcon} />
-                                        <input type="range" min="0" max="100" value={clarity} onChange={handleClarityChange}
-                                            className={styles.volumeSlider} />
-                                    </div>
-                                </div>
-                        ) : (
-                            <div className={selectedIcon === "iconRatio" ? styles.ratioGrid : styles.imageGrid}>
-                                {selectedIcon === "iconRatio"
-                                    ? ratioImages.map((ratio, idx) => {
-                                        const isSelected = selectedRatio === ratio.name;
-                                        return (
-                                            <div key={idx} className={styles.imageStyleItem} onClick={() => handleRatioClick(ratio.name)}>
-                                                <img src={isSelected ? ratio.src.replace("white", "green") : ratio.src} alt={ratio.name} />
-                                                <p className={isSelected ? styles.selectedRatioText : styles.imageText}>{ratio.name}</p>
-                                            </div>
-                                        );
-                                    })
+                            <div className={styles.soundControl}>
+                                <img src="/iconClarity.png" alt="Clarity Icon" className={styles.soundIcon} />
+                                <input type="range" min="0" max="100" value={clarity} onChange={handleClarityChange}
+                                    className={styles.volumeSlider} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={selectedIcon === "iconRatio" ? styles.ratioGrid : styles.imageGrid}>
+                            {selectedIcon === "iconRatio"
+                                ? ratioImages.map((ratio, idx) => {
+                                    const isSelected = selectedRatio === ratio.name;
+                                    return (
+                                        <div key={idx} className={styles.imageStyleItem} onClick={() => handleRatioClick(ratio.name)}>
+                                            <img src={isSelected ? ratio.src.replace("white", "green") : ratio.src} alt={ratio.name} />
+                                            <p className={isSelected ? styles.selectedRatioText : styles.imageText}>{ratio.name}</p>
+                                        </div>
+                                    );
+                                })
                                 : images.map((style, idx) => (
                                     <div key={idx} className={`${styles.imageItem} ${selectedImage === style.src ? styles.selected : ''}`}
                                         onClick={() => handleImageClick(style.src)}>
@@ -533,11 +646,11 @@ const EditVideo: React.FC = () => {
                                             className={`${styles.styleImageInImages} ${selectedImage === style.src ? styles.selected : ''}`} />
                                     </div>
                                 ))
-                                }
-                            </div>
-                        )}
+                            }
                         </div>
-                    </div>
+                    )}
+                </div>
+            </div>
 
             <div className={styles.timeline}>
                 <div className={styles.leftTimeline}>
@@ -548,7 +661,7 @@ const EditVideo: React.FC = () => {
                                 <div className={styles.trackLabel}>Script</div>
                                 <div className={styles.trackContent}>
                                     {scriptSegments.map((segment, index) => (
-                                        <div 
+                                        <div
                                             key={`script-${index}`}
                                             className={clsx(styles.segment, {
                                                 [styles.selectedSegment]: index === selectedSegmentIndex
@@ -559,7 +672,7 @@ const EditVideo: React.FC = () => {
                                                 {segment.substring(0, 30)}...
                                             </div>
                                             <div className={styles.segmentControls}>
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleSwapLeft(index);
@@ -569,7 +682,7 @@ const EditVideo: React.FC = () => {
                                                 >
                                                     ←
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleSwapRight(index);
@@ -590,7 +703,7 @@ const EditVideo: React.FC = () => {
                                 <div className={styles.trackLabel}>Images</div>
                                 <div className={styles.trackContent}>
                                     {checkedImagesList.map((imageData, index) => (
-                                        <div 
+                                        <div
                                             key={`image-${index}`}
                                             className={clsx(styles.segment, {
                                                 [styles.selectedSegment]: index === selectedSegmentIndex
@@ -598,8 +711,8 @@ const EditVideo: React.FC = () => {
                                             onClick={() => setSelectedSegmentIndex(index)}
                                         >
                                             <div className={styles.segmentContent}>
-                                                <img 
-                                                    src={imageData.localImages[0]} 
+                                                <img
+                                                    src={imageData.localImages[0]}
                                                     alt={`Segment ${index}`}
                                                     className={styles.segmentImage}
                                                 />
@@ -614,7 +727,7 @@ const EditVideo: React.FC = () => {
                                 <div className={styles.trackLabel}>Voice</div>
                                 <div className={styles.trackContent}>
                                     {voices_list.map((voice, index) => (
-                                        <div 
+                                        <div
                                             key={`voice-${index}`}
                                             className={clsx(styles.segment, {
                                                 [styles.selectedSegment]: index === selectedSegmentIndex
@@ -666,8 +779,16 @@ const EditVideo: React.FC = () => {
                 </div>
                 <div className={clsx(styles.rightSide)}>
                     <div className={clsx(styles.nextButtonWrapper)}>
-                        <button className={clsx(styles.nextButton)} onClick={() => navigate('/export-video')}>
-                            <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
+                        <button
+                            className={clsx(styles.nextButton, { [styles.disabled]: loading })}
+                            onClick={handleCreateVideo}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span className={styles.loader}></span>
+                            ) : (
+                                <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
+                            )}
                         </button>
                     </div>
                 </div>

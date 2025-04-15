@@ -664,53 +664,117 @@ class SlideshowGenerator {
     }
 }
 
+// function generateDrawTextFilter(subtitle: any, resolutionWidth: any, resolutionHeight: any) {
+//     if (!subtitle) return '';
+    
+//     // 1. Calculate font size based on video height
+//     const fontsize = Math.floor(resolutionHeight * 0.04);
+
+//     // 2. Calculate max characters per line based on width
+//     const maxLineLength = Math.floor(resolutionWidth / fontsize);
+
+//     // 3. Wrap subtitle
+//     const wrappedText = wrapSubtitle(subtitle, maxLineLength);
+
+//     // 4. Escape special characters more carefully
+//     // First, escape backslashes
+//     let escapedText = wrappedText.replace(/\\/g, '\\\\');
+    
+//     // Then escape other special characters
+//     escapedText = escapedText
+//         .replace(/'/g, "\\\\'")   // Escape single quotes 
+//         .replace(/:/g, '\\:')     // Escape colons
+//         .replace(/\[/g, '\\[')    // Escape square brackets
+//         .replace(/\]/g, '\\]')
+//         .replace(/\{/g, '\\{')    // Escape curly braces
+//         .replace(/\}/g, '\\}')
+//         .replace(/\(/g, '\\(')    // Escape parentheses
+//         .replace(/\)/g, '\\)')
+//         .replace(/\%/g, '\\%');   // Escape percent signs
+
+//     // 5. Use only the most basic parameters that work across all FFmpeg versions
+//     return `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.1`;
+// }
+
 function generateDrawTextFilter(subtitle: any, resolutionWidth: any, resolutionHeight: any) {
-    // 1. Tính font size dựa trên chiều cao video
-    const fontsize = Math.floor(resolutionHeight * 0.04);
-
-    // 2. Tính số ký tự tối đa mỗi dòng dựa trên chiều rộng
-    const maxLineLength = Math.floor(resolutionWidth / fontsize);
-
+    // 1. Calculate font size based on video height
+    const fontsize = Math.floor(resolutionHeight * 0.04)
+  
+    // 2. Calculate max characters per line based on width
+    const maxLineLength = Math.floor(resolutionWidth / fontsize)
+  
     // 3. Wrap subtitle
-    const wrappedText = wrapSubtitle(subtitle, maxLineLength);
+    const wrappedText = wrapSubtitle(subtitle, maxLineLength)
+  
+    // 4. Escape special characters
+    const escapedText = wrappedText
+      .replace(/\\/g, "\\\\") // Escape backslashes
+      .replace(/'/g, "`") // Escape single quotes
+      .replace(/:/g, "\\:") // Escape colons
+      .replace(/\[/g, "\\[") // Escape square brackets
+      .replace(/\]/g, "\\]") // Escape square brackets
+      .replace(/\{/g, "\\{") // Escape curly braces
+      .replace(/\}/g, "\\}") // Escape curly braces
+      .replace(/\(/g, "\\(") // Escape parentheses
+      .replace(/\)/g, "\\)") // Escape parentheses
+      .replace(/%/g, "\\%") // Escape percent signs
+  
+    // 5. Return the drawtext filter WITHOUT line_spacing parameter
+    // Some FFmpeg versions don't support line_spacing in drawtext
+    return `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.05:box=1:boxcolor=black@0.5:boxborderw=10`
+  }
 
-    // 4. Trả về filter drawtext
-    return `drawtext=text='${wrappedText.replace(
-        /:/g,
-        '\\:',
-    )}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.05
-  :box=1:boxcolor=black@0.5:boxborderw=10:line_spacing=10`;
-}
+// function wrapSubtitle(text: any, maxLineLength = 30) {
+//     const words = text.split(' ');
+//     let lines = [''];
 
-function wrapSubtitle(text: any, maxLineLength = 30) {
-    const words = text.split(' ');
-    let lines = [''];
+//     // Create lines that don't exceed maxLineLength
+//     for (let word of words) {
+//         if ((lines[lines.length - 1] + ' ' + word).trim().length <= maxLineLength) {
+//             lines[lines.length - 1] += ' ' + word;
+//         } else {
+//             lines.push(word);
+//         }
+//     }
 
-    // Create lines that don't exceed maxLineLength
-    for (let word of words) {
-        if ((lines[lines.length - 1] + ' ' + word).trim().length <= maxLineLength) {
-            lines[lines.length - 1] += ' ' + word;
-        } else {
-            lines.push(word);
-        }
+//     // Trim each line
+//     lines = lines.map((line) => line.trim());
+
+//     // Find the longest line length
+//     const longestLineLength = Math.max(...lines.map((line) => line.length));
+
+//     // Pad each line with spaces to center the text
+//     const centeredLines = lines.map((line) => {
+//         const spacesToAdd = longestLineLength - line.length;
+//         const leftPadding = Math.floor(spacesToAdd / 2);
+//         return ' '.repeat(leftPadding) + line;
+//     });
+
+//     // Join with newline for FFmpeg
+//     return centeredLines.join('\n');
+// }
+
+function wrapSubtitle(subtitle: string, maxLineLength: number): string {
+    // Simple text wrapping function
+    const words = subtitle.split(" ")
+    const lines = []
+    let currentLine = ""
+  
+    for (const word of words) {
+      if ((currentLine + word).length > maxLineLength) {
+        lines.push(currentLine.trim())
+        currentLine = word + " "
+      } else {
+        currentLine += word + " "
+      }
     }
-
-    // Trim each line
-    lines = lines.map((line) => line.trim());
-
-    // Find the longest line length
-    const longestLineLength = Math.max(...lines.map((line) => line.length));
-
-    // Pad each line with spaces to center the text
-    const centeredLines = lines.map((line) => {
-        const spacesToAdd = longestLineLength - line.length;
-        const leftPadding = Math.floor(spacesToAdd / 2);
-        return ' '.repeat(leftPadding) + line;
-    });
-
-    // Join with newline for FFmpeg
-    return centeredLines.join('\n');
-}
+  
+    if (currentLine.trim()) {
+      lines.push(currentLine.trim())
+    }
+  
+    return lines.join("\n")
+  }
 
 const user_config: Partial<SlideshowConfig> = {
     images: [

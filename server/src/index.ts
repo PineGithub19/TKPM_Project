@@ -2,6 +2,7 @@ import express, { Express, Request, response, Response } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import path from 'path';
 import VideoRouter from './routers/VideoRouter';
 import ImageRouter from './routers/ImageRouter';
 import LiteratureRouter from './routers/LiteratureRouter';
@@ -28,7 +29,9 @@ app.use(cookieParser());
 
 app.use(express.json({ limit: '10mb' }));
 
+// Serve static files from public directory
 app.use(express.static('public'));
+app.use('/videos', express.static(path.join(__dirname, './services/VideoService')));
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Express + TypeScript Server');
