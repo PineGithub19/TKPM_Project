@@ -27,8 +27,8 @@ interface ImageInfo {
 
 interface SlideshowConfig {
     // Directories and paths
-    imagesDir: string;
-    outputDir: string;
+    imagesDir?: string;
+    outputDir?: string;
     finalOutputPath: string;
     finalWithMusicPath: string; // Path to final output video with music
 
@@ -49,10 +49,10 @@ interface SlideshowConfig {
 // Default configuration
 const defaultConfig: SlideshowConfig = {
     // Directories and paths
-    imagesDir: path.join(__dirname, 'images'),
-    outputDir: path.join(__dirname, 'tmp_videos'),
-    finalOutputPath: path.join(__dirname, 'final_output.mp4'),
-    finalWithMusicPath: path.join(__dirname, 'final_output_with_music.mp4'),
+    // imagesDir: path.join(__dirname, 'images'),
+    outputDir: path.join(process.cwd(), 'public/videos/tmp_videos'),
+    finalOutputPath: path.join(process.cwd(), 'public/videos', `final_output_${Date.now()}.mp4`),
+    finalWithMusicPath: path.join(process.cwd(), 'public/videos', `final_output_with_music_${Date.now()}.mp4`),
     // Video configuration
     videoDuration: 5, // Duration per image (seconds)
     resolution: { width: 1920, height: 1080 },
@@ -108,6 +108,11 @@ class SlideshowGenerator {
                     duration: this.config.videoDuration,
                     title: filename.replace(/\.(jpg|jpeg|png|webp)$/i, ''),
                 }));
+        }
+
+        const publicVideosPath = path.join(process.cwd(), 'public/videos');
+        if (!fs.existsSync(publicVideosPath)) {
+            fs.mkdirSync(publicVideosPath, { recursive: true });
         }
 
         console.log(`🖼️ Found ${this.images.length} images`);
