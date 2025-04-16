@@ -29,7 +29,7 @@ export interface IVideo extends Document {
     script: string;
     voice_config: mongoose.Types.ObjectId;
     image_config: mongoose.Types.ObjectId;
-    status: string;
+    is_finished: boolean;
     publish_date: Date;
 }
 

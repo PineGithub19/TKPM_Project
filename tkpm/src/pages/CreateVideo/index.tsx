@@ -42,13 +42,13 @@ function ImportantAlert({
     isFinishedVideo,
     promptId,
     scriptPromptId,
-    voicePromtId,
+    voicePromptId,
     imagePromptId,
 }: {
     isFinishedVideo: boolean;
     promptId?: string;
     scriptPromptId?: string;
-    voicePromtId?: string;
+    voicePromptId?: string;
     imagePromptId?: string;
 }) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
@@ -59,7 +59,7 @@ function ImportantAlert({
                 await request.del('/information/delete', {
                     promptId: promptId,
                     scriptId: scriptPromptId,
-                    voiceId: voicePromtId,
+                    voiceId: voicePromptId,
                     imageId: imagePromptId,
                 });
             } catch (error) {
@@ -83,6 +83,9 @@ function ImportantAlert({
     useEffect(() => {
         if (blocker.state === 'blocked' && isFinishedVideo === false) {
             setIsAlerted(blocker.state === 'blocked');
+        } else if (isFinishedVideo === true) {
+            blocker.proceed?.();
+            setIsAlerted(false);
         }
     }, [blocker, isFinishedVideo]);
 
@@ -134,19 +137,28 @@ function CreateVideo() {
 
     const handleFinish = async () => {
         setIsFinishedVideo(true); // preemptively allow
-        try {
-            await request.del('/information/delete', { promptId });
-            navigate('/edit-video', {
-                state: {
-                    scriptSegments,
-                    checkedImagesList,
-                    voices_list,
-                },
-            });
-        } catch (error) {
-            console.error('Error during finish:', error);
-            setIsFinishedVideo(false); // revert if needed
-        }
+        navigate('/edit-video', {
+            state: {
+                scriptSegments,
+                checkedImagesList,
+                voices_list,
+            },
+        });
+        // try {
+        //     await request.put('/information/update', {
+        //         promptId: promptId,
+        //     });
+        //     navigate('/edit-video', {
+        //         state: {
+        //             scriptSegments,
+        //             checkedImagesList,
+        //             voices_list,
+        //         },
+        //     });
+        // } catch (error) {
+        //     console.error('Error during finish:', error);
+        //     setIsFinishedVideo(false); // revert if needed
+        // }
     };
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
@@ -226,7 +238,7 @@ function CreateVideo() {
                         {activeStep === 2 && (
                             <div className="create-video-image-container">
                                 <ImagePrompt
-                                    promptId={promptId}
+                                    promptId={imagePromptId}
                                     scriptSegments={scriptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                                 />
@@ -235,6 +247,7 @@ function CreateVideo() {
                         {activeStep === 3 && (
                             <div className="create-video-voice-container">
                                 <GenerateVoice
+                                    promptId={voicePromptId}
                                     scriptSegments={scriptSegments}
                                     scriptTitle={scriptTitle}
                                     onComplete={handleVoiceComplete}
@@ -248,7 +261,7 @@ function CreateVideo() {
                 isFinishedVideo={isFinishedVideo}
                 promptId={promptId}
                 scriptPromptId={scriptPromptId}
-                voicePromtId={voicePromptId}
+                voicePromptId={voicePromptId}
                 imagePromptId={imagePromptId}
             />
         </>

@@ -8,7 +8,7 @@ const VideoSchema = new Schema<IVideo>(
         script: { type: String, required: true },
         voice_config: { type: Schema.Types.ObjectId, ref: 'VoiceConfig', required: true },
         image_config: { type: Schema.Types.ObjectId, ref: 'ImageConfig', required: true },
-        status: { type: String, required: true },
+        is_finished: { type: Boolean, required: true },
         publish_date: { type: Date, required: true },
     },
     {

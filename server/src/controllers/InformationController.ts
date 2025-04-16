@@ -13,7 +13,7 @@ interface VideoConfigData {
     script: string;
     voice_config: Types.ObjectId;
     image_config: Types.ObjectId;
-    status: string;
+    is_finished: boolean;
     publish_date: Date;
 }
 
@@ -94,7 +94,7 @@ class InformationController {
                 script: 'script',
                 voice_config: new mongoose.Types.ObjectId(voiceResponse._id),
                 image_config: new mongoose.Types.ObjectId(imageResponse._id),
-                status: 'pending',
+                is_finished: false,
                 publish_date: new Date(),
             };
             const videoResponse = (await DBServices.createDocument(VideoConfigModel, videoData)) as VideoConfigData;
@@ -111,6 +111,36 @@ class InformationController {
             }
         } catch (error) {
             res.status(500).send('Cannot create a Prompt: ' + error);
+        }
+    }
+
+    async updateImagePrompt(req: Request, res: Response, next: NextFunction) {
+        const { promptId } = req.body;
+
+        if (!promptId) {
+            res.status(400).json({ message: 'Prompt ID is required' });
+        }
+
+        try {
+            const data = await DBServices.getDocumentById(VideoConfigModel, promptId as string);
+
+            if (!data) {
+                res.status(404).json({ message: 'Prompt not found' });
+                return;
+            } else {
+                data.is_finished = true;
+            }
+
+            const response = await DBServices.updateDocument(VideoConfigModel, promptId as string, data);
+
+            if (response) {
+                res.status(200).json({ message: 'Prompt updated' });
+            } else {
+                res.status(500).send('Error: prompt is null');
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error updating prompt');
         }
     }
 

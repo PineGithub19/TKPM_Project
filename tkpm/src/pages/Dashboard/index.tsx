@@ -10,7 +10,22 @@ import DefaultVideoItem from './DefaultVideoItem';
 
 interface VideoInformation {
     videoId: string;
+    scriptId: string;
+    voiceId: string;
+    imageId: string;
+    is_finished: boolean;
     background: string;
+}
+
+interface VideoConfigData {
+    _id?: string;
+    user_id?: string;
+    literature_work_id: string;
+    script: string;
+    voice_config: string;
+    image_config: string;
+    is_finished: boolean;
+    publish_date: Date;
 }
 
 function DashBoard() {
@@ -29,6 +44,10 @@ function DashBoard() {
         }
     };
 
+    const handleDeleteVideo = (videoId: string) => {
+        setVideoInformation((prevVideos) => prevVideos.filter((video) => video.videoId !== videoId));
+    };
+
     useEffect(() => {
         const fetchVideoInformation = async () => {
             try {
@@ -36,7 +55,15 @@ function DashBoard() {
                 const response = await request.get('/video/all');
 
                 if (response) {
-                    setVideoInformation(response.videos || []);
+                    setVideoInformation(
+                        response.videos.map((item: VideoConfigData) => ({
+                            videoId: item._id,
+                            scriptId: item.literature_work_id,
+                            voiceId: item.voice_config,
+                            imageId: item.image_config,
+                            is_finished: item.is_finished,
+                        })) || [],
+                    );
                 }
             } catch (error) {
                 console.error('Error fetching video information:', error);
@@ -72,11 +99,7 @@ function DashBoard() {
                     </div>
                     {videoInformation.length > 0 &&
                         videoInformation.map((video) => (
-                            <DefaultVideoItem
-                                key={video.videoId}
-                                background={video.background}
-                                videoId={video.videoId}
-                            />
+                            <DefaultVideoItem key={video.videoId} videoData={video} onDelete={handleDeleteVideo} />
                         ))}
                 </div>
                 <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>

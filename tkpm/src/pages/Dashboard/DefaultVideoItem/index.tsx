@@ -1,34 +1,115 @@
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilm } from '@fortawesome/free-solid-svg-icons';
+import { faFilm, faXmark } from '@fortawesome/free-solid-svg-icons';
+import styles from './DefaultVideoItem.module.css';
+import * as request from '../../../utils/request';
 
-interface DefaultVideoItemProps {
-    background?: string;
-    videoId?: string;
+interface VideoInformation {
+    videoId: string;
+    scriptId: string;
+    voiceId: string;
+    imageId: string;
+    is_finished: boolean;
+    background: string;
 }
 
-function DefaultVideoItem({ background = '', videoId }: DefaultVideoItemProps) {
-    return background ? (
-        <div>
-            <img src={background} alt="Video Thumbnail" className={clsx('img-fluid')} />
-        </div>
-    ) : (
-        <div>
-            <div
-                className={clsx(
-                    'd-flex',
-                    'flex-column',
-                    'justify-content-center',
-                    'align-items-center',
-                    'bg-primary',
-                    'p-4',
-                    'rounded-4',
-                    'ms-4',
-                )}
-            >
-                <FontAwesomeIcon icon={faFilm} className={clsx('mb-3', 'text-light', 'fs-2')} />
-                <h5 className={clsx('text-light')}>Video in Progress</h5>
-            </div>
+function DefaultVideoItem({
+    videoData,
+    onDelete,
+}: {
+    videoData: VideoInformation;
+    onDelete: (videoId: string) => void;
+}) {
+    const navigate = useNavigate();
+
+    const handleClick = async () => {
+        const response = await Promise.all([
+            // request.get('/script_generate/get-script'),
+            // request.get('/voice/get-voices'),
+            request.get(`/image/get-images?promptId=${videoData.imageId}`),
+        ]);
+
+        // const scriptSegments = response[0].data.map((item: any) => item.script_segment);
+        const checkedImagesList = response[0].imageList;
+        // const voicesList = response[1].data.map((item: any) => item.voice_path);
+
+        navigate('/edit-video', {
+            state: {
+                scriptSegments: [],
+                voicesList: [],
+                checkedImagesList: checkedImagesList,
+            },
+        });
+
+        if (videoData.is_finished) {
+            // Handle click for pending status
+        }
+        if (!videoData.is_finished) {
+            // Handle click for finished status
+        }
+    };
+
+    const handleDeleteVideo = async () => {
+        try {
+            await request.del('/information/delete', {
+                promptId: videoData.videoId,
+                scriptId: videoData.scriptId,
+                voiceId: videoData.voiceId,
+                imageId: videoData.imageId,
+            });
+            onDelete(videoData.videoId);
+        } catch (error) {
+            console.error('Error deleting video:', error);
+        }
+    };
+
+    return (
+        <div onClick={handleClick}>
+            {videoData.background ? (
+                <div>
+                    <img src={videoData.background} alt="Video Thumbnail" className={clsx('img-fluid')} />
+                </div>
+            ) : (
+                <div className={clsx('position-relative')}>
+                    <div
+                        className={clsx(
+                            'd-flex',
+                            'flex-column',
+                            'justify-content-center',
+                            'align-items-center',
+                            'ms-4',
+                            styles.imageContainer,
+                            {
+                                [styles.incompletedStatusBackground]: !videoData.is_finished,
+                                [styles.completedStatusBackground]: videoData.is_finished,
+                            },
+                        )}
+                    >
+                        <FontAwesomeIcon icon={faFilm} className={clsx('mb-3', 'text-black', 'fs-2')} />
+                        <h5 className={clsx('text-black')}>
+                            {videoData.is_finished ? 'Completed Video' : 'Video in Progress'}
+                        </h5>
+                    </div>
+                    <div
+                        onClick={handleDeleteVideo}
+                        className={clsx(
+                            'position-absolute',
+                            'top-0',
+                            'end-0',
+                            'p-2',
+                            'pe-3',
+                            'ps-3',
+                            'rounded-start',
+                            'rounded-end',
+                            'bg-white',
+                            styles.iconContainer,
+                        )}
+                    >
+                        <FontAwesomeIcon icon={faXmark} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
