@@ -1,12 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-interface IVideoPublishHistory extends Document {
-    video_id: mongoose.Types.ObjectId;
-    platform: string;
-    publish_date: Date;
-    status: string;
-    video_url: string;
-}
+import mongoose, { Schema } from 'mongoose';
+import { IVideoPublishHistory } from '../types/modelTypes';
 
 const VideoPublishHistorySchema = new Schema<IVideoPublishHistory>(
     {

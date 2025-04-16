@@ -1,14 +1,22 @@
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilm } from '@fortawesome/free-solid-svg-icons';
 import styles from './DashBoard.module.css';
 import LoadingComponent from '../../components/Loading';
+import * as request from '../../utils/request';
+import DefaultVideoItem from './DefaultVideoItem';
+
+interface VideoInformation {
+    videoId: string;
+    background: string;
+}
 
 function DashBoard() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [videoInformation, setVideoInformation] = useState<VideoInformation[]>([]);
 
     const handleCreateVideo = async () => {
         try {
@@ -20,6 +28,29 @@ function DashBoard() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        const fetchVideoInformation = async () => {
+            try {
+                setIsLoading(true);
+                const response = await request.get('/video/all');
+
+                if (response) {
+                    setVideoInformation(response.videos || []);
+                }
+            } catch (error) {
+                console.error('Error fetching video information:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchVideoInformation();
+
+        return () => {
+            setVideoInformation([]);
+        };
+    }, []);
 
     return (
         <div className={clsx(styles.dashboard, 'position-relative')}>
@@ -39,6 +70,14 @@ function DashBoard() {
                         <FontAwesomeIcon icon={faFilm} className={clsx(styles.icon, 'mb-3')} />
                         <h5>Create new video</h5>
                     </div>
+                    {videoInformation.length > 0 &&
+                        videoInformation.map((video) => (
+                            <DefaultVideoItem
+                                key={video.videoId}
+                                background={video.background}
+                                videoId={video.videoId}
+                            />
+                        ))}
                 </div>
                 <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>
             </div>

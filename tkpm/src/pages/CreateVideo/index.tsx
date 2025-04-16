@@ -38,13 +38,30 @@ interface ImagesListComplete {
     segment: string;
 }
 
-function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
+function ImportantAlert({
+    isFinishedVideo,
+    promptId,
+    scriptPromptId,
+    voicePromtId,
+    imagePromptId,
+}: {
+    isFinishedVideo: boolean;
+    promptId?: string;
+    scriptPromptId?: string;
+    voicePromtId?: string;
+    imagePromptId?: string;
+}) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
 
     const handleConfirmAlert = async (blocker: Blocker) => {
         if (blocker.state === 'blocked') {
             try {
-                await request.del('/information/delete', { promptId: promptId });
+                await request.del('/information/delete', {
+                    promptId: promptId,
+                    scriptId: scriptPromptId,
+                    voiceId: voicePromtId,
+                    imageId: imagePromptId,
+                });
             } catch (error) {
                 console.log(error);
             } finally {
@@ -72,15 +89,23 @@ function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolea
     return isAlerted ? (
         <SweetAlert
             title="Wanna leave this page?"
-            text="Your video has not been created yet. Your changes won't be saved."
+            text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
             onConfirm={() => handleConfirmAlert(blocker)}
+            onDenied={() => {
+                blocker.proceed?.();
+                setIsAlerted(false);
+            }}
         />
     ) : null;
 }
 
 function CreateVideo() {
     const [promptId, setPromptId] = useState<string>('');
+    const [scriptPromptId, setScriptPromptId] = useState<string>('');
+    const [voicePromptId, setVoicePromptId] = useState<string>('');
+    const [imagePromptId, setImagePromptId] = useState<string>('');
+
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef(false);
     const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
@@ -149,7 +174,10 @@ function CreateVideo() {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
                 const response = await request.post('/information/create');
-                setPromptId(response?.id || '');
+                setPromptId(response?.promptId || '');
+                setScriptPromptId(response?.scriptPromptId || '');
+                setVoicePromptId(response?.voicePromptId || '');
+                setImagePromptId(response?.imagePromptId || '');
             }
             fetchPromptId();
             hasFetchedPromptId.current = true;
@@ -216,7 +244,13 @@ function CreateVideo() {
                     </PromptBody>
                 </div>
             </div>
-            <ImportantAlert isFinishedVideo={isFinishedVideo} promptId={promptId} />
+            <ImportantAlert
+                isFinishedVideo={isFinishedVideo}
+                promptId={promptId}
+                scriptPromptId={scriptPromptId}
+                voicePromtId={voicePromptId}
+                imagePromptId={imagePromptId}
+            />
         </>
     );
 }

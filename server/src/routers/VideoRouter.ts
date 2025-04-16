@@ -9,4 +9,8 @@ router.post('/create', (req, res, next) => {
     videoController.createSlideshow(req, res, next);
 });
 
+router.get('/all', (req, res, next) => {
+    videoController.getAllVideos(req, res, next);
+});
+
 export default router;
