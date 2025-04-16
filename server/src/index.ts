@@ -18,12 +18,12 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 const databaseURL = process.env.DB_URL as string;
 
-app.use(cors(
-    {
-        origin: "http://localhost:5173",
-        credentials: true, 
-    }
-));
+app.use(
+    cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    }),
+);
 
 app.use(cookieParser());
 
@@ -31,7 +31,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve static files from public directory
 app.use(express.static('public'));
-app.use('/videos', express.static(path.join(__dirname, './services/VideoService')));
+// app.use('/videos', express.static(path.join(__dirname, './services/VideoService')));
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Express + TypeScript Server');
@@ -44,7 +44,6 @@ app.use('/script_generate', ScriptRouter);
 app.use('/information', InformationRouter);
 app.use('/user', UserRouter);
 app.use('/voice', voiceRoutes);
-
 
 mongoose
     .connect(databaseURL)

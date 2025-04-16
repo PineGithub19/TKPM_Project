@@ -64,21 +64,6 @@ const defaultConfig: SlideshowConfig = {
     cleanupTemp: true,
 };
 
-// type EditOptions = {
-//   speed?: number;
-//   resolution?: { width: number; height: number };
-//   brightness?: number;
-//   contrast?: number;
-//   volume?: number;
-//   fade?: boolean;
-//   kenBurns?: boolean;
-//   kenBurnsDirection?:
-//     | "leftToRight"
-//     | "rightToLeft"
-//     | "topToBottom"
-//     | "bottomToTop";
-// };
-
 interface EditOptions {
     resolution?: { width: number; height: number };
     brightness?: number;
@@ -311,149 +296,6 @@ class SlideshowGenerator {
         });
     }
 
-    // public async createVideoFromImage(
-    //   imageInfo: ImageInfo | string,
-    //   index: number,
-    //   editOptions?: EditOptions
-    // ): Promise<void> {
-    //   const inputImage =
-    //     typeof imageInfo === "string" ? imageInfo : imageInfo.path;
-    //   const imgInfo =
-    //     typeof imageInfo === "string" ? { path: inputImage } : imageInfo;
-
-    //   const audioPath = imgInfo.audioPath || "";
-    //   const subtitle = imgInfo.subtitle || "";
-    //   const {
-    //     resolution = this.config.resolution,
-    //     brightness = 0,
-    //     contrast = 1,
-    //     volume = 1,
-    //     fade = true,
-    //     kenBurns = false,
-    //     kenBurnsDirection = "leftToRight",
-    //     crop = {
-    //       width: resolution.width,
-    //       height: resolution.height,
-    //       x: 0,
-    //       y: 0,
-    //     },
-    //     rotate = 0,
-    //     blur = 0,
-    //   } = editOptions || {};
-
-    //   const rotateRad = (rotate * Math.PI) / 180;
-
-    //   const audioDuration = await new Promise<number>((resolve, reject) => {
-    //     ffmpeg.ffprobe(audioPath, (err: any, metadata: any) => {
-    //       if (err) {
-    //         console.error(`❌ Lỗi khi lấy metadata audio:`, err);
-    //         reject(err);
-    //       }
-    //       resolve(metadata.format.duration || this.config.videoDuration);
-    //     });
-    //   });
-
-    //   const outputVideo = path.join(this.config.outputDir, `video_${index}.mp4`);
-    //   console.log(`🎬 Bắt đầu xử lý video ${index + 1}:`);
-
-    //   return new Promise<void>((resolve, reject) => {
-    //     const filters: string[] = [];
-
-    //     // Base scale and padding
-    //     filters.push(
-    //       `scale=${resolution.width}:${resolution.height}:force_original_aspect_ratio=decrease`,
-    //       `pad=${resolution.width}:${resolution.height}:(ow-iw)/2:(oh-ih)/2:black`
-    //     );
-
-    //     // Adjustments
-    //     filters.push(`eq=brightness=${brightness}:contrast=${contrast}`);
-
-    //     // Crop
-    //     if (crop) {
-    //       filters.push(`crop=${crop.width}:${crop.height}:${crop.x}:${crop.y}`);
-    //     }
-
-    //     // Rotate
-    //     if (rotate !== 0) {
-    //       filters.push(`rotate=${rotateRad}:c=black@0`);
-    //     }
-
-    //     // Blur
-    //     if (blur > 0) {
-    //       filters.push(`boxblur=${blur}`);
-    //     }
-
-    //     // Ken Burns effect
-    //     if (kenBurns) {
-    //       let zoomFilter = "";
-    //       switch (kenBurnsDirection) {
-    //         case "leftToRight":
-    //           zoomFilter = `zoompan=z='min(zoom+0.0003,1.04)':x='iw/2-(iw/2)*zoom+(zoom-1)*8':y='ih/2-(ih/2)*zoom':d=500`;
-    //           break;
-    //         case "rightToLeft":
-    //           zoomFilter = `zoompan=z='min(zoom+0.0003,1.04)':x='iw/2-(iw/2)*zoom-(zoom-1)*8':y='ih/2-(ih/2)*zoom':d=500`;
-    //           break;
-    //         case "topToBottom":
-    //           zoomFilter = `zoompan=z='min(zoom+0.0003,1.04)':x='iw/2-(iw/2)*zoom':y='ih/2-(ih/2)*zoom+(zoom-1)*8':d=500`;
-    //           break;
-    //         case "bottomToTop":
-    //           zoomFilter = `zoompan=z='min(zoom+0.0003,1.04)':x='iw/2-(iw/2)*zoom':y='ih/2-(ih/2)*zoom-(zoom-1)*8':d=500`;
-    //           break;
-    //       }
-    //       filters.push(zoomFilter);
-    //     }
-
-    //     // Fade
-    //     if (fade) {
-    //       filters.push(`fade=t=in:st=0:d=1`);
-    //       filters.push(`fade=t=out:st=${audioDuration - 1}:d=1`);
-    //     }
-
-    //     // Subtitle
-    //     filters.push(
-    //       generateDrawTextFilter(subtitle, resolution.width, resolution.height)
-    //     );
-
-    //     // Combine all filters and label [v]
-    //     const filterComplex = `[0:v]${filters.join(",")}[v]`;
-
-    //     ffmpeg()
-    //       .input(inputImage)
-    //       .inputOptions(["-loop", "1"])
-    //       .input(audioPath)
-    //       .complexFilter(filterComplex, ["v"])
-    //       .outputOptions([
-    //         "-map",
-    //         "1:a", // Map original audio
-    //         "-t",
-    //         audioDuration.toString(),
-    //         "-preset",
-    //         "ultrafast",
-    //         "-c:v",
-    //         "libx264",
-    //         "-crf",
-    //         "23",
-    //         "-pix_fmt",
-    //         "yuv420p",
-    //         "-movflags",
-    //         "+faststart",
-    //       ])
-    //       .on("start", (cmd: any) => {
-    //         console.log("⚙️ FFmpeg command:", cmd);
-    //       })
-    //       .on("end", () => {
-    //         console.log(`✅ Video ${index + 1} hoàn thành`);
-    //         this.videoFiles.push(outputVideo);
-    //         resolve();
-    //       })
-    //       .on("error", (err: any) => {
-    //         console.error(`❌ Lỗi video ${index + 1}:`, err);
-    //         reject(err);
-    //       })
-    //       .save(outputVideo);
-    //   });
-    // }
-
     // Clean up temporary files
     private cleanUpTempFiles(): void {
         if (!this.config.cleanupTemp) return;
@@ -476,7 +318,7 @@ class SlideshowGenerator {
             }
         });
 
-        if(this.config.backgroundMusic && fs.existsSync(this.config.backgroundMusic))
+        if (this.config.backgroundMusic && fs.existsSync(this.config.backgroundMusic))
             fs.unlinkSync(this.config.backgroundMusic);
 
         //Delete image files
@@ -566,65 +408,6 @@ class SlideshowGenerator {
         }
     }
 
-    // public async editVideo(inputVideo: string, options: EditOptions): Promise<void> {
-    //   return new Promise((resolve, reject) => {
-    //     const {
-    //       output,
-    //       brightness = 0,
-    //       contrast = 1,
-    //       extraAudio
-    //     } = options;
-
-    //     const command = ffmpeg(inputVideo);
-
-    //     if (extraAudio) command.input(extraAudio);
-
-    //     const filters = [];
-    //     let currentVideo = '[0:v]';
-
-    //     // Just brightness & contrast
-    //     if (brightness !== 0 || contrast !== 1) {
-    //       filters.push(`${currentVideo}eq=brightness=${brightness}:contrast=${contrast}[v_eq]`);
-    //       currentVideo = '[v_eq]';
-    //     }
-    //     if (resolution && resolution.width && resolution.height) {
-    //       filters.push(`${currentVideo}scale=w=${resolution.width}:h=${resolution.height}:force_original_aspect_ratio=decrease,pad=${resolution.width}:${resolution.height}:(ow-iw)/2:(oh-ih)/2[v_scaled]`);
-    //       currentVideo = '[v_scaled]';
-    //     }
-
-    //     command
-    //       .complexFilter(filters)
-    //       .outputOptions([
-    //         '-map', currentVideo,
-    //         '-c:v', 'libx264',
-    //         '-preset', 'ultrafast',
-    //         '-crf', '23',
-    //         '-pix_fmt', 'yuv420p'
-    //       ]);
-
-    //     // Add audio separately
-    //     if (extraAudio) {
-    //       command.outputOptions([
-    //         '-map', '1:a',  // Use audio from second input
-    //         '-c:a', 'aac',
-    //         '-b:a', '192k'
-    //       ]);
-    //     }
-
-    //     command
-    //       .on('start', (cmd: any) => console.log('🔧 FFmpeg command:', cmd))
-    //       .on('end', () => {
-    //         console.log('✅ Video edited successfully');
-    //         console.log(`Output saved to: ${output}`);
-    //         resolve();
-    //       })
-    //       .on('error', (err: any) => {
-    //         console.error('❌ FFmpeg error:', err);
-    //         reject(err);
-    //       })
-    //       .save(output);
-    //   });
-    // }
     public async addMusicToVideo(inputVideo: string, musicPath: string, volume: string, output: string): Promise<void> {
         return new Promise((resolve, reject) => {
             ffmpeg()
@@ -664,117 +447,55 @@ class SlideshowGenerator {
     }
 }
 
-// function generateDrawTextFilter(subtitle: any, resolutionWidth: any, resolutionHeight: any) {
-//     if (!subtitle) return '';
-    
-//     // 1. Calculate font size based on video height
-//     const fontsize = Math.floor(resolutionHeight * 0.04);
-
-//     // 2. Calculate max characters per line based on width
-//     const maxLineLength = Math.floor(resolutionWidth / fontsize);
-
-//     // 3. Wrap subtitle
-//     const wrappedText = wrapSubtitle(subtitle, maxLineLength);
-
-//     // 4. Escape special characters more carefully
-//     // First, escape backslashes
-//     let escapedText = wrappedText.replace(/\\/g, '\\\\');
-    
-//     // Then escape other special characters
-//     escapedText = escapedText
-//         .replace(/'/g, "\\\\'")   // Escape single quotes 
-//         .replace(/:/g, '\\:')     // Escape colons
-//         .replace(/\[/g, '\\[')    // Escape square brackets
-//         .replace(/\]/g, '\\]')
-//         .replace(/\{/g, '\\{')    // Escape curly braces
-//         .replace(/\}/g, '\\}')
-//         .replace(/\(/g, '\\(')    // Escape parentheses
-//         .replace(/\)/g, '\\)')
-//         .replace(/\%/g, '\\%');   // Escape percent signs
-
-//     // 5. Use only the most basic parameters that work across all FFmpeg versions
-//     return `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.1`;
-// }
-
 function generateDrawTextFilter(subtitle: any, resolutionWidth: any, resolutionHeight: any) {
     // 1. Calculate font size based on video height
-    const fontsize = Math.floor(resolutionHeight * 0.04)
-  
+    const fontsize = Math.floor(resolutionHeight * 0.04);
+
     // 2. Calculate max characters per line based on width
-    const maxLineLength = Math.floor(resolutionWidth / fontsize)
-  
+    const maxLineLength = Math.floor(resolutionWidth / fontsize);
+
     // 3. Wrap subtitle
-    const wrappedText = wrapSubtitle(subtitle, maxLineLength)
-  
+    const wrappedText = wrapSubtitle(subtitle, maxLineLength);
+
     // 4. Escape special characters
     const escapedText = wrappedText
-      .replace(/\\/g, "\\\\") // Escape backslashes
-      .replace(/'/g, "`") // Escape single quotes
-      .replace(/:/g, "\\:") // Escape colons
-      .replace(/\[/g, "\\[") // Escape square brackets
-      .replace(/\]/g, "\\]") // Escape square brackets
-      .replace(/\{/g, "\\{") // Escape curly braces
-      .replace(/\}/g, "\\}") // Escape curly braces
-      .replace(/\(/g, "\\(") // Escape parentheses
-      .replace(/\)/g, "\\)") // Escape parentheses
-      .replace(/%/g, "\\%") // Escape percent signs
-  
+        .replace(/\\/g, '\\\\') // Escape backslashes
+        .replace(/'/g, '`') // Escape single quotes
+        .replace(/:/g, '\\:') // Escape colons
+        .replace(/\[/g, '\\[') // Escape square brackets
+        .replace(/\]/g, '\\]') // Escape square brackets
+        .replace(/\{/g, '\\{') // Escape curly braces
+        .replace(/\}/g, '\\}') // Escape curly braces
+        .replace(/\(/g, '\\(') // Escape parentheses
+        .replace(/\)/g, '\\)') // Escape parentheses
+        .replace(/%/g, '\\%'); // Escape percent signs
+
     // 5. Return the drawtext filter WITHOUT line_spacing parameter
     // Some FFmpeg versions don't support line_spacing in drawtext
-    return `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.05:box=1:boxcolor=black@0.5:boxborderw=10`
-  }
-
-// function wrapSubtitle(text: any, maxLineLength = 30) {
-//     const words = text.split(' ');
-//     let lines = [''];
-
-//     // Create lines that don't exceed maxLineLength
-//     for (let word of words) {
-//         if ((lines[lines.length - 1] + ' ' + word).trim().length <= maxLineLength) {
-//             lines[lines.length - 1] += ' ' + word;
-//         } else {
-//             lines.push(word);
-//         }
-//     }
-
-//     // Trim each line
-//     lines = lines.map((line) => line.trim());
-
-//     // Find the longest line length
-//     const longestLineLength = Math.max(...lines.map((line) => line.length));
-
-//     // Pad each line with spaces to center the text
-//     const centeredLines = lines.map((line) => {
-//         const spacesToAdd = longestLineLength - line.length;
-//         const leftPadding = Math.floor(spacesToAdd / 2);
-//         return ' '.repeat(leftPadding) + line;
-//     });
-
-//     // Join with newline for FFmpeg
-//     return centeredLines.join('\n');
-// }
+    return `drawtext=text='${escapedText}':fontcolor=white:fontsize=${fontsize}:x=(w-text_w)/2:y=(h-text_h)/1.05:box=1:boxcolor=black@0.5:boxborderw=10`;
+}
 
 function wrapSubtitle(subtitle: string, maxLineLength: number): string {
     // Simple text wrapping function
-    const words = subtitle.split(" ")
-    const lines = []
-    let currentLine = ""
-  
+    const words = subtitle.split(' ');
+    const lines = [];
+    let currentLine = '';
+
     for (const word of words) {
-      if ((currentLine + word).length > maxLineLength) {
-        lines.push(currentLine.trim())
-        currentLine = word + " "
-      } else {
-        currentLine += word + " "
-      }
+        if ((currentLine + word).length > maxLineLength) {
+            lines.push(currentLine.trim());
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
     }
-  
+
     if (currentLine.trim()) {
-      lines.push(currentLine.trim())
+        lines.push(currentLine.trim());
     }
-  
-    return lines.join("\n")
-  }
+
+    return lines.join('\n');
+}
 
 const user_config: Partial<SlideshowConfig> = {
     images: [

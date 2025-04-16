@@ -1,17 +1,17 @@
+import clsx from 'clsx';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { BlockerFunction, useBlocker, Blocker, useNavigate } from 'react-router-dom';
+import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
+import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
 import ScriptAutoGenerate from '../ScriptAutoGenerate';
 import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
-import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import * as request from '../../utils/request';
-import clsx from 'clsx';
-import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
-import SweetAlert from '../../components/SweetAlert';
 
 const steps = [
     {
@@ -40,6 +40,7 @@ interface ImagesListComplete {
 
 function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
+
     const handleConfirmAlert = async (blocker: Blocker) => {
         if (blocker.state === 'blocked') {
             try {
@@ -64,7 +65,6 @@ function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolea
 
     useEffect(() => {
         if (blocker.state === 'blocked' && isFinishedVideo === false) {
-            // blocker.reset();
             setIsAlerted(blocker.state === 'blocked');
         }
     }, [blocker, isFinishedVideo]);
@@ -91,7 +91,9 @@ function CreateVideo() {
 
     const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
 
-    const [voices_list, setVoicesList] = useState<string[]>([]) // string array of voice
+    const [voices_list, setVoicesList] = useState<string[]>([]); // string array of voice
+
+    const navigate = useNavigate();
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -105,10 +107,22 @@ function CreateVideo() {
         setActiveStep(0);
     };
 
-    const handleFinish = () => {
-        setIsFinishedVideo(true);
+    const handleFinish = async () => {
+        setIsFinishedVideo(true); // preemptively allow
+        try {
+            await request.del('/information/delete', { promptId });
+            navigate('/edit-video', {
+                state: {
+                    scriptSegments,
+                    checkedImagesList,
+                    voices_list,
+                },
+            });
+        } catch (error) {
+            console.error('Error during finish:', error);
+            setIsFinishedVideo(false); // revert if needed
+        }
     };
-
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
         handleNext(); // Move to the next step (ScriptAutoGenerate)
@@ -116,7 +130,7 @@ function CreateVideo() {
 
     const handleScriptComplete = (segments: string[], title: string) => {
         setScriptSegments(segments);
-        console.log("check scripts: ", scriptSegments);
+        console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
         handleNext(); // Move to the next step (GenerateVoice)
     };
@@ -125,7 +139,6 @@ function CreateVideo() {
         setVoicesList(voices);
         setScriptSegments(scripts);
         handleNext(); // Move to the image generation step
-        
     };
 
     const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
@@ -162,9 +175,6 @@ function CreateVideo() {
                             handleNext={handleNext}
                             handleBack={handleBack}
                             handleReset={handleReset}
-                            scriptSegments={scriptSegments}
-                            checkedImagesList={checkedImagesList}
-                            voices_list={voices_list}
                             onFinish={handleFinish}
                         />
                     </div>

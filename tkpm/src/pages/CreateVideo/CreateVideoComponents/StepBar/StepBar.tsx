@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 // import StepConnector from '@mui/material/StepConnector';
-import { useNavigate } from 'react-router-dom';
 
 interface ImagesListComplete {
     images: string[];
@@ -21,9 +20,6 @@ function StepBar({
     handleNext,
     handleBack,
     handleReset,
-    scriptSegments,
-    checkedImagesList,
-    voices_list,
     onFinish,
 }: {
     steps: { label: string; description: string }[];
@@ -34,39 +30,30 @@ function StepBar({
     scriptSegments?: string[];
     checkedImagesList?: ImagesListComplete[];
     voices_list?: string[];
-    onFinish?: () => void;
+    onFinish?: () => Promise<void>;
 }) {
-    const navigate = useNavigate();
-
-    const handleFinish = () => {
+    const handleFinish = async () => {
         if (onFinish) {
-            onFinish();
+            await onFinish();
         }
-        navigate('/edit-video', {
-            state: {
-                scriptSegments,
-                checkedImagesList,
-                voices_list
-            }
-        });
     };
 
     return (
         <Box
-        sx={{
-            bgcolor: '#2C3E50',
-            borderRadius: 3,
-            p: 4,
-            boxShadow: ' 0 4px 20px rgba(0, 0, 0, 0.2)',
-            color: '#f5f5f5',
-            transition: 'box-shadow 0.3s ease, border 0.3s ease',
-            boxSizing: 'border-box',
-            border: '2px solid transparent',
-            '&:hover': {
-                boxShadow: 8,
-                border: '2px solid #ffffff',
-            },
-        }}
+            sx={{
+                bgcolor: '#2C3E50',
+                borderRadius: 3,
+                p: 4,
+                boxShadow: ' 0 4px 20px rgba(0, 0, 0, 0.2)',
+                color: '#f5f5f5',
+                transition: 'box-shadow 0.3s ease, border 0.3s ease',
+                boxSizing: 'border-box',
+                border: '2px solid transparent',
+                '&:hover': {
+                    boxShadow: 8,
+                    border: '2px solid #ffffff',
+                },
+            }}
         >
             <Stepper
                 activeStep={activeStep}
@@ -80,7 +67,7 @@ function StepBar({
                         },
                         '&.Mui-completed': {
                             color: '#1ABC9C',
-                        }
+                        },
                     },
                     '.MuiStepContent-root': {
                         marginLeft: '20px',
@@ -139,7 +126,7 @@ function StepBar({
                                         fontSize: '1.2rem',
                                         padding: '15px 30px',
                                         textTransform: 'none',
-                                        display: activeStep === 0 ? 'none' : 'inline-block', 
+                                        display: activeStep === 0 ? 'none' : 'inline-block',
                                         '&:hover': {
                                             backgroundColor: '#4D5B63',
                                             borderColor: '#4D5B63',
@@ -165,7 +152,9 @@ function StepBar({
                         color: '#BDC3C7',
                     }}
                 >
-                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>🎉 All steps completed - you're finished!</Typography>
+                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>
+                        🎉 All steps completed - you're finished!
+                    </Typography>
                     <Button
                         onClick={handleFinish}
                         sx={{

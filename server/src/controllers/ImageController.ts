@@ -39,7 +39,6 @@ class ImageController {
         this.handleTextToMultipleImages = this.handleTextToMultipleImages.bind(this);
         this.handleImageToText = this.handleImageToText.bind(this);
         this.getImages = this.getImages.bind(this);
-        this.saveImageToLocal = this.saveImageToLocal.bind(this);
         this.saveImageBatchToLocal = this.saveImageBatchToLocal.bind(this);
     }
 
@@ -202,88 +201,6 @@ class ImageController {
         }
     }
 
-    async saveImageToLocal(req: Request, res: Response, next: NextFunction) {
-        const { generationType, images, promptId } = req.body;
-
-        if (!images || !Array.isArray(images)) {
-            res.status(400).json({ message: 'Images array is required' });
-            return;
-        }
-
-        try {
-            // Ensure the directory exists
-            const publicDir = 'public';
-            const imagesDir = 'public/images';
-
-            if (!fs.existsSync(publicDir)) {
-                fs.mkdirSync(publicDir);
-            }
-            if (!fs.existsSync(imagesDir)) {
-                fs.mkdirSync(imagesDir);
-            }
-
-            const savedPaths: string[] = [];
-
-            // Process each image
-            images.forEach((base64Image: string, index: number) => {
-                // Remove the data URL prefix if it exists
-                const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-
-                // Generate a unique filename using timestamp
-                const timestamp = new Date().getTime();
-                const filename =
-                    generationType === 'static' ? `image_${timestamp}_${index}.png` : `image_${timestamp}_${index}.gif`;
-                const filepath = `${imagesDir}/${filename}`;
-
-                // Convert base64 to buffer and save
-                const imageBuffer = Buffer.from(base64Data, 'base64');
-                fs.writeFileSync(filepath, imageBuffer);
-
-                savedPaths.push(`http://localhost:${process.env.PORT}/images/${filename}`);
-            });
-
-            // Update or create image config in database
-            if (promptId) {
-                const currentImageData = await DBServices.getDocumentById(ImageConfigModel, promptId);
-
-                if (currentImageData) {
-                    // Update existing document with $set to ensure the array is updated
-                    const updateData = {
-                        style: currentImageData.style,
-                        size: currentImageData.size,
-                        resolution: currentImageData.resolution,
-                        color_scheme: currentImageData.color_scheme,
-                        generated_images: savedPaths,
-                    };
-
-                    await DBServices.updateDocument(ImageConfigModel, promptId, updateData);
-                } else {
-                    // Create new document
-                    const newDocument = {
-                        style: 'classic',
-                        size: 'small',
-                        resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
-                        color_scheme: 'normal',
-                        generated_images: savedPaths,
-                    };
-                    const response = await DBServices.createDocument(ImageConfigModel, newDocument);
-                    console.log('Created document:', response);
-                }
-            }
-
-            res.status(200).json({
-                message: 'Images saved successfully',
-                paths: savedPaths,
-            });
-        } catch (error) {
-            console.error('Error saving images:', error);
-            res.status(500).json({
-                message: 'Error saving images',
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
-    }
-
     async saveImageBatchToLocal(req: Request, res: Response, next: NextFunction) {
         const { generationType, images, promptId, batchIndex, totalBatches, uploadSessionId } = req.body;
 
@@ -318,10 +235,10 @@ class ImageController {
                 const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
 
                 // Generate a unique filename using timestamp
-                const uniqueIndex = (batchIndex * this.MAX_IMAGES_PER_BATCH) + index;
+                const uniqueIndex = batchIndex * this.MAX_IMAGES_PER_BATCH + index;
                 const filename =
-                    generationType === 'static' 
-                        ? `image_${timestamp}_${uniqueIndex}.png` 
+                    generationType === 'static'
+                        ? `image_${timestamp}_${uniqueIndex}.png`
                         : `image_${timestamp}_${uniqueIndex}.gif`;
                 const filepath = `${imagesDir}/${filename}`;
 
@@ -334,10 +251,10 @@ class ImageController {
 
             // Get previous paths from cache or initialize
             const previousPaths = this.imageSessionCache.get(uploadSessionId) || [];
-            
+
             // Add new paths to cache
             this.imageSessionCache.set(uploadSessionId, [...previousPaths, ...savedPaths]);
-            
+
             // If this is the final batch, update the database
             if (batchIndex === totalBatches - 1) {
                 const allPaths = this.imageSessionCache.get(uploadSessionId) || [];
@@ -380,7 +297,7 @@ class ImageController {
                 paths: savedPaths,
                 batchIndex,
                 totalBatches,
-                completed: batchIndex === totalBatches - 1
+                completed: batchIndex === totalBatches - 1,
             });
         } catch (error) {
             console.error('Error saving images batch:', error);
