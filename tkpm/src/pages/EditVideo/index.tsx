@@ -3,6 +3,7 @@ import styles from "./EditVideo.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
 import clsx from "clsx";
+import {post} from "../../utils/request";
 
 interface ImagesListComplete {
     images: string[];
@@ -327,7 +328,7 @@ const EditVideo: React.FC = () => {
             // Create config object from current state
             const images = scriptSegments.map((segment, index) => {
                 const imageObj: any = {
-                    path: checkedImagesList[index]?.localImages[0] || "http://localhost:3000/videos/images/i1.jpg",
+                    path: checkedImagesList[index]?.localImages[0] || `${import.meta.env.VITE_BACKEND_URL}/videos/images/i1.jpg`,
                     subtitle: segment
                 };
 
@@ -375,21 +376,15 @@ const EditVideo: React.FC = () => {
                 images,
                 resolution: getResolutionFromRatio(selectedRatio),
                 videoDuration: 5,
-                backgroundMusic: "http://localhost:3000/video/audios/background.mp3",
+                backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/video/audios/background.mp3`,
                 backgroundMusicVolume: volume / 100,
                 cleanupTemp: false
             };
 
             // Call API to create video
-            const response = await fetch('http://localhost:3000/video/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ config }),
-            });
+            const response = await post('/video/create', { config });
 
-            if (!response.ok) {
+            if (!response) {
                 throw new Error('Failed to create video');
             }
 
