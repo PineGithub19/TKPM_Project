@@ -5,6 +5,9 @@ import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import * as DBService from '../services/DBServices';
+import VoiceConfig from '../models/VoiceConfig';
+import { Request, Response, NextFunction } from 'express';
 
 // Use promisify to convert callback-based functions to promise-based
 const execPromise = promisify(exec);
@@ -34,12 +37,13 @@ type VoiceGenerationDto = {
     tone?: ToneStyle;
     outputPath?: string;
     duration?: number; // Duration in milliseconds for SRT segments
+    audio_content?: string[];
 };
 
 export class VoiceController {
     // Original function to generate voice
-    generateVoice(dto: VoiceGenerationDto): Promise<string> {
-        return new Promise((resolve, reject) => {
+    async generateVoice(dto: VoiceGenerationDto, promptId: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
             // Xác định ngôn ngữ, mặc định là tiếng Việt
             const language: string = dto.language || 'vi';
 
@@ -69,6 +73,12 @@ export class VoiceController {
                     }
                     resolve(`/voices/${filename}`);
                 });
+
+                // Update database
+                const savePath = `http://localhost:${process.env.PORT}/voices/${filename}`;
+                await DBService.updateDocumentById(VoiceConfig, promptId, {
+                    audio_content: [savePath],
+                });
             } catch (error) {
                 console.error('Lỗi sinh giọng nói:', error);
                 reject(new Error('Không thể sinh giọng nói'));
@@ -80,7 +90,7 @@ export class VoiceController {
     async generateSRTVoice(dto: VoiceGenerationDto): Promise<string> {
         try {
             // First generate regular voice
-            const voicePath = await this.generateVoice(dto);
+            const voicePath = await this.generateVoice(dto, '');
 
             // If no duration specified, return the regular voice
             if (!dto.duration) {
@@ -119,6 +129,25 @@ export class VoiceController {
         } catch (error: any) {
             console.error('Error generating SRT voice:', error);
             throw new Error(`Không thể sinh giọng nói với thời lượng cụ thể: ${error.message}`);
+        }
+    }
+
+    async getVoices(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { promptId } = req.query;
+            if (!promptId) {
+                res.status(400).json({ message: 'Prompt ID is required' });
+            }
+
+            const data = await DBService.getDocumentById(VoiceConfig, promptId as string);
+            if (!data) {
+                res.status(404).json({ message: 'Prompt not found' });
+            }
+
+            res.status(200).json({ voiceList: data?.audio_content });
+        } catch (error) {
+            console.error('Error getting voices:', error);
+            res.status(500).json({ message: 'Error getting voices' });
         }
     }
 

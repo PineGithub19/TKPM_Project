@@ -25,19 +25,19 @@ function DefaultVideoItem({
 
     const handleClick = async () => {
         const response = await Promise.all([
-            // request.get('/script_generate/get-script'),
-            // request.get('/voice/get-voices'),
+            request.get(`/script_generate/get-script?promptId=${videoData.scriptId}`),
+            request.get(`/voice/get-voices?promptId=${videoData.voiceId}`),
             request.get(`/image/get-images?promptId=${videoData.imageId}`),
         ]);
 
-        // const scriptSegments = response[0].data.map((item: any) => item.script_segment);
-        const checkedImagesList = response[0].imageList;
-        // const voicesList = response[1].data.map((item: any) => item.voice_path);
+        const scriptSegments = response[0].scriptList || [];
+        const voicesList = response[1].voiceList || [];
+        const checkedImagesList = response[2].imageList || [];
 
         navigate('/edit-video', {
             state: {
-                scriptSegments: [],
-                voicesList: [],
+                scriptSegments: scriptSegments,
+                voicesList: voicesList,
                 checkedImagesList: checkedImagesList,
             },
         });
@@ -50,7 +50,9 @@ function DefaultVideoItem({
         }
     };
 
-    const handleDeleteVideo = async () => {
+    const handleDeleteVideo = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+
         try {
             await request.del('/information/delete', {
                 promptId: videoData.videoId,
@@ -92,7 +94,7 @@ function DefaultVideoItem({
                         </h5>
                     </div>
                     <div
-                        onClick={handleDeleteVideo}
+                        onClick={(e) => handleDeleteVideo(e)}
                         className={clsx(
                             'position-absolute',
                             'top-0',

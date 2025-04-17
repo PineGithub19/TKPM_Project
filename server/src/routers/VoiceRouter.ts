@@ -1,22 +1,14 @@
 import { Router } from 'express';
 import { VoiceController } from '../controllers/VoiceController';
-import * as DBService from '../services/DBServices';
-import VoiceConfig from '../models/VoiceConfig';
 
 const router = Router();
 const voiceController = new VoiceController();
 
 router.post('/generate', async (req, res) => {
     try {
-        const request = req.body;
-        const voiceId = request.voiceId;
-        const data = request.map((item: { promptId: string; text: string; tone?: string; language?: string }) => ({
-            text: item.text,
-            tone: item.tone,
-            language: item.language,
-        }));
-        await DBService.updateDocument(VoiceConfig, voiceId, data);
-        const voicePath = await voiceController.generateVoice(data);
+        const { promptId, text, tone, language } = req.body;
+        const data = { text, tone, language };
+        const voicePath = await voiceController.generateVoice(data, promptId);
         res.json({ success: true, path: voicePath });
     } catch (e: any) {
         res.status(500).json({ success: false, error: e.message });
@@ -31,5 +23,7 @@ router.post('/generate-srt', async (req, res) => {
         res.status(500).json({ success: false, error: e.message });
     }
 });
+
+router.get('/get-voices', voiceController.getVoices);
 
 export default router;

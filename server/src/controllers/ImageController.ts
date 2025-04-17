@@ -283,8 +283,7 @@ class ImageController {
                             color_scheme: 'normal',
                             generated_images: allPaths,
                         };
-                        const response = await DBServices.createDocument(ImageConfigModel, newDocument);
-                        console.log('Created document:', response);
+                        await DBServices.createDocument(ImageConfigModel, newDocument);
                     }
                 }
 

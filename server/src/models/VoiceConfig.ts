@@ -9,6 +9,10 @@ const VoiceConfigSchema = new Schema<IVoiceConfig>(
         speed: { type: Number, required: true },
         pitch: { type: Number, required: true },
         volume: { type: Number, required: true },
+        audio_content: {
+            type: [String],
+            required: true,
+        },
     },
     {
         timestamps: true,

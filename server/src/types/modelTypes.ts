@@ -13,7 +13,7 @@ export interface ILiteratureWork extends Document {
     author: string;
     genre: string;
     summary: string;
-    content: string;
+    content: string[];
 }
 
 export interface IUser extends Document {
@@ -48,4 +48,5 @@ export interface IVoiceConfig extends Document {
     speed: number;
     pitch: number;
     volume: number;
+    audio_content: string[];
 }

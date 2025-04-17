@@ -32,11 +32,11 @@ const steps = [
     },
 ];
 
-interface ImagesListComplete {
-    images: string[];
-    localImages: string[];
-    segment: string;
-}
+// interface ImagesListComplete {
+//     images: string[];
+//     localImages: string[];
+//     segment: string;
+// }
 
 function ImportantAlert({
     isFinishedVideo,
@@ -117,7 +117,7 @@ function CreateVideo() {
     const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
 
-    const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
+    const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
 
     const [voices_list, setVoicesList] = useState<string[]>([]); // string array of voice
 
@@ -178,7 +178,7 @@ function CreateVideo() {
         handleNext(); // Move to the image generation step
     };
 
-    const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
+    const handleCheckedImagesListComplete = (images: string[]) => {
         setCheckedImagesList(images);
     };
 
@@ -229,6 +229,7 @@ function CreateVideo() {
                         {activeStep === 1 && selectedLiterature && (
                             <div className="create-video-script-container">
                                 <ScriptAutoGenerate
+                                    promptId={scriptPromptId}
                                     literatureContent={selectedLiterature.content}
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}

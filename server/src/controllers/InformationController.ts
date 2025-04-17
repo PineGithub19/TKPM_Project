@@ -23,7 +23,7 @@ interface LiteratureWorkData {
     author: string;
     genre: string;
     summary: string;
-    content: string;
+    content: string[];
 }
 
 interface ImageConfigData {
@@ -43,6 +43,7 @@ interface VoiceConfigData {
     speed: number;
     pitch: number;
     volume: number;
+    audio_content: string[];
 }
 
 class InformationController {
@@ -63,17 +64,18 @@ class InformationController {
                 author: 'author',
                 genre: 'gerne',
                 summary: 'summary',
-                content: 'content',
+                content: [],
             };
             const scriptResponse = (await DBServices.createDocument(ScriptModel, scriptData)) as LiteratureWorkData;
 
             const VoiceConfigData: VoiceConfigData = {
-                voice_service: 'voice_service',
+                voice_service: 'Google TTS',
                 language: 'VN',
                 style: 'style',
                 speed: 1,
                 pitch: 1,
                 volume: 1,
+                audio_content: [],
             };
             const voiceResponse = (await DBServices.createDocument(
                 VoiceConfigModel,

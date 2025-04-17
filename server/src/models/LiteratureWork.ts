@@ -7,7 +7,7 @@ const LiteratureWorkSchema = new Schema<ILiteratureWork>(
         author: { type: String, required: true },
         genre: { type: String, required: true },
         summary: { type: String, required: true },
-        content: { type: String, required: true },
+        content: { type: [String], required: true },
     },
     {
         timestamps: true,

@@ -33,6 +33,12 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     scriptTitle = '',
     onComplete,
 }) => {
+    useEffect(() => {
+        console.log('Prompt ID:', promptId);
+        console.log('Script Segments:', scriptSegments);
+        console.log('Script Title:', scriptTitle);
+    }, []);
+
     const [loading, setLoading] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('single');
@@ -159,7 +165,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
 
     const handleComplete = () => {
         if (onComplete) {
-            let list_voice: string[] = [];
+            const list_voice: string[] = [];
             voiceSegments.forEach((voice) => {
                 if (voice.status === 'success' && voice.audioUrl) list_voice.push(voice.audioUrl);
             });
