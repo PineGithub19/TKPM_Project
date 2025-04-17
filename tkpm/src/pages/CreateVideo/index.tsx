@@ -119,7 +119,7 @@ function CreateVideo() {
 
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
 
-    const [voices_list, setVoicesList] = useState<string[]>([]); // string array of voice
+    const [voicesList, setVoicesList] = useState<string[]>([]); // string array of voice
 
     const navigate = useNavigate();
 
@@ -141,7 +141,7 @@ function CreateVideo() {
             state: {
                 scriptSegments,
                 checkedImagesList,
-                voices_list,
+                voicesList,
             },
         });
         // try {
@@ -152,7 +152,7 @@ function CreateVideo() {
         //         state: {
         //             scriptSegments,
         //             checkedImagesList,
-        //             voices_list,
+        //             voicesList,
         //         },
         //     });
         // } catch (error) {

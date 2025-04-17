@@ -8,7 +8,7 @@ import { post } from '../../utils/request';
 interface LocationState {
     scriptSegments?: string[];
     checkedImagesList?: string[];
-    voices_list?: string[];
+    voicesList?: string[];
 }
 
 const contentStyleOptions = [
@@ -41,7 +41,7 @@ const EditVideo: React.FC = () => {
     // Access the passed data
     const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []);
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>(state?.checkedImagesList || []);
-    const [voices_list, setVoicesList] = useState<string[]>(state?.voices_list || []);
+    const [voicesList, setVoicesList] = useState<string[]>(state?.voicesList || []);
 
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number>(0);
 
@@ -84,9 +84,9 @@ const EditVideo: React.FC = () => {
         console.log('Received from CreateVideo:', {
             scriptSegments,
             checkedImagesList,
-            voices_list,
+            voicesList,
         });
-    }, [scriptSegments, checkedImagesList, voices_list]);
+    }, [scriptSegments, checkedImagesList, voicesList]);
 
     const ratioMap: { [key: string]: number } = {
         '16:9': 16 / 9,
@@ -134,7 +134,7 @@ const EditVideo: React.FC = () => {
         checkedImagesList.length > 0
             ? checkedImagesList.slice(0, 8).map((item, index) => ({
                   name: `Image ${index + 1}`,
-                  src: item[0] || `/anime${index + 1}.png`,
+                  src: item || `/anime${index + 1}.png`,
               }))
             : [
                   { name: 'Sketch Art', src: '/anime1.png' },
@@ -288,8 +288,8 @@ const EditVideo: React.FC = () => {
             ];
             setCheckedImagesList(newCheckedImagesList);
 
-            // Swap in voices_list
-            const newVoicesList = [...voices_list];
+            // Swap in voicesList
+            const newVoicesList = [...voicesList];
             [newVoicesList[index], newVoicesList[index - 1]] = [newVoicesList[index - 1], newVoicesList[index]];
             setVoicesList(newVoicesList);
 
@@ -316,8 +316,8 @@ const EditVideo: React.FC = () => {
             ];
             setCheckedImagesList(newCheckedImagesList);
 
-            // Swap in voices_list
-            const newVoicesList = [...voices_list];
+            // Swap in voicesList
+            const newVoicesList = [...voicesList];
             [newVoicesList[index], newVoicesList[index + 1]] = [newVoicesList[index + 1], newVoicesList[index]];
             setVoicesList(newVoicesList);
 
@@ -355,8 +355,8 @@ const EditVideo: React.FC = () => {
                 };
 
                 // Add audioPath if available
-                if (voices_list[index]) {
-                    imageObj.audioPath = voices_list[index];
+                if (voicesList[index]) {
+                    imageObj.audioPath = voicesList[index];
                 }
 
                 // Add effects if any adjustments were made
@@ -830,7 +830,7 @@ const EditVideo: React.FC = () => {
                             <div className={styles.timelineTrack}>
                                 <div className={styles.trackLabel}>Voice</div>
                                 <div className={styles.trackContent}>
-                                    {voices_list.map((voice, index) => (
+                                    {voicesList.map((voice, index) => (
                                         <div
                                             key={`voice-${index}`}
                                             className={clsx(styles.segment, {

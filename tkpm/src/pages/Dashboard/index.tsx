@@ -7,6 +7,7 @@ import styles from './DashBoard.module.css';
 import LoadingComponent from '../../components/Loading';
 import * as request from '../../utils/request';
 import DefaultVideoItem from './DefaultVideoItem';
+import DataChart from './DataChart';
 
 interface VideoInformation {
     videoId: string;
@@ -103,6 +104,7 @@ function DashBoard() {
                         ))}
                 </div>
                 <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>
+                <DataChart />
             </div>
         </div>
     );
