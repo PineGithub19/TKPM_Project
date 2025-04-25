@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
+import Moon from './CreateVideoComponents/Moon/Moon';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
@@ -30,6 +31,13 @@ const steps = [
         label: 'Create Images for Video',
         description: 'Generate images for your video based on the script segments.',
     },
+];
+
+const backgrounds = [
+    'linear-gradient(to top right, #2a2a72, #009ffd)',
+    'linear-gradient(to top right, #4b6cb7, #182848)',
+    'linear-gradient(to top right, #0d1b2a, #1b263b)',
+    'linear-gradient(to top right, #232526, #414345)',
 ];
 
 interface ImagesListComplete {
@@ -138,7 +146,8 @@ function CreateVideo() {
 
     return (
         <>
-            <div className={clsx(styles.container, 'mb-4')}>
+            <div className={clsx(styles.container, 'mb-4')} style={{ background: backgrounds[activeStep] }}>
+                <Moon/>
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
                     <div className={clsx(styles.otherThing)}>
