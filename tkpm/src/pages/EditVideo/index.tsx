@@ -4,6 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
 import clsx from 'clsx';
 import { post } from '../../utils/request';
+import HeaderCategory from './EditVideoComponents/HeaderCategory/HeaderCategory';
+import CaptionEdit from './EditVideoComponents/CaptionEdit/CaptionEdit';
+import PromptEdit from './EditVideoComponents/PromptEdit/PromptEdit';
+import SoundAndSpeed from './EditVideoComponents/SoundAndSpeed/SoundAndSpeed';
+import ImageEdit from './EditVideoComponents/ImageEdit/ImageEdit';
+import ImageAdjustment from './EditVideoComponents/ImageAdjustment/ImageAdjustment';
 
 interface LocationState {
     scriptSegments?: string[];
@@ -11,16 +17,6 @@ interface LocationState {
     voicesList?: string[];
 }
 
-const contentStyleOptions = [
-    'Analytical',
-    'Narrative',
-    'Modern',
-    'Poetic Illustration',
-    'Classic',
-    'Storytelling',
-    'Dramatic',
-    'Satirical',
-];
 type IconKeys =
     | 'iconStyle'
     | 'iconRatio'
@@ -342,14 +338,25 @@ const EditVideo: React.FC = () => {
     }, [selectedRatio]);
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
     const handleCreateVideo = async () => {
         setLoading(true);
         try {
             // Create config object from current state
             const images = scriptSegments.map((segment, index) => {
-                const imageObj: any = {
+                type ImageObj = {
+                    path: string;
+                    subtitle: string;
+                    audioPath?: string;
+                    effects?: {
+                        brightness?: number;
+                        contrast?: number;
+                        rotate?: number;
+                        blur?: number;
+                    };
+                    fade?: boolean;
+                };
+                const imageObj: ImageObj = {
                     path: checkedImagesList[index] || `${import.meta.env.VITE_BACKEND_URL}/videos/images/i1.jpg`,
                     subtitle: segment,
                 };
@@ -418,7 +425,6 @@ const EditVideo: React.FC = () => {
             }
 
             const data = await response.json();
-            setVideoUrl(data.videoUrl);
 
             // Navigate to export video with the video URL
             if (response.status === 200) navigate('/export-video', { state: { videoUrl: data.videoUrl } });
@@ -459,31 +465,13 @@ const EditVideo: React.FC = () => {
             <FloatingParticles />
             <div className={styles.header}>
                 <div className={styles.left}>
-                    <button onClick={() => navigate('/create-video')} className={styles.backButton}>
+                    {/* <button onClick={() => navigate('/create-video')} className={styles.backButton}>
                         <img src="/arrow_left_black.png" alt="Back" className={styles.arrowIcon} />
                     </button>
-                    <span className={styles.title}>Edit Video</span>
+                    <span className={styles.title}>Edit Video</span> */}
                 </div>
 
-                <div className={styles.right}>
-                    {selectedIcon === 'iconRatio' ? (
-                        <span className={styles.editCategory}>Ratio</span>
-                    ) : selectedIcon === 'iconSound' ? (
-                        <span className={styles.editCategory}>Sound And Speed</span>
-                    ) : selectedIcon === 'iconAdjust' ? (
-                        <span className={styles.editCategory}>Image Adjustment</span>
-                    ) : selectedIcon === 'iconCutImage' ? (
-                        <span className={styles.editCategory}>Image Edit</span>
-                    ) : selectedIcon === 'iconLayout' ? (
-                        <span className={styles.editCategory}>Image Layout</span>
-                    ) : selectedIcon === 'iconCaption' ? (
-                        <span className={styles.editCategory}>Caption Edit</span>
-                    ) : selectedIcon === 'iconPrompt' ? (
-                        <span className={styles.editCategory}>New Prompt</span>
-                    ) : (
-                        <span className={styles.editCategory}>Images</span>
-                    )}
-                </div>
+                <HeaderCategory selectedIcon={selectedIcon} />
             </div>
             <div className={styles.body}>
                 <div className={styles.leftPanel}>
@@ -505,216 +493,47 @@ const EditVideo: React.FC = () => {
                     {selectedIcon === 'iconLayout' ? (
                         <div className={styles.soundAndSpeed}></div>
                     ) : selectedIcon === 'iconCaption' ? (
-                        <div className={styles.captionEdit}>
-                            <div className={styles.captionText}>
-                                <textarea
-                                    className={clsx(styles.input_text)}
-                                    placeholder="Enter caption"
-                                    value={caption}
-                                    onChange={(e) => setCaption(e.target.value)}
-                                ></textarea>
-                                <img src="/iconCheck.png" alt="Check Icon" className={styles.iconCheck} />
-                            </div>
-                            <div className={styles.captionStyle}>
-                                <span className={styles.titleCaption}>Caption Style</span>
-                                <div className={styles.formatStyle}>
-                                    <img src="/iconBold.png" alt="Bold Icon" className={styles.iconFormat} />
-                                    <img src="/iconItalic.png" alt="Italic Icon" className={styles.iconFormat} />
-                                    <img src="/iconUnderline.png" alt="Underline Icon" className={styles.iconFormat} />
-                                </div>
-                            </div>
-                            <div className={styles.captionStyle}>
-                                <div className={styles.titleAutomatic}>
-                                    <span className={styles.titleCaption}>Automatic subtitles</span>
-                                    <img
-                                        src="/iconStar.png"
-                                        alt="Automatic Subtitles Icon"
-                                        className={styles.iconAutomaticSubtitles}
-                                    />
-                                </div>
-
-                                <div className={styles.formatStyle}>
-                                    <img
-                                        src="/iconAutomaticSubtitles.png"
-                                        alt="Automatic Subtitles Icon"
-                                        className={styles.iconFormat}
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                        <CaptionEdit caption={caption} setCaption={setCaption} />
                     ) : selectedIcon === 'iconPrompt' ? (
-                        <div className={styles.soundAndSpeed}>
-                            <div className={styles.captionEdit}>
-                                <div className={styles.captionText}>
-                                    <textarea
-                                        className={clsx(styles.input_text)}
-                                        placeholder="Enter new prompt"
-                                        value={newPrompt}
-                                        onChange={(e) => setnewPrompt(e.target.value)}
-                                    ></textarea>
-                                </div>
-                                <div className={styles.contentStyle}>
-                                    <span className={styles.titleCaption}>Content Style</span>
-                                    <div className={styles.formatContentStyle}>
-                                        <div className={`${styles.style_buttons} content`}>
-                                            {contentStyleOptions.map((style) => (
-                                                <button
-                                                    key={style}
-                                                    onClick={() => handleContentStyleClick(style)}
-                                                    className={clsx(styles.style_button, {
-                                                        [styles.activeContent]: selectedContentStyles.includes(style),
-                                                    })}
-                                                >
-                                                    {style}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <div className={styles.style_recreate}>
-                                            <button className={styles.style_button_recreate}>Recreate</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <PromptEdit
+                            newPrompt={newPrompt}
+                            setnewPrompt={setnewPrompt}
+                            selectedContentStyles={selectedContentStyles}
+                            handleContentStyleClick={handleContentStyleClick}
+                        />
                     ) : selectedIcon === 'iconSound' ? (
-                        <div className={styles.soundAndSpeed}>
-                            <div className={styles.soundControl}>
-                                <img src="/iconVolumn.png" alt="Listen Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={volume}
-                                    onChange={handleVolumeChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconSpeed.png" alt="Speed Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={speed}
-                                    onChange={handleSpeedChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-                        </div>
+                        <SoundAndSpeed
+                            volume={volume}
+                            handleVolumeChange={handleVolumeChange}
+                            speed={speed}
+                            handleSpeedChange={handleSpeedChange}
+                        />
                     ) : selectedIcon === 'iconCutImage' ? (
-                        <div className={styles.imageEdit}>
-                            <img
-                                src={iconFlipColor}
-                                alt="Flip Vertical Icon"
-                                className={styles.soundIcon}
-                                onClick={handleFlipVerticalClick}
-                            />
-                            <img
-                                src={iconRotateColor}
-                                alt="Rotate Icon"
-                                className={styles.soundIcon}
-                                onClick={handleRotateClick}
-                            />
-                        </div>
+                        <ImageEdit
+                            iconFlipColor={iconFlipColor}
+                            handleFlipVerticalClick={handleFlipVerticalClick}
+                            iconRotateColor={iconRotateColor}
+                            handleRotateClick={handleRotateClick}
+                        />
                     ) : selectedIcon === 'iconAdjust' ? (
-                        <div className={styles.soundAndSpeed}>
-                            <div className={styles.soundControl}>
-                                <img src="/iconBrightness.png" alt="Brightness Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={brightness}
-                                    onChange={handleBrightnessChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconContrast.png" alt="Contrast Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={contrast}
-                                    onChange={handleContrastChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconExposure.png" alt="Exposure Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={exposure}
-                                    onChange={handleExposureChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconTemperature.png" alt="Temperature Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={temperature}
-                                    onChange={handleTemperatureChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconSaturation.png" alt="Saturation Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={saturation}
-                                    onChange={handleSaturationChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconBlur.png" alt="Blur Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={blur}
-                                    onChange={handleBlurChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconVignette.png" alt="Vignette Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={vignette}
-                                    onChange={handleVignetteChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-
-                            <div className={styles.soundControl}>
-                                <img src="/iconClarity.png" alt="Clarity Icon" className={styles.soundIcon} />
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={clarity}
-                                    onChange={handleClarityChange}
-                                    className={styles.volumeSlider}
-                                />
-                            </div>
-                        </div>
+                        <ImageAdjustment
+                            brightness={brightness}
+                            handleBrightnessChange={handleBrightnessChange}
+                            contrast={contrast}
+                            handleContrastChange={handleContrastChange}
+                            exposure={exposure}
+                            handleExposureChange={handleExposureChange}
+                            temperature={temperature}
+                            handleTemperatureChange={handleTemperatureChange}
+                            saturation={saturation}
+                            handleSaturationChange={handleSaturationChange}
+                            blur={blur}
+                            handleBlurChange={handleBlurChange}
+                            vignette={vignette}
+                            handleVignetteChange={handleVignetteChange}
+                            clarity={clarity}
+                            handleClarityChange={handleClarityChange}
+                        />
                     ) : (
                         <div className={selectedIcon === 'iconRatio' ? styles.ratioGrid : styles.imageGrid}>
                             {selectedIcon === 'iconRatio'
@@ -862,7 +681,7 @@ const EditVideo: React.FC = () => {
                 <div className={styles.rightTimeline}></div>
             </div>
 
-            <div className={styles.editVideoList}>
+            <div className={clsx(styles.editVideoList, 'mb-4')}>
                 <div className={styles.leftSide}>
                     <div className={styles.functionIcon}>
                         {Object.keys(iconsState).map((iconKey) => {
