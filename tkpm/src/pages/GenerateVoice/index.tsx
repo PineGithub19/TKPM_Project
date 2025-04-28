@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message, Tabs, Card, Spin, Progress } from 'antd';
 import { post } from '../../utils/request';
 import styles from './GenerateVoice.module.css';
+import { VoiceRecorder } from '../../components/RecordVoice';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -18,6 +19,7 @@ interface VoiceSegment {
     audioUrl: string | null;
     status: 'idle' | 'loading' | 'success' | 'error';
     index: number;
+    isRecorded?: boolean; // Thêm trường để đánh dấu segment được ghi âm
 }
 
 interface GenerateVoiceProps {
@@ -48,6 +50,8 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     const [batchProcessing, setBatchProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [translatedSegments, setTranslatedSegments] = useState<string[]>([]);
+    const [recordingMode, setRecordingMode] = useState(false); // State để kiểm soát chế độ ghi âm
+    const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number | null>(null); // Segment đang được chọn để ghi âm
 
     useEffect(() => {
         const translateSegments = async () => {
@@ -119,6 +123,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                   ...s,
                                   audioUrl: `${import.meta.env.VITE_BACKEND_URL}${response.path}`,
                                   status: 'success',
+                                  isRecorded: false,
                               }
                             : s,
                     ),
@@ -143,6 +148,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
 
         for (let i = 0; i < voiceSegments.length; i++) {
             const segment = voiceSegments[i];
+            // Bỏ qua những segment đã được ghi âm
             if (segment.status !== 'success') {
                 const success = await generateVoiceForSegment(segment);
                 if (success) successCount++;
@@ -172,6 +178,39 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
 
             onComplete(list_voice, translatedSegments);
         }
+    };
+
+    // Hàm xử lý khi nhận được bản ghi âm từ VoiceRecorder
+    const handleRecordingComplete = (recordingUrl: string, blob: Blob) => {
+        if (selectedSegmentIndex !== null) {
+            setVoiceSegments((prev) =>
+                prev.map((s) =>
+                    s.index === selectedSegmentIndex
+                        ? {
+                              ...s,
+                              audioUrl: recordingUrl,
+                              status: 'success',
+                              isRecorded: true,
+                          }
+                        : s,
+                ),
+            );
+            setRecordingMode(false);
+            setSelectedSegmentIndex(null);
+            message.success('Đã thêm bản ghi âm vào phân đoạn!');
+        }
+    };
+
+    // Hàm xử lý khi người dùng chọn ghi âm cho một phân đoạn
+    const startRecordingForSegment = (segmentIndex: number) => {
+        setSelectedSegmentIndex(segmentIndex);
+        setRecordingMode(true);
+    };
+
+    // Hàm xử lý khi người dùng hủy ghi âm
+    const cancelRecording = () => {
+        setRecordingMode(false);
+        setSelectedSegmentIndex(null);
     };
 
     const renderSingleVoiceGenerator = () => (
@@ -234,6 +273,27 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             )}
         </Form>
     );
+
+    const renderRecorder = () => {
+        if (!recordingMode) return null;
+
+        return (
+            <div className={styles.recorderOverlay}>
+                <Card className={styles.recorderCard}>
+                    <h3 className={styles.recorderTitle}>
+                        Ghi âm cho phân đoạn #{(selectedSegmentIndex !== null ? selectedSegmentIndex : 0) + 1}
+                    </h3>
+                    <p className={styles.recorderText}>
+                        {selectedSegmentIndex !== null && voiceSegments[selectedSegmentIndex]?.text}
+                    </p>
+                    <VoiceRecorder onRecordingComplete={handleRecordingComplete} singleRecordingMode={true} />
+                    <Button onClick={cancelRecording} className={styles.cancelButton}>
+                        Hủy ghi âm
+                    </Button>
+                </Card>
+            </div>
+        );
+    };
 
     const renderBatchVoiceGenerator = () => (
         <div className={styles.batchContainer}>
@@ -336,7 +396,6 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                             className={styles.progress}
                             style={{ width: '200px' }}
                         />
-                        {/* <p className="text-center" style={{margin: 0}}>Đang xử lý phân đoạn...</p> */}
                     </div>
                 )}
             </div>
@@ -348,27 +407,46 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                         className={styles.segmentCard}
                         title={`Phân đoạn #${index + 1}`}
                         extra={
-                            <Button
-                                type="link"
-                                onClick={() => generateVoiceForSegment(segment)}
-                                disabled={segment.status === 'loading' || batchProcessing}
-                                style={{
-                                    color: 'white',
-                                    backgroundColor: '#28A745',
-                                    border: '2px solid #28A745',
-                                    borderRadius: '8px',
-                                    padding: '20px 20px',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                    fontSize: '20px',
-                                }}
-                            >
-                                {segment.status === 'success' ? 'Tạo lại' : 'Tạo giọng nói'}
-                            </Button>
+                            <div className={styles.segmentCardButtons}>
+                                <Button
+                                    type="link"
+                                    onClick={() => generateVoiceForSegment(segment)}
+                                    disabled={segment.status === 'loading' || batchProcessing}
+                                    style={{
+                                        color: 'white',
+                                        backgroundColor: '#28A745',
+                                        border: '2px solid #28A745',
+                                        borderRadius: '8px',
+                                        padding: '20px 20px',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                        fontSize: '20px',
+                                        marginRight: '10px',
+                                    }}
+                                >
+                                    {segment.status === 'success' && !segment.isRecorded ? 'Tạo lại' : 'Tạo giọng nói'}
+                                </Button>
+                                <Button
+                                    type="link"
+                                    onClick={() => startRecordingForSegment(index)}
+                                    disabled={segment.status === 'loading' || batchProcessing}
+                                    style={{
+                                        color: 'white',
+                                        backgroundColor: '#007BFF',
+                                        border: '2px solid #007BFF',
+                                        borderRadius: '8px',
+                                        padding: '20px 20px',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                        fontSize: '20px',
+                                    }}
+                                >
+                                    {segment.status === 'success' && segment.isRecorded ? 'Ghi âm lại' : 'Ghi âm'}
+                                </Button>
+                            </div>
                         }
                         style={{ padding: '0', border: '1px solid white' }}
                     >
-                        {/* extra={<Button style={{ fontSize: 16, padding: '20px 30px 20px 30px', backgroundColor: '#ff6600', color: 'white', border: 'none', fontWeight: 'bold', textTransform: 'uppercase', boxShadow: 'none',}}>Chọn</Button>} */}
                         <div className={styles.segmentCardBody}>{segment.text}</div>
 
                         {segment.status === 'loading' && (
@@ -392,11 +470,17 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                         Tải xuống
                                     </a>
                                 </div>
+                                {segment.isRecorded && (
+                                    <div className={styles.recordBadge}>Đã ghi âm</div>
+                                )}
                             </div>
                         )}
                     </Card>
                 ))}
             </div>
+
+        {/* Phần hiển thị component ghi âm khi được kích hoạt */}
+        {renderRecorder()}
         </div>
     );
 

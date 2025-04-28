@@ -26,6 +26,7 @@
         "dotenv": "^16.4.7",
         "framer-motion": "^12.6.5",
         "jwt-decode": "^4.0.0",
+        "lucide-react": "^0.503.0",
         "mespeak": "^2.0.2",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
