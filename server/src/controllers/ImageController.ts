@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { imageService } from '../services/ImageService/Image.service';
+import { imageService } from '../services/ImageService/image.service';
 
 class ImageController {
     constructor() {

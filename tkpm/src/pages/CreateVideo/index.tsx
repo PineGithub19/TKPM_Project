@@ -23,7 +23,7 @@ const steps = [
         description: 'Configure and generate a script based on the selected literature.',
     },
     {
-        label: 'Create Images for Video',
+        label: 'Create Images',
         description: 'Generate images for your video based on the script segments.',
     },
     {
@@ -137,6 +137,12 @@ function CreateVideo() {
 
     const handleFinish = async () => {
         setIsFinishedVideo(true); // preemptively allow
+        console.log('Finish video creation:', {
+            scriptSegments,
+            checkedImagesList,
+            voicesList,
+        });
+
         navigate('/edit-video', {
             state: {
                 scriptSegments,
@@ -167,7 +173,6 @@ function CreateVideo() {
 
     const handleScriptComplete = (segments: string[], title: string) => {
         setScriptSegments(segments);
-        console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
         handleNext(); // Move to the next step (GenerateVoice)
     };
@@ -195,10 +200,6 @@ function CreateVideo() {
             hasFetchedPromptId.current = true;
         }
     }, []);
-
-    useEffect(() => {
-        if (checkedImagesList.length > 0) console.log(checkedImagesList);
-    }, [checkedImagesList]);
 
     return (
         <>

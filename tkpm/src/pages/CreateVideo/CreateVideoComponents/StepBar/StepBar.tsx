@@ -84,7 +84,7 @@ function StepBar({
                                 '.MuiStepLabel-label': {
                                     fontWeight: index === activeStep ? 'bold' : 500,
                                     color: index === activeStep ? '#E74E3C !important' : '#BDC3C7 !important',
-                                    fontSize: '1.5rem',
+                                    fontSize: '1.4rem',
                                 },
                                 '.MuiSvgIcon-root': {
                                     color: index <= activeStep ? '#E74E3C' : '#B3B6B7',
@@ -94,7 +94,7 @@ function StepBar({
                             {step.label}
                         </StepLabel>
                         <StepContent>
-                            <Typography sx={{ color: '#BDC3C7', fontSize: '1.2rem', mb: 2 }}>
+                            <Typography sx={{ color: '#BDC3C7', fontSize: '1rem', mb: 2 }}>
                                 {step.description}
                             </Typography>
                             <Box sx={{ mb: 3 }}>
@@ -107,7 +107,6 @@ function StepBar({
                                         bgcolor: '#E74C3C',
                                         color: '#fff',
                                         fontSize: '1.2rem',
-                                        padding: '15px 30px',
                                         '&:hover': { bgcolor: '#C0392B' },
                                         textTransform: 'none',
                                     }}
@@ -124,7 +123,6 @@ function StepBar({
                                         backgroundColor: '#5D6D7E',
                                         borderColor: '#5D6D7E',
                                         fontSize: '1.2rem',
-                                        padding: '15px 30px',
                                         textTransform: 'none',
                                         display: activeStep === 0 ? 'none' : 'inline-block',
                                         '&:hover': {
