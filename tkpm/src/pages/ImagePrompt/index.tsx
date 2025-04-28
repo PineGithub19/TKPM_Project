@@ -12,12 +12,6 @@ interface ImagesSegment {
     status: string;
 }
 
-// interface ImagesListComplete {
-//     images: string[];
-//     localImages: string[];
-//     segment: string;
-// }
-
 const { TabPane } = Tabs;
 
 function ImagePrompt({
@@ -147,7 +141,7 @@ function ImagePrompt({
                 : `${segment}, (high quality:1.4), (detailed:1.2), (sharp focus:1.1), 4k, masterpiece`;
 
             const endpoint =
-                generationType === 'static' ? '/image/text-to-multiple-images' : '/image/text-to-animation';
+                generationType === 'static' ? '/image/text-to-multiple-images-gemini' : '/image/text-to-animation';
             const response = await request.post(endpoint, {
                 prompt: enhancedPrompt,
                 configuration: imageConfig,
@@ -211,16 +205,6 @@ function ImagePrompt({
 
     const handleFinishImagesGeneration = async () => {
         try {
-            // Group selected images by segment
-            // const selectedImagesBySegment = selectedImages.reduce((acc, image) => {
-            //     const segment = imageData[image.segmentId].text;
-            //     if (!acc[segment]) {
-            //         acc[segment] = [];
-            //     }
-            //     acc[segment].push(image.path);
-            //     return acc;
-            // }, {} as Record<string, string[]>);
-
             const base64Paths = selectedImages.map((item) => item.path);
             const localImagePaths: string[] = [];
 
@@ -250,29 +234,6 @@ function ImagePrompt({
                     localImagePaths.push(...batchResponse.paths);
                 }
             }
-
-            // Create a map from base64 path to local path
-            // const base64ToLocalPathMap = new Map<string, string>();
-            // base64Paths.forEach((base64Path, index) => {
-            //     if (localImagePaths[index]) {
-            //         base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
-            //     }
-            // });
-
-            // Convert to ImagesListComplete format, including localImages
-            // const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
-            //     ([segment, segmentBase64Images]) => {
-            //         const segmentLocalImages = segmentBase64Images
-            //             .map((base64Path) => base64ToLocalPathMap.get(base64Path))
-            //             .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
-
-            //         return {
-            //             segment,
-            //             images: segmentBase64Images, // Keep original base64 images
-            //             localImages: segmentLocalImages, // Add the resolved local paths
-            //         };
-            //     },
-            // );
 
             // Pass the result to parent component
             if (handleCheckedImagesListComplete) {
