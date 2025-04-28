@@ -1,12 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-interface IImageConfig extends Document {
-    style: string;
-    size: string;
-    resolution: string;
-    color_scheme: string;
-    generated_images: string[];
-}
+import mongoose, { Schema } from 'mongoose';
+import { IImageConfig } from '../types/modelTypes';
 
 const ImageConfigSchema = new Schema<IImageConfig>(
     {

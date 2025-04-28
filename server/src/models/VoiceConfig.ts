@@ -1,13 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-
-interface IVoiceConfig extends Document {
-    voice_service: string;
-    language: string;
-    style: string;
-    speed: number;
-    pitch: number;
-    volume: number;
-}
+import { IVoiceConfig } from '../types/modelTypes';
 
 const VoiceConfigSchema = new Schema<IVoiceConfig>(
     {
@@ -17,6 +9,10 @@ const VoiceConfigSchema = new Schema<IVoiceConfig>(
         speed: { type: Number, required: true },
         pitch: { type: Number, required: true },
         volume: { type: Number, required: true },
+        audio_content: {
+            type: [String],
+            required: true,
+        },
     },
     {
         timestamps: true,

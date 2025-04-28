@@ -16,14 +16,28 @@ const updateDocument = async <T extends Document>(model: Model<T>, id: string, d
     return await model.findByIdAndUpdate(id, data, { new: true });
 };
 
+const updateDocumentById = async <T extends Document>(
+    model: Model<T>,
+    id: string,
+    data: Partial<T>,
+): Promise<T | null> => {
+    return await model.findByIdAndUpdate(id, data, { new: true });
+};
+
 const deleteDocument = async <T extends Document>(model: Model<T>, id: string) => {
     return await model.findByIdAndDelete(id);
 };
 
 const getDocumentByQuery = async <T extends Document>(model: Model<T>, query: any) => {
-    return await model
-        .findOne(query)
-        .exec();
+    return await model.findOne(query).exec();
 };
 
-export { createDocument, getDocuments, getDocumentById, updateDocument, deleteDocument, getDocumentByQuery };
+export {
+    createDocument,
+    getDocuments,
+    getDocumentById,
+    updateDocument,
+    updateDocumentById,
+    deleteDocument,
+    getDocumentByQuery,
+};

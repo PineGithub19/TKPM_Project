@@ -12,6 +12,7 @@
     flex-direction: column;
     width: 100%;
     height: 100vh;
+    background-color: #1e1e1e;
 }
 
 .header {
@@ -46,7 +47,7 @@
 }
 
 .backButton:hover {
-    background-color: #FF4242;
+    background-color: #ff4242;
     border: 1px solid black;
 }
 
@@ -74,7 +75,7 @@
 .body {
     display: flex;
     width: 100%;
-    height: 60vh;
+    height: 60%;
     margin-top: 20px;
 }
 
@@ -96,7 +97,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     width: 90%;
-    height: 100%;
+    height: 50vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -163,14 +164,14 @@
     border-radius: 3px;
 }
 
-.ratioGrid  {
+.ratioGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     width: 100%;
 }
 
-.imageGrid { 
+.imageGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -178,14 +179,14 @@
     max-height: 650px;
 }
 
-
 .imageStyleItem {
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s, border 0.2s;
 }
 
-.imageStyleItem:nth-child(1), .imageStyleItem:nth-child(2){
+.imageStyleItem:nth-child(1),
+.imageStyleItem:nth-child(2) {
     margin-top: 5px;
 }
 
@@ -204,9 +205,8 @@
 }
 
 .selected .styleImageInImages {
-    border: 3px solid #00FF00;
+    border: 3px solid #00ff00;
 }
-
 
 .imageText {
     margin-top: 8px;
@@ -215,13 +215,13 @@
 }
 
 .selected .imageText {
-    color: #00FF00;
+    color: #00ff00;
 }
 
 .timeline {
     display: flex;
     width: 100%;
-    height: 15vh;
+    height: 100%;
     margin-top: 20px;
     border-radius: 12px;
     align-items: center;
@@ -239,43 +239,170 @@
     font-size: 18px;
 }
 
+.timelineTracks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    width: 90%;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+}
+
 .timelineTrack {
     display: flex;
-    justify-content: space-between;
-    width: 90%;
-    font-size: 18px;
-    color: white;
-    opacity: 0.7;
+    align-items: center;
+    width: 100%;
+    min-height: 40px;
+    background-color: #363636;
+    border-radius: 6px;
+    padding: 8px;
 }
 
 .timelineMarker {
-    min-width: 30px;
-    text-align: center;
+    margin: auto;
 }
 
-.rightTimeline {
+.trackLabel {
+    width: 60px;
+    color: #e74c3c;
+    font-weight: bold;
+    text-align: center;
+    padding: 4px;
+    border-right: 2px solid #444;
+    font-size: 14px;
+}
+
+.trackContent {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    padding: 0 8px;
+    overflow-x: auto;
+}
+
+.segment {
+    min-width: 150px;
+    height: 35px;
+    background-color: #444;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 4px;
     position: relative;
-    width: 30%;
-    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.segment:hover {
+    background-color: #555;
+}
+
+.selectedSegment {
+    background-color: #e74c3c;
+}
+
+.segmentContent {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #fff;
+    font-size: 0.8em;
+    padding-right: 50px;
+}
+
+.segmentImage {
+    height: 30px;
+    width: auto;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.segmentControls {
+    display: flex;
+    gap: 4px;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.swapButton {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.swapButton:hover:not(:disabled) {
+    background-color: #ff6b6b;
+    transform: scale(1.1);
+}
+
+.swapButton:disabled {
+    background-color: #666;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.voiceWaveform {
+    width: 100%;
+    height: 25px;
+    background-color: #555;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.8em;
+}
+
+.trackContent::-webkit-scrollbar {
+    height: 6px;
+}
+
+.trackContent::-webkit-scrollbar-track {
+    background: #2c2c2c;
+    border-radius: 3px;
+}
+
+.trackContent::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.trackContent::-webkit-scrollbar-thumb:hover {
+    background: #ff6b6b;
 }
 
 .editVideoList {
     display: flex;
     width: 100%;
-    padding: 20px;
+    padding: 8px;
     gap: 20px;
     height: 10%;
+
+    margin-top: auto;
 }
 
 .leftSide {
     position: relative;
     width: 70%;
     height: 100%;
-    padding: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -333,7 +460,7 @@
     margin-bottom: 10px;
 }
 
-.backToImageStyle{
+.backToImageStyle {
     background-color: transparent;
     border: none;
 }
@@ -350,7 +477,8 @@
     transition: transform 0.2s, border 0.2s;
 }
 
-.imageItem:nth-child(1), .imageItem:nth-child(2){
+.imageItem:nth-child(1),
+.imageItem:nth-child(2) {
     margin-top: 5px;
 }
 
@@ -359,7 +487,7 @@
     border-radius: 12px;
 }
 
-.styleImageInImages{
+.styleImageInImages {
     width: 90%;
     height: 150px;
     border: 3px solid transparent;
@@ -370,7 +498,7 @@
 }
 
 .selectedRatioText {
-    color: #00FF00;
+    color: #00ff00;
     margin-top: 8px;
     font-size: 20px;
 }
@@ -392,18 +520,18 @@
     margin: 10px 0 0 10px;
 }
 
-.soundAndSpeed{
+.soundAndSpeed {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.imageEdit{
+.imageEdit {
     display: flex;
     gap: 40px;
 }
 
-.captionEdit{
+.captionEdit {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -451,7 +579,7 @@
 }
 
 .input_text:focus {
-    border-color: #8A2BE2;
+    border-color: #8a2be2;
     outline: none;
 }
 
@@ -464,36 +592,36 @@
     cursor: pointer;
 }
 
-.captionStyle{
+.captionStyle {
     height: 130px;
     margin-top: 10px;
 }
 
-.titleCaption{
+.titleCaption {
     color: white;
     font-size: 30px;
     margin: 0 0 5px 20px;
 }
 
-.formatStyle{
+.formatStyle {
     display: flex;
     gap: 40px;
     margin: 20px 0 5px 20px;
 }
 
-.iconFormat{
+.iconFormat {
     height: 60px;
     width: 60px;
     cursor: pointer;
 }
 
-.titleAutomatic{
+.titleAutomatic {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.iconAutomaticSubtitles{
+.iconAutomaticSubtitles {
     height: 40px;
     width: 40px;
 }
@@ -522,42 +650,41 @@
 }
 
 .activeContent {
-    background-color: #8A2BE2;
-    border-color: #FFFFFF;
+    background-color: #8a2be2;
+    border-color: #ffffff;
     color: white;
 }
 
-.formatContentStyle{
+.formatContentStyle {
     display: flex;
     gap: 40px;
     margin: 20px 0 5px 20px;
     flex-direction: column;
 }
 
-.style_button_recreate{
+.style_button_recreate {
     padding: 10px 30px;
     width: 170px;
     height: 70px;
     font-weight: bold;
-    background-color: #FF4242;
+    background-color: #ff4242;
     color: white;
     border-radius: 30px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
-    font-size: 24px;   
+    font-size: 24px;
 }
 
 .style_button_recreate:hover {
-    background-color: #FF6B6B;
+    background-color: #ff6b6b;
     transform: scale(1.05);
 }
 
-.style_recreate{
+.style_recreate {
     display: flex;
     justify-content: center;
     margin: 0 50px 0 0;
 }
-
 
 .nextButton {
     background-color: white;
@@ -575,7 +702,7 @@
 }
 
 .nextButton:hover {
-    background-color: #FF4242;
+    background-color: #ff4242;
 }
 
 .nextIcon {
@@ -586,4 +713,27 @@
 .nextButtonWrapper {
     display: flex;
     justify-content: flex-end;
+}
+
+.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loader {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid white;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

@@ -1,23 +1,14 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-interface IVideo extends Document {
-    user_id: mongoose.Types.ObjectId;
-    literature_work_id: mongoose.Types.ObjectId;
-    script: string;
-    voice_config: mongoose.Types.ObjectId;
-    image_config: mongoose.Types.ObjectId;
-    status: string;
-    publish_date: Date;
-}
+import mongoose, { Schema } from 'mongoose';
+import { IVideo } from '../types/modelTypes';
 
 const VideoSchema = new Schema<IVideo>(
     {
-        user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        user_id: { type: Schema.Types.ObjectId, ref: 'User', required: false },
         literature_work_id: { type: Schema.Types.ObjectId, ref: 'LiteratureWork', required: true },
         script: { type: String, required: true },
         voice_config: { type: Schema.Types.ObjectId, ref: 'VoiceConfig', required: true },
         image_config: { type: Schema.Types.ObjectId, ref: 'ImageConfig', required: true },
-        status: { type: String, required: true },
+        is_finished: { type: Boolean, required: true },
         publish_date: { type: Date, required: true },
     },
     {

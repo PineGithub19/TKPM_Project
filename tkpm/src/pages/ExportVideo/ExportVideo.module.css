@@ -179,3 +179,98 @@
     border-color: #FFFFFF;
     color: white;
 }
+
+.previewVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: black;
+}
+
+.loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.loader {
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 5px solid #8A2BE2;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.noVideoMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    gap: 20px;
+}
+
+.resolutionSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.resolutionSection h3 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.exportButtons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+    height: 100%;
+    padding-right: 32px;
+}
+
+.downloadButton, .shareButton {
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.downloadButton {
+    background-color: #8A2BE2;
+    color: white;
+    border: none;
+}
+
+.shareButton {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.downloadButton:hover {
+    background-color: #6a1cb3;
+    transform: scale(1.05);
+}
+
+.shareButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}

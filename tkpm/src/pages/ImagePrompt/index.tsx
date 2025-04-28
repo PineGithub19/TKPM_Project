@@ -12,11 +12,11 @@ interface ImagesSegment {
     status: string;
 }
 
-interface ImagesListComplete {
-    images: string[];
-    localImages: string[];
-    segment: string;
-}
+// interface ImagesListComplete {
+//     images: string[];
+//     localImages: string[];
+//     segment: string;
+// }
 
 const { TabPane } = Tabs;
 
@@ -27,7 +27,7 @@ function ImagePrompt({
 }: {
     promptId?: string;
     scriptSegments?: string[];
-    handleCheckedImagesListComplete?: (images: ImagesListComplete[]) => void;
+    handleCheckedImagesListComplete?: (images: string[]) => void;
 }) {
     const [promptInfo, setPromptInfo] = useState<string>();
     const [imageData, setImageData] = useState<ImagesSegment[]>([]);
@@ -210,56 +210,83 @@ function ImagePrompt({
     };
 
     const handleFinishImagesGeneration = async () => {
-        // Group selected images by segment
-        const selectedImagesBySegment = selectedImages.reduce((acc, image) => {
-            const segment = imageData[image.segmentId].text;
-            if (!acc[segment]) {
-                acc[segment] = [];
+        try {
+            // Group selected images by segment
+            // const selectedImagesBySegment = selectedImages.reduce((acc, image) => {
+            //     const segment = imageData[image.segmentId].text;
+            //     if (!acc[segment]) {
+            //         acc[segment] = [];
+            //     }
+            //     acc[segment].push(image.path);
+            //     return acc;
+            // }, {} as Record<string, string[]>);
+
+            const base64Paths = selectedImages.map((item) => item.path);
+            const localImagePaths: string[] = [];
+
+            // Generate a unique upload session ID
+            const uploadSessionId = Date.now().toString();
+
+            // Split images into batches of 5 for upload
+            const batchSize = 5;
+            const totalBatches = Math.ceil(base64Paths.length / batchSize);
+
+            for (let i = 0; i < totalBatches; i++) {
+                const startIdx = i * batchSize;
+                const endIdx = Math.min(startIdx + batchSize, base64Paths.length);
+                const batchImages = base64Paths.slice(startIdx, endIdx);
+
+                const batchResponse = await request.post('/image/image-storage-batch', {
+                    generationType: generationType,
+                    images: batchImages,
+                    promptId: promptId,
+                    batchIndex: i,
+                    totalBatches: totalBatches,
+                    uploadSessionId: uploadSessionId,
+                });
+
+                // Collect paths from each batch response
+                if (batchResponse && batchResponse.paths) {
+                    localImagePaths.push(...batchResponse.paths);
+                }
             }
-            acc[segment].push(image.path);
-            return acc;
-        }, {} as Record<string, string[]>);
 
-        const base64Paths = selectedImages.map((item) => item.path);
+            // Create a map from base64 path to local path
+            // const base64ToLocalPathMap = new Map<string, string>();
+            // base64Paths.forEach((base64Path, index) => {
+            //     if (localImagePaths[index]) {
+            //         base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
+            //     }
+            // });
 
-        const localImagesInformationResponse = await request.post('/image/image-storage', {
-            generationType: generationType,
-            images: base64Paths,
-            promptId: promptId,
-        });
+            // Convert to ImagesListComplete format, including localImages
+            // const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
+            //     ([segment, segmentBase64Images]) => {
+            //         const segmentLocalImages = segmentBase64Images
+            //             .map((base64Path) => base64ToLocalPathMap.get(base64Path))
+            //             .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
 
-        const localImagePaths: string[] = localImagesInformationResponse.paths;
+            //         return {
+            //             segment,
+            //             images: segmentBase64Images, // Keep original base64 images
+            //             localImages: segmentLocalImages, // Add the resolved local paths
+            //         };
+            //     },
+            // );
 
-        // Create a map from base64 path to local path
-        const base64ToLocalPathMap = new Map<string, string>();
-        base64Paths.forEach((base64Path, index) => {
-            if (localImagePaths[index]) {
-                base64ToLocalPathMap.set(base64Path, localImagePaths[index]);
+            // Pass the result to parent component
+            if (handleCheckedImagesListComplete) {
+                handleCheckedImagesListComplete(localImagePaths);
             }
-        });
 
-        // Convert to ImagesListComplete format, including localImages
-        const result: ImagesListComplete[] = Object.entries(selectedImagesBySegment).map(
-            ([segment, segmentBase64Images]) => {
-                const segmentLocalImages = segmentBase64Images
-                    .map((base64Path) => base64ToLocalPathMap.get(base64Path))
-                    .filter((path): path is string => !!path); // Filter out any potential undefined values and assert type
+            // Switch to the configuration tab after saving
+            setActiveTab('1');
 
-                return {
-                    segment,
-                    images: segmentBase64Images, // Keep original base64 images
-                    localImages: segmentLocalImages, // Add the resolved local paths
-                };
-            },
-        );
-
-        // Pass the result to parent component
-        if (handleCheckedImagesListComplete) {
-            handleCheckedImagesListComplete(result);
+            return true; // Indicate successful completion
+        } catch (error) {
+            console.error('Error saving images:', error);
+            throw error; // Re-throw the error to be caught by the caller
         }
-
-        // Switch to the configuration tab after saving
-        setActiveTab('1');
     };
 
     const handleConfigChange = (key: string, value: number | string) => {
@@ -471,7 +498,7 @@ function ImagePrompt({
                                 disabled={isLoading || selectedImages.length === 0}
                                 onClick={handleFinishImagesGeneration}
                             >
-                                Next Step
+                                Save Images
                             </button>
                         </div>
                     </div>

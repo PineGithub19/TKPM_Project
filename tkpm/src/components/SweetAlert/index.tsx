@@ -7,28 +7,33 @@ type SweetAlertProps = {
     text: string;
     icon?: SweetAlertIcon;
     onConfirm?: () => void;
+    onDenied?: () => void;
     onCancel?: () => void;
 };
 
 const MySwal = withReactContent(Swal);
 
-const SweetAlert = ({ title, text, icon = 'success', onConfirm, onCancel }: SweetAlertProps) => {
+const SweetAlert = ({ title, text, icon = 'success', onConfirm, onDenied, onCancel }: SweetAlertProps) => {
     useEffect(() => {
         MySwal.fire({
             title,
             text,
             icon,
+            showDenyButton: true,
             showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No',
+            confirmButtonText: 'Delete',
+            denyButtonText: 'Keep',
+            cancelButtonText: 'Cancel',
         }).then((result) => {
             if (result.isConfirmed) {
                 if (onConfirm) onConfirm();
+            } else if (result.isDenied) {
+                if (onDenied) onDenied();
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 if (onCancel) onCancel();
             }
         });
-    }, [title, text, icon, onConfirm, onCancel]);
+    }, [title, text, icon, onConfirm, onDenied, onCancel]);
 
     return null;
 };
