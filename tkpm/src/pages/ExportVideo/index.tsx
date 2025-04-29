@@ -4,18 +4,25 @@ import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 
 const resolutionOptions = ["360p", "720p", "1080p", "4k"];
+const videoUrl = "/videodemo.mp4";
 
 function ExportVideo() {
     const navigate = useNavigate();
 
-    const [selectedResolution, setResolution] = useState<string[]>([]);
+    const [selectedResolution, setResolution] = useState<string>("720p");
 
     const handleResolutionClick = (style: string) => {
-        setResolution((prev) =>
-            prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
-        );
+        if (style !== selectedResolution) {
+            setResolution(style);
+        }
+    };    
+    
+    const handleUploadToYouTube = () => {
+        window.location.href = "http://localhost:3000/api/upload/auth";
     };
     
+    
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -43,14 +50,17 @@ function ExportVideo() {
 
             <div className={styles.footer}>
                 <div className={styles.leftPanel}>
+                    <div className={styles.titleBody}>Resolution</div>
+
                     <div className={`${styles.style_buttons} content`}>
                         {resolutionOptions.map((style) => (
                             <button
                                 key={style}
                                 onClick={() => handleResolutionClick(style)}
                                 className={clsx(styles.style_button, {
-                                    [styles.activeContent]: selectedResolution.includes(style),
-                                })}>
+                                    [styles.activeContent]: selectedResolution === style,
+                                })}
+                            >
                                 {style}
                             </button>
                         ))}
@@ -58,7 +68,18 @@ function ExportVideo() {
                 </div>
 
                 <div className={styles.rightPanel}>
-a
+                    <div className={styles.titleBody}>Store - Share</div>
+                        <div className={styles.optionsStoreShare}>
+                            <img src="/iconSave.png" alt="Save" className={styles.iconStoreShare} />
+                            <img 
+                                src="/iconYoutube.png" 
+                                alt="YouTube" 
+                                className={styles.iconStoreShare}
+                                onClick={handleUploadToYouTube}
+                            />
+                            <img src="/iconTiktok.png" alt="TikTok" className={styles.iconStoreShare} />
+                            <img src="/iconFacebook.png" alt="Facebook" className={styles.iconStoreShare} />
+                        </div>
                 </div>
             </div>
         </div>

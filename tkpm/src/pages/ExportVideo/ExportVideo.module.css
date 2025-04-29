@@ -45,9 +45,13 @@
 }
 
 .title {
-    font-size: 24px;
-    margin: 0 0 5px 20px;
+    font-size: 30px;
+    margin: 0 0 5px 36px;
     color: white;
+}
+
+.titleBody{
+    font-size: 30px;
 }
 
 .body {
@@ -142,12 +146,21 @@
     display: flex;
     width: 50%;
     color: white;
+    margin-top: 30px;
+    padding-left: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .rightPanel {
     display: flex;
     width: 50%;
     color: white;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .style_buttons {
@@ -178,4 +191,21 @@
     background-color: #8A2BE2;
     border-color: #FFFFFF;
     color: white;
+}
+
+.optionsStoreShare {
+    display: flex;
+    gap: 70px;
+}
+
+.iconStoreShare {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.iconStoreShare:hover {
+    transform: scale(1.1);
 }
