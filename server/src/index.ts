@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import InformationRouter from './routers/InformationRouter';
 import UserRouter from './routers/UserRouter';
 import voiceRoutes from './routers/VoiceRouter';
+import UploadRouter from './routers/UploadRouter';
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ app.use('/script_generate', ScriptRouter);
 app.use('/information', InformationRouter);
 app.use('/user', UserRouter);
 app.use('/voice', voiceRoutes);
-
+app.use('/api/upload', UploadRouter);
 
 mongoose
     .connect(databaseURL)
