@@ -89,6 +89,7 @@ function ImportantAlert({
             text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
             confirmButtonText="Delete"
+            denyButtonText="Keep it"
             onConfirm={() => handleConfirmAlert(blocker)}
             onDenied={() => {
                 blocker.proceed?.();

@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message, Tabs, Card, Spin, Progress } from 'antd';
 import { post } from '../../utils/request';
 import styles from './GenerateVoice.module.css';
+import clsx from 'clsx';
+import LoadingComponent from '../../components/Loading';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -33,6 +35,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     scriptTitle = '',
     onComplete,
 }) => {
+    const [isTranslating, setIsTranslating] = useState(false);
     const [loading, setLoading] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('single');
@@ -46,6 +49,8 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     useEffect(() => {
         const translateSegments = async () => {
             try {
+                setIsTranslating(true);
+
                 const response = await post('/script_generate/edit', {
                     originalScript: scriptSegments.join('\n\n'),
                     editInstructions: 'Translate to Vietnamese',
@@ -68,6 +73,8 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             } catch (error) {
                 console.log(error);
                 message.error('Error translating script segments.');
+            } finally {
+                setIsTranslating(false);
             }
         };
 
@@ -396,6 +403,13 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
 
     return (
         <div className={styles.container}>
+            {isTranslating && (
+                <LoadingComponent
+                    customClassName={clsx('position-absolute', 'top-50', 'start-50')}
+                    description="Đang dịch kịch bản..."
+                    isOverlay={isTranslating}
+                />
+            )}
             <Tabs activeKey={activeTab} onChange={setActiveTab} className="custom-tabs">
                 <TabPane tab="Tạo Đơn Lẻ" key="single" className="custom-tab-pane">
                     {renderSingleVoiceGenerator()}
