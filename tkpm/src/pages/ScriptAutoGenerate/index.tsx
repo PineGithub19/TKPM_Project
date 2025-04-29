@@ -26,10 +26,11 @@ interface ScriptAutoGenerateProps {
     promptId: string;
     literatureContent?: string;
     literatureTitle?: string;
+    scriptSegment?: string[];
     onComplete?: (segments: string[], title: string) => void;
 }
 
-const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onComplete }: ScriptAutoGenerateProps) => {
+const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scriptSegment, onComplete }: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [script, setScript] = useState<string>('');
@@ -46,7 +47,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
         tone: 'formal',
         duration: 'standard',
     });
-    const [scriptSegments, setScriptSegments] = useState<string[]>([]);
+    const [scriptSegments, setScriptSegments] = useState<string[]>(scriptSegment? scriptSegment : []);
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
     const [scriptTitle, setScriptTitle] = useState<string>('');

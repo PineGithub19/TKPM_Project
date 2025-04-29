@@ -24,10 +24,12 @@ function ImagePrompt({
     promptId,
     scriptSegments = [],
     handleCheckedImagesListComplete,
+    checkedImagesList,
 }: {
     promptId?: string;
     scriptSegments?: string[];
     handleCheckedImagesListComplete?: (images: string[]) => void;
+    checkedImagesList: string[];
 }) {
     const [promptInfo, setPromptInfo] = useState<string>();
     const [imageData, setImageData] = useState<ImagesSegment[]>([]);
@@ -59,19 +61,28 @@ function ImagePrompt({
     });
 
     const [generationType, setGenerationType] = useState<'static' | 'motion'>('static');
+    const [localPath, setLocalPath] = useState<string[]>([]);
 
     useEffect(() => {
         console.log(scriptSegments.length);
         if (scriptSegments && scriptSegments.length > 0) {
             setImageData(
-                scriptSegments.map((segment) => ({
+                scriptSegments.map((segment, index) => ({
                     text: segment,
-                    images: [],
-                    status: 'idle',
+                    images: checkedImagesList && index < checkedImagesList.length 
+                        ? [checkedImagesList[index]] 
+                        : [],
+                    status: checkedImagesList && index < checkedImagesList.length 
+                        ? 'success' 
+                        : 'idle',
                 })),
             );
         }
-    }, [scriptSegments]);
+
+        if (checkedImagesList && checkedImagesList.length > 0) {
+            setLocalPath(checkedImagesList);
+        }
+    }, [scriptSegments, checkedImagesList]);
 
     const handleTabChange = (key: string) => {
         setActiveTab(key);
@@ -222,7 +233,7 @@ function ImagePrompt({
             // }, {} as Record<string, string[]>);
 
             const base64Paths = selectedImages.map((item) => item.path);
-            const localImagePaths: string[] = [];
+            var localImagePaths: string[] = [];
 
             // Generate a unique upload session ID
             const uploadSessionId = Date.now().toString();
@@ -276,6 +287,9 @@ function ImagePrompt({
 
             // Pass the result to parent component
             if (handleCheckedImagesListComplete) {
+                if (localImagePaths.length === 0) {
+                    localImagePaths = localPath;
+                }
                 handleCheckedImagesListComplete(localImagePaths);
             }
 

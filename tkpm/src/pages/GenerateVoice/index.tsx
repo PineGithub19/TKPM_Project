@@ -26,6 +26,7 @@ interface GenerateVoiceProps {
     promptId: string;
     scriptSegments?: string[];
     scriptTitle?: string;
+    voicesList?: string[];
     onComplete?: (voices: string[], segmentsScript: string[]) => void;
 }
 
@@ -33,13 +34,15 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     promptId = '',
     scriptSegments = [],
     scriptTitle = '',
+    voicesList = [],
     onComplete,
 }) => {
     useEffect(() => {
         console.log('Prompt ID:', promptId);
         console.log('Script Segments:', scriptSegments);
         console.log('Script Title:', scriptTitle);
-    }, []);
+        console.log('voice list: ', voicesList);
+    }, [promptId, scriptSegments, scriptTitle, voicesList]);
 
     const [loading, setLoading] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -64,14 +67,18 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 if (response.success) {
                     const translatedSegments = response.script.split('\n\n');
                     setTranslatedSegments(translatedSegments);
-                    setVoiceSegments(
-                        translatedSegments.map((text: string, index: number) => ({
-                            text,
-                            audioUrl: null,
-                            status: 'idle',
-                            index,
-                        })),
-                    );
+                    
+                    // Nếu không có voicesList, sử dụng translatedSegments để tạo voiceSegments
+                    if (!voicesList || voicesList.length === 0) {
+                        setVoiceSegments(
+                            translatedSegments.map((text: string, index: number) => ({
+                                text,
+                                audioUrl: null,
+                                status: 'idle',
+                                index,
+                            })),
+                        );
+                    }
                 } else {
                     message.error('Failed to translate script segments.');
                 }
@@ -80,11 +87,23 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 message.error('Error translating script segments.');
             }
         };
-
-        if (scriptSegments && scriptSegments.length > 0) {
+        
+        // Nếu có voicesList, sử dụng nó để tạo voiceSegments với text từ scriptSegments
+        if (voicesList && voicesList.length > 0 && scriptSegments && scriptSegments.length > 0) {
+            setVoiceSegments(
+                voicesList.map((audioUrl: string, index: number) => ({
+                    text: index < scriptSegments.length ? scriptSegments[index] : '',
+                    audioUrl: audioUrl,
+                    status: 'success',
+                    index,
+                })),
+            );
+        } 
+        // Nếu chỉ có scriptSegments mà không có voicesList
+        else if (scriptSegments && scriptSegments.length > 0) {
             translateSegments();
         }
-    }, [scriptSegments]);
+    }, [scriptSegments, voicesList]);
 
     const onFinish = async (values: VoiceGenerationForm) => {
         try {

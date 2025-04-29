@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as request from '../../utils/request';
 import clsx from 'clsx';
@@ -22,15 +22,37 @@ interface WikipediaResponse {
 
 interface LiteratureProps {
     onSelectLiterature?: (content: string, title: string) => void;
+    selectedLiterature: { content: string; title: string } | null;
 }
 
-const Literature = ({ onSelectLiterature }: LiteratureProps) => {
+const Literature = ({ onSelectLiterature, selectedLiterature }: LiteratureProps) => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [response, setResponse] = useState<WikipediaResponse | null>(null);
     const [showFullContent, setShowFullContent] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (selectedLiterature) {
+            setResponse({
+                success: true,
+                data: {
+                    title: selectedLiterature.title,
+                    sections: [{
+                        title: selectedLiterature.title,
+                        content: selectedLiterature.content
+                    }],
+                    summaryText: selectedLiterature.content.substring(0, 200) + '...',
+                    url: '',
+                    displayTitle: selectedLiterature.title,
+                    originalImage: '',
+                    fullText: selectedLiterature.content
+                }
+            });
+            setShowFullContent(true);
+        }
+    }, [selectedLiterature]);
 
     const searchWikipedia = async () => {
         if (!query.trim()) {

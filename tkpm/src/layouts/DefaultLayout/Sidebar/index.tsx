@@ -31,7 +31,7 @@ function Sidebar() {
     useEffect(() => {
         const newRoutes = publicRoutes
             .filter((route) => !route.private) // Filter out non-private routes
-            .map((route) => ({
+            .map((route) =>( {
                 name: formatName(route.path.slice(1)), // Format the name
                 route: route.path, // Keep the route path
             }));

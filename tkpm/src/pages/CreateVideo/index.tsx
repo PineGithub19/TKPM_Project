@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { BlockerFunction, useBlocker, Blocker, useNavigate } from 'react-router-dom';
+import { BlockerFunction, useBlocker, Blocker, useNavigate, useLocation } from 'react-router-dom';
 import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
@@ -103,23 +103,41 @@ function ImportantAlert({
     ) : null;
 }
 
+interface LocationState {
+    scriptSegments?: string[];
+    checkedImagesList?: string[];
+    voicesList?: string[];
+    hasFetchedPromptId?: boolean;
+    selectedLiterature?: { content: string; title: string };
+
+    //cho các id của phiên làm việc:
+    promptId?: string,
+    scriptPromptId?: string,
+    voicePromptId?: string,
+    imagePromptId?: string,
+}
+
 function CreateVideo() {
-    const [promptId, setPromptId] = useState<string>('');
-    const [scriptPromptId, setScriptPromptId] = useState<string>('');
-    const [voicePromptId, setVoicePromptId] = useState<string>('');
-    const [imagePromptId, setImagePromptId] = useState<string>('');
+
+    const location = useLocation();
+    const state = location.state as LocationState;
+
+    const [promptId, setPromptId] = useState<string>(state?.promptId || '');
+    const [scriptPromptId, setScriptPromptId] = useState<string>(state?.scriptPromptId || '');
+    const [voicePromptId, setVoicePromptId] = useState<string>(state?.voicePromptId || '');
+    const [imagePromptId, setImagePromptId] = useState<string>(state?.imagePromptId || '');
 
     const [activeStep, setActiveStep] = useState(0);
-    const hasFetchedPromptId = useRef(false);
-    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
+    const hasFetchedPromptId = useRef<boolean>(state?.hasFetchedPromptId || false); // Fixed initialization
+    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(state?.selectedLiterature || null);
     const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
 
-    const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
+    const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
 
-    const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
+    const [checkedImagesList, setCheckedImagesList] = useState<string[]>(state?.checkedImagesList || []);
 
-    const [voicesList, setVoicesList] = useState<string[]>([]); // string array of voice
+    const [voicesList, setVoicesList] = useState<string[]>(state?.voicesList || []); // string array of voice
 
     const navigate = useNavigate();
 
@@ -137,11 +155,24 @@ function CreateVideo() {
 
     const handleFinish = async () => {
         setIsFinishedVideo(true); // preemptively allow
+        console.log('Received in CreateVideo before navigate:', {
+            scriptSegments,
+            checkedImagesList,
+            voicesList,
+        });
         navigate('/edit-video', {
             state: {
                 scriptSegments,
                 checkedImagesList,
                 voicesList,
+                hasFetchedPromptId,
+                selectedLiterature,
+
+                //các id của phiên làm việc:
+                promptId,
+                scriptPromptId,
+                voicePromptId,
+                imagePromptId,
             },
         });
         // try {
@@ -165,7 +196,7 @@ function CreateVideo() {
         handleNext(); // Move to the next step (ScriptAutoGenerate)
     };
 
-    const handleScriptComplete = (segments: string[], title: string) => {
+    const handleScriptComplete = (segments: string[], title: string = '') => {
         setScriptSegments(segments);
         console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
@@ -194,6 +225,12 @@ function CreateVideo() {
             fetchPromptId();
             hasFetchedPromptId.current = true;
         }
+
+        console.log('Editvideo -> CreateVideo', {
+            scriptSegments,
+            checkedImagesList,
+            voicesList,
+        });
     }, []);
 
     useEffect(() => {
@@ -223,7 +260,10 @@ function CreateVideo() {
                     <PromptBody>
                         {activeStep === 0 && (
                             <div className="create-video-literature-container">
-                                <Literature onSelectLiterature={handleLiteratureSelected} />
+                                <Literature 
+                                onSelectLiterature={handleLiteratureSelected}
+                                selectedLiterature={selectedLiterature}
+                                />
                             </div>
                         )}
                         {activeStep === 1 && selectedLiterature && (
@@ -233,6 +273,8 @@ function CreateVideo() {
                                     literatureContent={selectedLiterature.content}
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}
+                                    scriptSegment={scriptSegments}
+                                    
                                 />
                             </div>
                         )}
@@ -242,6 +284,7 @@ function CreateVideo() {
                                     promptId={imagePromptId}
                                     scriptSegments={scriptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                    checkedImagesList={checkedImagesList}
                                 />
                             </div>
                         )}
@@ -252,6 +295,7 @@ function CreateVideo() {
                                     scriptSegments={scriptSegments}
                                     scriptTitle={scriptTitle}
                                     onComplete={handleVoiceComplete}
+                                    voicesList={voicesList}
                                 />
                             </div>
                         )}
