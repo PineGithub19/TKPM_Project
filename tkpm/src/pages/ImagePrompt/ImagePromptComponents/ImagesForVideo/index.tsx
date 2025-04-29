@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Card, Button } from 'antd';
-import LoadingComponent from '../../../../components/Loading';
-import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
 import * as request from '../../../../utils/request';
 import { ImageConfig } from '../ImagesConfiguration';
 
+import { Card, Button } from 'antd';
 import styles from '../../ImagePrompt.module.css';
+import LoadingComponent from '../../../../components/Loading';
+import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
+import SweetAlert from '../../../../components/SweetAlert';
 
 interface ImagesSegment {
     text: string;
@@ -365,6 +366,14 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                     </div>
                 </div>
             </div>
+            {isDownloading && (
+                <SweetAlert
+                    title="Downloading all images successfully!"
+                    text="Now, you can move to the next step."
+                    icon="success"
+                    confirmButtonText="OK"
+                />
+            )}
         </div>
     );
 };

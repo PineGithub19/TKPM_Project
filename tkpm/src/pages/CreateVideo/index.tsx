@@ -32,12 +32,6 @@ const steps = [
     },
 ];
 
-// interface ImagesListComplete {
-//     images: string[];
-//     localImages: string[];
-//     segment: string;
-// }
-
 function ImportantAlert({
     isFinishedVideo,
     promptId,
@@ -94,6 +88,7 @@ function ImportantAlert({
             title="Wanna leave this page?"
             text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
+            confirmButtonText="Delete"
             onConfirm={() => handleConfirmAlert(blocker)}
             onDenied={() => {
                 blocker.proceed?.();
@@ -150,21 +145,6 @@ function CreateVideo() {
                 voicesList,
             },
         });
-        // try {
-        //     await request.put('/information/update', {
-        //         promptId: promptId,
-        //     });
-        //     navigate('/edit-video', {
-        //         state: {
-        //             scriptSegments,
-        //             checkedImagesList,
-        //             voicesList,
-        //         },
-        //     });
-        // } catch (error) {
-        //     console.error('Error during finish:', error);
-        //     setIsFinishedVideo(false); // revert if needed
-        // }
     };
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });

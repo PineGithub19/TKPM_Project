@@ -16,6 +16,8 @@
 
 .videoContainer,
 .imageContainer {
+    width: 240px;
+    height: 120px;
     background: linear-gradient(to top right, #00c6dd 2%, #13d8ec 32%, #bef3ff 100%);
     color: #090c14;
     padding: 24px 36px;

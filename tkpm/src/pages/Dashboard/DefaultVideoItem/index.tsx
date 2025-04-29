@@ -1,7 +1,8 @@
 import clsx from 'clsx';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilm, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faFilm, faXmark, faClockRotateLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import styles from './DefaultVideoItem.module.css';
 import * as request from '../../../utils/request';
 
@@ -11,7 +12,7 @@ interface VideoInformation {
     voiceId: string;
     imageId: string;
     is_finished: boolean;
-    background: string;
+    background?: string;
 }
 
 function DefaultVideoItem({
@@ -23,17 +24,32 @@ function DefaultVideoItem({
 }) {
     const navigate = useNavigate();
 
-    const handleClick = async () => {
-        const response = await Promise.all([
+    const [scriptSegments, setScriptSegments] = useState<string[]>([]);
+    const [voicesList, setVoicesList] = useState<string[]>([]);
+    const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
+    const [background, setBackground] = useState<string | undefined>(videoData.background);
+
+    useEffect(() => {
+        let isMounted = true;
+        Promise.all([
             request.get(`/script_generate/get-script?promptId=${videoData.scriptId}`),
             request.get(`/voice/get-voices?promptId=${videoData.voiceId}`),
             request.get(`/image/get-images?promptId=${videoData.imageId}`),
-        ]);
+        ]).then((response) => {
+            if (!isMounted) return;
+            setScriptSegments(response[0].scriptList || []);
+            setVoicesList(response[1].voiceList || []);
+            setCheckedImagesList(response[2].imageList || []);
+            if (!videoData.background && response[2].imageList && response[2].imageList.length > 0) {
+                setBackground(response[2].imageList[0]);
+            }
+        });
+        return () => {
+            isMounted = false;
+        };
+    }, [videoData.scriptId, videoData.voiceId, videoData.imageId, videoData.background]);
 
-        const scriptSegments = response[0].scriptList || [];
-        const voicesList = response[1].voiceList || [];
-        const checkedImagesList = response[2].imageList || [];
-
+    const handleClick = async () => {
         navigate('/edit-video', {
             state: {
                 scriptSegments: scriptSegments,
@@ -68,12 +84,19 @@ function DefaultVideoItem({
 
     return (
         <div onClick={handleClick}>
-            {videoData.background ? (
-                <div>
-                    <img src={videoData.background} alt="Video Thumbnail" className={clsx('img-fluid')} />
-                </div>
-            ) : (
-                <div className={clsx('position-relative')}>
+            <div className={clsx('position-relative')}>
+                {background ? (
+                    <div className={clsx(styles.backgroundContainer, 'ms-4', 'position-relative')}>
+                        <img src={background} alt="Video Thumbnail" className={clsx(styles.imageConfig)} />
+                        <FontAwesomeIcon
+                            icon={videoData.is_finished ? faCheck : faClockRotateLeft}
+                            className={clsx('fs-5', 'position-absolute', 'end-0', 'bottom-0', 'me-2', 'mb-2', {
+                                [styles.pendingICon]: !videoData.is_finished,
+                                [styles.completedIcon]: videoData.is_finished,
+                            })}
+                        />
+                    </div>
+                ) : (
                     <div
                         className={clsx(
                             'd-flex',
@@ -81,7 +104,7 @@ function DefaultVideoItem({
                             'justify-content-center',
                             'align-items-center',
                             'ms-4',
-                            styles.imageContainer,
+                            styles.noBackgroundContainer,
                             {
                                 [styles.incompletedStatusBackground]: !videoData.is_finished,
                                 [styles.completedStatusBackground]: videoData.is_finished,
@@ -93,25 +116,25 @@ function DefaultVideoItem({
                             {videoData.is_finished ? 'Completed Video' : 'Video in Progress'}
                         </h5>
                     </div>
-                    <div
-                        onClick={(e) => handleDeleteVideo(e)}
-                        className={clsx(
-                            'position-absolute',
-                            'top-0',
-                            'end-0',
-                            'p-2',
-                            'pe-3',
-                            'ps-3',
-                            'rounded-start',
-                            'rounded-end',
-                            'bg-white',
-                            styles.iconContainer,
-                        )}
-                    >
-                        <FontAwesomeIcon icon={faXmark} />
-                    </div>
+                )}
+                <div
+                    onClick={(e) => handleDeleteVideo(e)}
+                    className={clsx(
+                        'position-absolute',
+                        'top-0',
+                        'end-0',
+                        'p-1',
+                        'pe-3',
+                        'ps-3',
+                        'rounded-start',
+                        'rounded-end',
+                        'bg-white',
+                        styles.iconContainer,
+                    )}
+                >
+                    <FontAwesomeIcon icon={faXmark} />
                 </div>
-            )}
+            </div>
         </div>
     );
 }
