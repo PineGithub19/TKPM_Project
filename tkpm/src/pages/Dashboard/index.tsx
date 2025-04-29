@@ -11,7 +11,7 @@ import DataChart from './DataChart';
 
 interface VideoInformation {
     videoId: string;
-    scriptId: string;
+    scriptId: string; 
     voiceId: string;
     imageId: string;
     is_finished: boolean;

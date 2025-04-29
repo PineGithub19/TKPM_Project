@@ -274,6 +274,8 @@ function CreateVideo() {
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}
                                     scriptSegment={scriptSegments}
+
+                                    selectedLiterature={selectedLiterature}
                                     
                                 />
                             </div>

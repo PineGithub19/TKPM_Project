@@ -31,6 +31,7 @@ function DefaultVideoItem({
         ]);
 
         const scriptSegments = response[0].scriptList || [];
+        const selectedLiterature = response[0].selectedLiterature || null;
         const voicesList = response[1].voiceList || [];
         const checkedImagesList = response[2].imageList || [];
 
@@ -39,6 +40,12 @@ function DefaultVideoItem({
                 scriptSegments: scriptSegments,
                 voicesList: voicesList,
                 checkedImagesList: checkedImagesList,
+                selectedLiterature: selectedLiterature,
+
+                promptId: videoData.videoId,
+                scriptPromptId: videoData.scriptId,
+                voicePromptId: videoData.voiceId,
+                imagePromptId: videoData.imageId,
             },
         });
 
