@@ -67,11 +67,13 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 if (response.success) {
                     const translatedSegments = response.script.split('\n\n');
                     setTranslatedSegments(translatedSegments);
+
+                    const segmentFromThird = translatedSegments.slice(2);
                     
                     // Nếu không có voicesList, sử dụng translatedSegments để tạo voiceSegments
                     if (!voicesList || voicesList.length === 0) {
                         setVoiceSegments(
-                            translatedSegments.map((text: string, index: number) => ({
+                            segmentFromThird.map((text: string, index: number) => ({
                                 text,
                                 audioUrl: null,
                                 status: 'idle',

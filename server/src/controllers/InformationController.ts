@@ -20,6 +20,7 @@ interface VideoConfigData {
 interface LiteratureWorkData {
     _id?: string;
     title: string;
+    full_content: { content: string; title: string };
     author: string;
     genre: string;
     summary: string;
@@ -61,6 +62,7 @@ class InformationController {
         try {
             const scriptData: LiteratureWorkData = {
                 title: 'title',
+                full_content: { content: 'default', title: 'default' },
                 author: 'author',
                 genre: 'gerne',
                 summary: 'summary',
@@ -101,6 +103,8 @@ class InformationController {
             };
             const videoResponse = (await DBServices.createDocument(VideoConfigModel, videoData)) as VideoConfigData;
 
+            console.log("Check videoResponse in BE: ", videoResponse);
+
             if (!videoResponse || !scriptResponse || !voiceResponse || !imageResponse) {
                 res.status(500).send('Error creating prompt');
             } else {
@@ -112,7 +116,18 @@ class InformationController {
                 });
             }
         } catch (error) {
-            res.status(500).send('Cannot create a Prompt: ' + error);
+            console.error('Error creating prompt:', error);
+            if (error instanceof mongoose.Error.ValidationError) {
+                res.status(400).json({ 
+                    message: 'Validation error', 
+                    errors: error.errors 
+                });
+            } else {
+                res.status(500).json({ 
+                    message: 'Cannot create a Prompt', 
+                    error: error instanceof Error ? error.message : 'Unknown error' 
+                });
+            }
         }
     }
 

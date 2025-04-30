@@ -10,7 +10,7 @@ export interface IImageConfig extends Document {
 
 export interface ILiteratureWork extends Document {
     title: string;
-    full_content: string;
+    full_content: { content: string; title: string };
     author: string;
     genre: string;
     summary: string;

@@ -130,6 +130,8 @@ class ScriptGenerateController {
         try {
             const { promptId, script, full_content } = req.body;
 
+            console.log("CHECK full_content backend: ", full_content);
+
             if (!script) {
                 res.status(400).json({ message: 'Script content is required' });
                 return;

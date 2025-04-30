@@ -23,7 +23,7 @@ interface ScriptConfig {
 }
 
 interface ScriptAutoGenerateProps {
-    promptId: string;
+    promptId?: string;
     literatureContent?: string;
     literatureTitle?: string;
     scriptSegment?: string[];
@@ -162,6 +162,8 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
     const generateSegments = async (scriptText: string) => {
         setSegmentLoading(true);
 
+        console.log("CHECK PROMPT_ID before split in generateSegments: ", promptId);
+
         try {
             const response = (await request.post('/script_generate/split', {
                 promptId: promptId,
@@ -232,11 +234,14 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
         setSegmentLoading(true);
         setError(null);
 
+        console.log("CHECK PROMPT_ID before split - in handleSplitScript: ", promptId);
+
         try {
             const textToSplit = editedScript || script;
             const response = (await request.post('/script_generate/split', {
                 promptId: promptId,
                 script: textToSplit,
+                full_content: selectedLiterature,
             })) as ScriptSegmentsResponse | null;
 
             if (response !== null && response.success) {

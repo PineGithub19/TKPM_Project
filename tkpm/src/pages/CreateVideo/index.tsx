@@ -214,24 +214,52 @@ function CreateVideo() {
     };
 
     useEffect(() => {
+        console.log("CHECK hasFetchedPromptId in createVideo: ", hasFetchedPromptId.current);
+
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
-                const response = await request.post('/information/create');
-                setPromptId(response?.promptId || '');
-                setScriptPromptId(response?.scriptPromptId || '');
-                setVoicePromptId(response?.voicePromptId || '');
-                setImagePromptId(response?.imagePromptId || '');
+                try {
+                    const response = await request.post('/information/create');
+                    console.log("API Response:", response); // Log the full response
+
+                    if (response) {
+                        setPromptId(response.promptId || '');
+                        setScriptPromptId(response.scriptPromptId || '');
+                        setVoicePromptId(response.voicePromptId || '');
+                        setImagePromptId(response.imagePromptId || '');
+
+                        // Log after setting state (but remember state updates are asynchronous)
+                        console.log("IDs set from response:", {
+                            promptId: response.promptId,
+                            scriptPromptId: response.scriptPromptId,
+                            voicePromptId: response.voicePromptId,
+                            imagePromptId: response.imagePromptId
+                        });
+                    } else {
+                        console.error("Empty response received from server");
+                    }
+                } catch (error) {
+                    console.error("Error fetching prompt IDs:", error);
+                    // Handle error appropriately (show message to user, etc.)
+                }
             }
             fetchPromptId();
             hasFetchedPromptId.current = true;
         }
+
+        console.log("CHECK id in CreateVideo: ", {
+            promptId,
+            scriptPromptId,
+            voicePromptId,
+            imagePromptId,
+        })
 
         console.log('Editvideo -> CreateVideo', {
             scriptSegments,
             checkedImagesList,
             voicesList,
         });
-    }, []);
+    }, [promptId, scriptPromptId, voicePromptId, imagePromptId]);
 
     useEffect(() => {
         if (checkedImagesList.length > 0) console.log(checkedImagesList);
@@ -260,9 +288,9 @@ function CreateVideo() {
                     <PromptBody>
                         {activeStep === 0 && (
                             <div className="create-video-literature-container">
-                                <Literature 
-                                onSelectLiterature={handleLiteratureSelected}
-                                selectedLiterature={selectedLiterature}
+                                <Literature
+                                    onSelectLiterature={handleLiteratureSelected}
+                                    selectedLiterature={selectedLiterature}
                                 />
                             </div>
                         )}
@@ -276,7 +304,7 @@ function CreateVideo() {
                                     scriptSegment={scriptSegments}
 
                                     selectedLiterature={selectedLiterature}
-                                    
+
                                 />
                             </div>
                         )}
