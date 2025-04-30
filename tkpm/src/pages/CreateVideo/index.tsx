@@ -1,18 +1,18 @@
+import clsx from 'clsx';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { BlockerFunction, useBlocker, Blocker, useNavigate } from 'react-router-dom';
+import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
 import Moon from './CreateVideoComponents/Moon/Moon';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
+import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
 import Literature from '../Literature';
 import ScriptAutoGenerate from '../ScriptAutoGenerate';
 import GenerateVoice from '../GenerateVoice';
 import ImagePrompt from '../ImagePrompt';
-import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import * as request from '../../utils/request';
-import clsx from 'clsx';
-import { BlockerFunction, useBlocker, Blocker } from 'react-router-dom';
-import SweetAlert from '../../components/SweetAlert';
 
 const steps = [
     {
@@ -24,12 +24,12 @@ const steps = [
         description: 'Configure and generate a script based on the selected literature.',
     },
     {
-        label: 'Create Voice Narration',
-        description: 'Generate voice narrations for each segment of your script.',
-    },
-    {
         label: 'Create Images for Video',
         description: 'Generate images for your video based on the script segments.',
+    },
+    {
+        label: 'Create Voice Narration',
+        description: 'Generate voice narrations for each segment of your script.',
     },
 ];
 
@@ -40,18 +40,36 @@ const backgrounds = [
     'linear-gradient(to top right, #232526, #414345)',
 ];
 
-interface ImagesListComplete {
-    images: string[];
-    localImages: string[];
-    segment: string;
-}
+// interface ImagesListComplete {
+//     images: string[];
+//     localImages: string[];
+//     segment: string;
+// }
 
-function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolean; promptId?: string }) {
+function ImportantAlert({
+    isFinishedVideo,
+    promptId,
+    scriptPromptId,
+    voicePromptId,
+    imagePromptId,
+}: {
+    isFinishedVideo: boolean;
+    promptId?: string;
+    scriptPromptId?: string;
+    voicePromptId?: string;
+    imagePromptId?: string;
+}) {
     const [isAlerted, setIsAlerted] = useState<boolean>(false);
+
     const handleConfirmAlert = async (blocker: Blocker) => {
         if (blocker.state === 'blocked') {
             try {
-                await request.del('/information/delete', { promptId: promptId });
+                await request.del('/information/delete', {
+                    promptId: promptId,
+                    scriptId: scriptPromptId,
+                    voiceId: voicePromptId,
+                    imageId: imagePromptId,
+                });
             } catch (error) {
                 console.log(error);
             } finally {
@@ -72,31 +90,46 @@ function ImportantAlert({ isFinishedVideo, promptId }: { isFinishedVideo: boolea
 
     useEffect(() => {
         if (blocker.state === 'blocked' && isFinishedVideo === false) {
-            // blocker.reset();
             setIsAlerted(blocker.state === 'blocked');
+        } else if (isFinishedVideo === true) {
+            blocker.proceed?.();
+            setIsAlerted(false);
         }
     }, [blocker, isFinishedVideo]);
 
     return isAlerted ? (
         <SweetAlert
             title="Wanna leave this page?"
-            text="Your video has not been created yet. Your changes won't be saved."
+            text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
             onConfirm={() => handleConfirmAlert(blocker)}
+            onDenied={() => {
+                blocker.proceed?.();
+                setIsAlerted(false);
+            }}
         />
     ) : null;
 }
 
 function CreateVideo() {
     const [promptId, setPromptId] = useState<string>('');
+    const [scriptPromptId, setScriptPromptId] = useState<string>('');
+    const [voicePromptId, setVoicePromptId] = useState<string>('');
+    const [imagePromptId, setImagePromptId] = useState<string>('');
+
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef(false);
     const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
+    const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
 
     const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
 
-    const [checkedImagesList, setCheckedImagesList] = useState<ImagesListComplete[]>([]);
+    const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
+
+    const [voicesList, setVoicesList] = useState<string[]>([]); // string array of voice
+
+    const navigate = useNavigate();
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -110,6 +143,31 @@ function CreateVideo() {
         setActiveStep(0);
     };
 
+    const handleFinish = async () => {
+        setIsFinishedVideo(true); // preemptively allow
+        navigate('/edit-video', {
+            state: {
+                scriptSegments,
+                checkedImagesList,
+                voicesList,
+            },
+        });
+        // try {
+        //     await request.put('/information/update', {
+        //         promptId: promptId,
+        //     });
+        //     navigate('/edit-video', {
+        //         state: {
+        //             scriptSegments,
+        //             checkedImagesList,
+        //             voicesList,
+        //         },
+        //     });
+        // } catch (error) {
+        //     console.error('Error during finish:', error);
+        //     setIsFinishedVideo(false); // revert if needed
+        // }
+    };
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
         handleNext(); // Move to the next step (ScriptAutoGenerate)
@@ -117,15 +175,18 @@ function CreateVideo() {
 
     const handleScriptComplete = (segments: string[], title: string) => {
         setScriptSegments(segments);
+        console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
-    const handleVoiceComplete = () => {
+    const handleVoiceComplete = (voices: string[], scripts: string[]) => {
+        setVoicesList(voices);
+        setScriptSegments(scripts);
         handleNext(); // Move to the image generation step
     };
 
-    const handleCheckedImagesListComplete = (images: ImagesListComplete[]) => {
+    const handleCheckedImagesListComplete = (images: string[]) => {
         setCheckedImagesList(images);
     };
 
@@ -133,7 +194,10 @@ function CreateVideo() {
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
                 const response = await request.post('/information/create');
-                setPromptId(response?.id || '');
+                setPromptId(response?.promptId || '');
+                setScriptPromptId(response?.scriptPromptId || '');
+                setVoicePromptId(response?.voicePromptId || '');
+                setImagePromptId(response?.imagePromptId || '');
             }
             fetchPromptId();
             hasFetchedPromptId.current = true;
@@ -160,6 +224,7 @@ function CreateVideo() {
                             handleNext={handleNext}
                             handleBack={handleBack}
                             handleReset={handleReset}
+                            onFinish={handleFinish}
                         />
                     </div>
                 </div>
@@ -173,6 +238,7 @@ function CreateVideo() {
                         {activeStep === 1 && selectedLiterature && (
                             <div className="create-video-script-container">
                                 <ScriptAutoGenerate
+                                    promptId={scriptPromptId}
                                     literatureContent={selectedLiterature.content}
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}
@@ -180,27 +246,34 @@ function CreateVideo() {
                             </div>
                         )}
                         {activeStep === 2 && (
+                            <div className="create-video-image-container">
+                                <ImagePrompt
+                                    promptId={imagePromptId}
+                                    scriptSegments={scriptSegments}
+                                    handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                />
+                            </div>
+                        )}
+                        {activeStep === 3 && (
                             <div className="create-video-voice-container">
                                 <GenerateVoice
+                                    promptId={voicePromptId}
                                     scriptSegments={scriptSegments}
                                     scriptTitle={scriptTitle}
                                     onComplete={handleVoiceComplete}
                                 />
                             </div>
                         )}
-                        {activeStep === 3 && (
-                            <div className="create-video-image-container">
-                                <ImagePrompt
-                                    promptId={promptId}
-                                    scriptSegments={scriptSegments}
-                                    handleCheckedImagesListComplete={handleCheckedImagesListComplete}
-                                />
-                            </div>
-                        )}
                     </PromptBody>
                 </div>
             </div>
-            <ImportantAlert isFinishedVideo={false} promptId={promptId} />
+            <ImportantAlert
+                isFinishedVideo={isFinishedVideo}
+                promptId={promptId}
+                scriptPromptId={scriptPromptId}
+                voicePromptId={voicePromptId}
+                imagePromptId={imagePromptId}
+            />
         </>
     );
 }

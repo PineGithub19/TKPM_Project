@@ -1,12 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-interface ILiteratureWork extends Document {
-    title: string;
-    author: string;
-    genre: string;
-    summary: string;
-    content: string;
-}
+import mongoose, { Schema } from 'mongoose';
+import { ILiteratureWork } from '../types/modelTypes';
 
 const LiteratureWorkSchema = new Schema<ILiteratureWork>(
     {
@@ -14,7 +7,7 @@ const LiteratureWorkSchema = new Schema<ILiteratureWork>(
         author: { type: String, required: true },
         genre: { type: String, required: true },
         summary: { type: String, required: true },
-        content: { type: String, required: true },
+        content: { type: [String], required: true },
     },
     {
         timestamps: true,

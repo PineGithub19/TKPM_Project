@@ -23,16 +23,13 @@ interface ScriptConfig {
 }
 
 interface ScriptAutoGenerateProps {
+    promptId: string;
     literatureContent?: string;
     literatureTitle?: string;
     onComplete?: (segments: string[], title: string) => void;
 }
 
-const ScriptAutoGenerate = ({
-    literatureContent,
-    literatureTitle,
-    onComplete
-}: ScriptAutoGenerateProps) => {
+const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onComplete }: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [script, setScript] = useState<string>('');
@@ -93,12 +90,12 @@ const ScriptAutoGenerate = ({
         if (literatureContent && literatureTitle) {
             setScriptContent({
                 content: literatureContent,
-                title: literatureTitle
+                title: literatureTitle,
             });
             setScriptTitle(literatureTitle);
             return;
         }
-        
+
         // Otherwise use location state (standalone mode)
         const { content, title } = location.state || {};
 
@@ -144,7 +141,7 @@ const ScriptAutoGenerate = ({
                 // Reset segmented script when generating a new script
                 setScriptSegments([]);
                 setShowSegments(false);
-                
+
                 // Automatically generate segments after script generation
                 if (response.script) {
                     generateSegments(response.script);
@@ -162,10 +159,11 @@ const ScriptAutoGenerate = ({
 
     const generateSegments = async (scriptText: string) => {
         setSegmentLoading(true);
-        
+
         try {
             const response = (await request.post('/script_generate/split', {
-                script: scriptText
+                promptId: promptId,
+                script: scriptText,
             })) as ScriptSegmentsResponse | null;
 
             if (response !== null && response.success) {
@@ -200,7 +198,7 @@ const ScriptAutoGenerate = ({
                 // Reset segmented script when editing script
                 setScriptSegments([]);
                 setShowSegments(false);
-                
+
                 // Automatically generate segments after script edit
                 if (response.script) {
                     generateSegments(response.script);
@@ -234,7 +232,8 @@ const ScriptAutoGenerate = ({
         try {
             const textToSplit = editedScript || script;
             const response = (await request.post('/script_generate/split', {
-                script: textToSplit
+                promptId: promptId,
+                script: textToSplit,
             })) as ScriptSegmentsResponse | null;
 
             if (response !== null && response.success) {
@@ -266,25 +265,30 @@ const ScriptAutoGenerate = ({
             // If no segments are available but we have a script, automatically generate segments
             if (scriptSegments.length === 0 && (script || editedScript)) {
                 const textToSplit = editedScript || script;
-                
+
                 setSegmentLoading(true);
-                
-                request.post('/script_generate/split', {
-                    script: textToSplit
-                }).then((response: ScriptSegmentsResponse | null) => {
-                    if (response !== null && response.success) {
-                        // Call onComplete with the generated segments
-                        onComplete(response.segments, scriptTitle);
-                    } else {
-                        // If splitting fails, create a single segment from the full script
+
+                request
+                    .post('/script_generate/split', {
+                        promptId: promptId,
+                        script: textToSplit,
+                    })
+                    .then((response: ScriptSegmentsResponse | null) => {
+                        if (response !== null && response.success) {
+                            // Call onComplete with the generated segments
+                            onComplete(response.segments, scriptTitle);
+                        } else {
+                            // If splitting fails, create a single segment from the full script
+                            onComplete([textToSplit], scriptTitle);
+                        }
+                    })
+                    .catch(() => {
+                        // If error occurs, use full script as a single segment
                         onComplete([textToSplit], scriptTitle);
-                    }
-                }).catch(() => {
-                    // If error occurs, use full script as a single segment
-                    onComplete([textToSplit], scriptTitle);
-                }).finally(() => {
-                    setSegmentLoading(false);
-                });
+                    })
+                    .finally(() => {
+                        setSegmentLoading(false);
+                    });
             } else {
                 // Use already generated segments
                 onComplete(scriptSegments, scriptTitle);
@@ -301,8 +305,8 @@ const ScriptAutoGenerate = ({
                 <div className={clsx(styles.inputGroup)}>
                     <div className={clsx(styles.formGroup)}>
                         <label className={clsx(styles.formLabel)}>Thể loại:</label>
-                        <select 
-                            className={clsx(styles.formSelect)} 
+                        <select
+                            className={clsx(styles.formSelect)}
                             value={scriptConfig.genre}
                             onChange={(e) => handleConfigChange('genre', e.target.value)}
                         >
@@ -313,11 +317,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-    
+
                     <div className={clsx(styles.formGroup)}>
                         <label className={clsx(styles.formLabel)}>Đối tượng:</label>
-                        <select 
-                            className={clsx(styles.formSelect)} 
+                        <select
+                            className={clsx(styles.formSelect)}
                             value={scriptConfig.audience}
                             onChange={(e) => handleConfigChange('audience', e.target.value)}
                         >
@@ -328,11 +332,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-    
+
                     <div className={clsx(styles.formGroup)}>
                         <label className={clsx(styles.formLabel)}>Giọng điệu:</label>
-                        <select 
-                            className={clsx(styles.formSelect)} 
+                        <select
+                            className={clsx(styles.formSelect)}
                             value={scriptConfig.tone}
                             onChange={(e) => handleConfigChange('tone', e.target.value)}
                         >
@@ -343,11 +347,11 @@ const ScriptAutoGenerate = ({
                             ))}
                         </select>
                     </div>
-    
+
                     <div className={clsx(styles.formGroup)}>
                         <label className={clsx(styles.formLabel)}>Độ dài:</label>
-                        <select 
-                            className={clsx(styles.formSelect)} 
+                        <select
+                            className={clsx(styles.formSelect)}
                             value={scriptConfig.duration}
                             onChange={(e) => handleConfigChange('duration', e.target.value)}
                         >
@@ -359,10 +363,10 @@ const ScriptAutoGenerate = ({
                         </select>
                     </div>
                 </div>
-    
+
                 <div className={clsx(styles.buttonGrid)}>
-                    <button 
-                        className={clsx(styles.primaryButton)} 
+                    <button
+                        className={clsx(styles.primaryButton)}
                         onClick={handleGenerateWithConfig}
                         disabled={loading}
                     >
@@ -377,10 +381,7 @@ const ScriptAutoGenerate = ({
         <div className={clsx(styles.card, styles.mb4)}>
             <div className={clsx(styles.cardHeader, styles.segmentHeader)}>
                 <h5 className={clsx(styles.cardTitle)}>Các phân đoạn kịch bản</h5>
-                <button 
-                    className={clsx(styles.backBtn)}
-                    onClick={() => setShowSegments(false)}
-                >
+                <button className={clsx(styles.backBtn)} onClick={() => setShowSegments(false)}>
                     Quay lại kịch bản đầy đủ
                 </button>
             </div>
@@ -392,7 +393,7 @@ const ScriptAutoGenerate = ({
                     <div key={index} className={clsx(styles.card, styles.mb3)}>
                         <div className={clsx(styles.segmentCardHeader)}>
                             <h6 className={clsx(styles.cardSegmentTitle)}>Phân đoạn #{index + 1}</h6>
-                            <button 
+                            <button
                                 className={clsx(styles.primaryButton, styles.btnSm, styles.copyBtn)}
                                 onClick={() => handleCopySegment(segment, index)}
                             >
@@ -415,7 +416,11 @@ const ScriptAutoGenerate = ({
                 {onComplete ? (
                     <div className={clsx(styles.actionButtonContainer)}>
                         {(script || editedScript) && (
-                            <button className={clsx(styles.primaryButton)} onClick={handleContinue} disabled={segmentLoading}>
+                            <button
+                                className={clsx(styles.primaryButton)}
+                                onClick={handleContinue}
+                                disabled={segmentLoading}
+                            >
                                 {segmentLoading ? 'Đang xử lý...' : 'Tiếp tục'}
                             </button>
                         )}
@@ -444,11 +449,7 @@ const ScriptAutoGenerate = ({
                 </div>
             )}
 
-            {error && (
-                <div className={clsx(styles.errorAlert)}>
-                    {error}
-                </div>
-            )}
+            {error && <div className={clsx(styles.errorAlert)}>{error}</div>}
 
             {/* Hiển thị form cấu hình hoặc kịch bản */}
             {!loading && !error && configMode && renderConfigForm()}
@@ -459,18 +460,15 @@ const ScriptAutoGenerate = ({
                         <button className={clsx(styles.secondaryButton)} onClick={() => setConfigMode(true)}>
                             Thay đổi cấu hình
                         </button>
-                        <button 
-                            className={clsx(styles.successButton)} 
+                        <button
+                            className={clsx(styles.successButton)}
                             onClick={handleSplitScript}
                             disabled={!script && !editedScript}
                         >
                             Tách thành phân đoạn
                         </button>
                         {scriptSegments.length > 0 && (
-                            <button 
-                                className={clsx(styles.infoButton)} 
-                                onClick={() => setShowSegments(true)}
-                            >
+                            <button className={clsx(styles.infoButton)} onClick={() => setShowSegments(true)}>
                                 Xem phân đoạn ({scriptSegments.length})
                             </button>
                         )}
@@ -482,7 +480,9 @@ const ScriptAutoGenerate = ({
                         <div className={clsx(styles.editSection)}>
                             <h4>Chỉnh sửa kịch bản</h4>
                             <div className={clsx(styles.formGroup)}>
-                                <label htmlFor="editInstructions" className={clsx(styles.formLabel)}>Hướng dẫn chỉnh sửa:</label>
+                                <label htmlFor="editInstructions" className={clsx(styles.formLabel)}>
+                                    Hướng dẫn chỉnh sửa:
+                                </label>
                                 <textarea
                                     id="editInstructions"
                                     className={clsx(styles.formControl)}
@@ -504,8 +504,6 @@ const ScriptAutoGenerate = ({
                             <pre className={clsx(styles.preWrap)}>{editedScript || script}</pre>
                         </div>
                     </div>
-
-
                 </>
             )}
 

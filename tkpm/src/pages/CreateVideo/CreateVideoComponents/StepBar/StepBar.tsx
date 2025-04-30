@@ -6,8 +6,13 @@ import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import StepConnector from '@mui/material/StepConnector';
+// import StepConnector from '@mui/material/StepConnector';
 
+interface ImagesListComplete {
+    images: string[];
+    localImages: string[];
+    segment: string;
+}
 
 function StepBar({
     steps,
@@ -15,29 +20,40 @@ function StepBar({
     handleNext,
     handleBack,
     handleReset,
+    onFinish,
 }: {
     steps: { label: string; description: string }[];
     activeStep: number;
     handleNext: () => void;
     handleBack: () => void;
     handleReset: () => void;
+    scriptSegments?: string[];
+    checkedImagesList?: ImagesListComplete[];
+    voices_list?: string[];
+    onFinish?: () => Promise<void>;
 }) {
+    const handleFinish = async () => {
+        if (onFinish) {
+            await onFinish();
+        }
+    };
+
     return (
         <Box
-        sx={{
-            bgcolor: '#2C3E50',
-            borderRadius: 3,
-            p: 4,
-            boxShadow: ' 0 4px 20px rgba(0, 0, 0, 0.2)',
-            color: '#f5f5f5',
-            transition: 'box-shadow 0.3s ease, border 0.3s ease',
-            boxSizing: 'border-box',
-            border: '2px solid transparent',
-            '&:hover': {
-                boxShadow: 8,
-                border: '2px solid #ffffff',
-            },
-        }}
+            sx={{
+                bgcolor: '#2C3E50',
+                borderRadius: 3,
+                p: 4,
+                boxShadow: ' 0 4px 20px rgba(0, 0, 0, 0.2)',
+                color: '#f5f5f5',
+                transition: 'box-shadow 0.3s ease, border 0.3s ease',
+                boxSizing: 'border-box',
+                border: '2px solid transparent',
+                '&:hover': {
+                    boxShadow: 8,
+                    border: '2px solid #ffffff',
+                },
+            }}
         >
             <Stepper
                 activeStep={activeStep}
@@ -51,7 +67,7 @@ function StepBar({
                         },
                         '&.Mui-completed': {
                             color: '#1ABC9C',
-                        }
+                        },
                     },
                     '.MuiStepContent-root': {
                         marginLeft: '20px',
@@ -84,7 +100,7 @@ function StepBar({
                             <Box sx={{ mb: 3 }}>
                                 <Button
                                     variant="contained"
-                                    onClick={handleNext}
+                                    onClick={index === steps.length - 1 ? handleFinish : handleNext}
                                     sx={{
                                         mt: 1,
                                         mr: 1,
@@ -110,7 +126,7 @@ function StepBar({
                                         fontSize: '1.2rem',
                                         padding: '15px 30px',
                                         textTransform: 'none',
-                                        display: activeStep === 0 ? 'none' : 'inline-block', 
+                                        display: activeStep === 0 ? 'none' : 'inline-block',
                                         '&:hover': {
                                             backgroundColor: '#4D5B63',
                                             borderColor: '#4D5B63',
@@ -136,7 +152,23 @@ function StepBar({
                         color: '#BDC3C7',
                     }}
                 >
-                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>🎉 All steps completed - you’re finished!</Typography>
+                    <Typography sx={{ mb: 1, fontSize: '1.5rem' }}>
+                        🎉 All steps completed - you're finished!
+                    </Typography>
+                    <Button
+                        onClick={handleFinish}
+                        sx={{
+                            textTransform: 'none',
+                            backgroundColor: '#E74C3C',
+                            color: '#fff',
+                            fontSize: '1.2rem',
+                            padding: '15px 30px',
+                            marginRight: '15px',
+                            '&:hover': { backgroundColor: '#C0392B' },
+                        }}
+                    >
+                        Proceed to Edit Video
+                    </Button>
                     <Button
                         onClick={handleReset}
                         sx={{

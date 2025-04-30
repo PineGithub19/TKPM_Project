@@ -1,0 +1,14 @@
+.completedStatusBackground {
+    background: linear-gradient(to top right, #00d600 2%, #5cff5c 32%, #c2ffc2 100%);
+}
+
+.incompletedStatusBackground {
+    background: linear-gradient(to top right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
+}
+
+.imageContainer {
+    padding: 24px 36px;
+    border-radius: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
