@@ -22,21 +22,25 @@ export const getYoutubeAuthUrl = () => {
 };
 
 
-export const uploadVideoToYoutube = async (oauth2Client: any, videoPath: string) => {
+export const uploadVideoToYoutube = async (
+    oauth2Client: any,
+    videoPath: string,
+    title: string,
+    description: string
+) => {
     const youtube = google.youtube({ version: "v3", auth: oauth2Client });
 
     const filePath = path.resolve(videoPath);
-    const fileSize = fs.statSync(filePath).size;
 
     const res = await youtube.videos.insert({
         part: ["snippet", "status"],
         requestBody: {
             snippet: {
-                title: "Video demo upload",
-                description: "This is a demo video uploaded from app",
+                title: title || "Default Title",
+                description: description || "Default Description",
             },
             status: {
-                privacyStatus: "public", // or "private" / "unlisted"
+                privacyStatus: "public",
             },
         },
         media: {
