@@ -6,12 +6,12 @@
     height: 100vh;
     padding: 0px 40px 40px 40px;
     font-family: 'Alata', sans-serif;
-
-    overflow: hidden;
-
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: row;
     width: 100%;
+    transition: background-color 0.5s ease-in-out, width 0.5s, height 0.5s;
 }
 
 .left,
@@ -23,6 +23,7 @@
     box-sizing: border-box;
     overflow: hidden;
     color: white;
+    overflow-x: hidden;
 }
 
 .title {

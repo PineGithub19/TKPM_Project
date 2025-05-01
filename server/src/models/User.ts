@@ -5,7 +5,7 @@ const UserScheme: Schema = new Schema<IUser>(
     {
         username: { type: String, required: true },
         email: { type: String, required: true },
-        password_hash: { type: String, required: true },
+        password_hash: { type: String, required: false },
         role: { type: String, required: true },
     },
     {

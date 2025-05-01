@@ -22,6 +22,7 @@
   transform: scale(1.03);
   filter: brightness(1.1);
   border: 1px solid white;
+  cursor: pointer;
 }
 
 .emoji {
@@ -36,6 +37,7 @@
   color: #cde8ff;
   text-shadow: 4px 4px 4px rgb(0, 0, 0);
   margin-bottom: 0.4rem;
+  user-select: none;
 }
 
 .time {
@@ -45,6 +47,7 @@
   font-size: 1.25rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0);
   color: #b2b2b2;
+  user-select: none;
 }
 
 .author {
@@ -55,4 +58,5 @@
   text-shadow: 3px 3px 4px rgba(0, 0, 0);
   color: #b2b2b2;
   font-style: italic;
+  user-select: none;
 }

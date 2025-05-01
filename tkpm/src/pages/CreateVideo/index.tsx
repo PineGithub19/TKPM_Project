@@ -4,6 +4,7 @@ import { BlockerFunction, useBlocker, Blocker, useNavigate } from 'react-router-
 import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
+import Moon from './CreateVideoComponents/Moon/Moon';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
 import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
@@ -31,6 +32,19 @@ const steps = [
         description: 'Generate voice narrations for each segment of your script.',
     },
 ];
+
+const backgrounds = [
+    'linear-gradient(to top right, #2a2a72, #009ffd)',
+    'linear-gradient(to top right, #4b6cb7, #182848)',
+    'linear-gradient(to top right, #0d1b2a, #1b263b)',
+    'linear-gradient(to top right, #232526, #414345)',
+];
+
+// interface ImagesListComplete {
+//     images: string[];
+//     localImages: string[];
+//     segment: string;
+// }
 
 function ImportantAlert({
     isFinishedVideo,
@@ -184,7 +198,8 @@ function CreateVideo() {
 
     return (
         <>
-            <div className={clsx(styles.container)}>
+            <div className={clsx(styles.container, 'mb-4')} style={{ background: backgrounds[activeStep] }}>
+                <Moon />
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
                     <div className={clsx(styles.otherThing)}>

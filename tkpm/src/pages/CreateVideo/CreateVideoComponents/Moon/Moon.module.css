@@ -1,0 +1,12 @@
+.moon {
+    position: absolute;
+    top: 1%;
+    left: -60px;
+    width: 200px;
+    height: 200px;
+    background-color: rgba(255, 255, 255, 0.8); /* Tăng độ sáng */
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.6); /* Tăng độ sáng của bóng đổ */
+    mask-image: radial-gradient(circle at 70% 50%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 1) 100%); /* Khuyết ngược lại (bên phải) */
+  }
+  

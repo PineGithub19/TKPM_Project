@@ -1,15 +1,15 @@
 import clsx from 'clsx';
 import styles from './Header.module.css';
 import { useEffect, useState } from 'react';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 interface UserI {
     username: string;
     role: string;
-};
+}
 
 function Header() {
-    const [user, setUser] = useState<{ username: string; role: string } | null>(null);
+    const [user, setUser] = useState<UserI | null>(null);
 
     useEffect(() => {
         const token = document.cookie
@@ -20,7 +20,10 @@ function Header() {
         if (token) {
             try {
                 const decoded: UserI = jwtDecode(token);
-                setUser({ username: decoded.username || 'Guest Token', role: decoded.role || 'User Token' });
+                setUser({
+                    username: decoded.username || 'Guest',
+                    role: decoded.role || 'User',
+                });
             } catch (error) {
                 console.error("Invalid token:", error);
             }
@@ -33,6 +36,7 @@ function Header() {
                 <img
                     src="https://www.marktechpost.com/wp-content/uploads/2023/05/7309681-scaled.jpg"
                     className={clsx(styles.image)}
+                    alt="Avatar"
                 />
                 <div className={clsx('d-flex', 'flex-column', 'ms-2')}>
                     <h6>{user ? user.username : "Guest"}</h6>
