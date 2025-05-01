@@ -681,7 +681,7 @@ const EditVideo: React.FC = () => {
                 <div className={styles.rightTimeline}></div>
             </div>
 
-            <div className={clsx(styles.editVideoList, 'mb-4')}>
+            <div className={clsx(styles.editVideoList)}>
                 <div className={styles.leftSide}>
                     <div className={styles.functionIcon}>
                         {Object.keys(iconsState).map((iconKey) => {

@@ -184,7 +184,7 @@ function CreateVideo() {
 
     return (
         <>
-            <div className={clsx(styles.container, 'mb-4')}>
+            <div className={clsx(styles.container)}>
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
                     <div className={clsx(styles.otherThing)}>

@@ -88,8 +88,8 @@ function DashBoard() {
                     isOverlay={isLoading}
                 />
             )}
-            <div className={clsx('container', styles.dashboardContainer)}>
-                <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>
+            <div className={clsx('container', 'd-flex', 'flex-column')}>
+                <h2 className={clsx('text-light', 'pt-4', 'pb-4')}>Create your video in minutes</h2>
                 <div className={clsx('d-flex')}>
                     <div
                         className={clsx(styles.videoContainer, 'd-flex', 'flex-column', 'justify-content-center')}
@@ -104,7 +104,9 @@ function DashBoard() {
                         ))}
                 </div>
                 <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>
-                <DataChart />
+                <div className={clsx('d-flex', 'flex-column')}>
+                    <DataChart />
+                </div>
             </div>
         </div>
     );

@@ -2,18 +2,6 @@
     background: linear-gradient(to top right, #011321 10%, #102632 88%);
 }
 
-.dashboardContainer {
-    min-height: 100vh;
-    max-height: 100vh;
-    overflow-y: scroll;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-}
-
-.dashboardContainer::-webkit-scrollbar {
-    display: none;
-}
-
 .videoContainer,
 .imageContainer {
     width: 240px;
