@@ -86,7 +86,7 @@ function DefaultVideoItem({
         <div onClick={handleClick}>
             <div className={clsx('position-relative')}>
                 {background ? (
-                    <div className={clsx(styles.backgroundContainer, 'ms-4', 'position-relative')}>
+                    <div className={clsx(styles.backgroundContainer, 'position-relative')}>
                         <img src={background} alt="Video Thumbnail" className={clsx(styles.imageConfig)} />
                         <FontAwesomeIcon
                             icon={videoData.is_finished ? faCheck : faClockRotateLeft}

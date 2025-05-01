@@ -94,32 +94,55 @@ function DataChart() {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top' as const,
+                labels: {
+                    font: {
+                        size: 18,
+                    },
+                },
             },
-            title: {
-                display: false,
+        },
+        scales: {
+            x: {
+                ticks: {
+                    font: {
+                        size: 18,
+                    },
+                },
+                title: {
+                    display: true,
+                    text: 'Date',
+                    font: {
+                        size: 18,
+                    },
+                },
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    font: {
+                        size: 18,
+                    },
+                    callback: function (value: string | number) {
+                        return Number.isInteger(value) ? value : null;
+                    },
+                },
+                title: {
+                    display: true,
+                    text: 'Count',
+                    font: {
+                        size: 18,
+                    },
+                },
             },
         },
     };
 
-    useEffect(() => {
-        console.log('Chart Data:', chartData); // Log the chart data for debugging
-    }, [chartData]);
-
-    return (
-        <div
-            style={{
-                backgroundColor: '#fff',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-            }}
-        >
-            <Line data={data} options={options} />
-        </div>
-    );
+    return <Line data={data} options={options} />;
 }
 
 export default DataChart;
