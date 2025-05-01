@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilm } from '@fortawesome/free-solid-svg-icons';
-import { faImage } from '@fortawesome/free-solid-svg-icons';
 import styles from './DashBoard.module.css';
 import LoadingComponent from '../../components/Loading';
 import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
@@ -19,15 +18,39 @@ import {
     Legend,
 } from 'chart.js';
 import dayjs from 'dayjs'; // Cài đặt dayjs để làm việc với ngày tháng
+import DefaultVideoItem from './DefaultVideoItem';
+import * as request from '../../utils/request';
+import DataChart from './DataChart';
 
 // Register chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+interface VideoInformation {
+    videoId: string;
+    scriptId: string;
+    voiceId: string;
+    imageId: string;
+    is_finished: boolean;
+    background: string;
+}
+
+interface VideoConfigData {
+    _id?: string;
+    user_id?: string;
+    literature_work_id: string;
+    script: string;
+    voice_config: string;
+    image_config: string;
+    is_finished: boolean;
+    publish_date: Date;
+}
 
 function DashBoard() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isLoading, setIsLoading] = useState(false);
     const [videoInformation, setVideoInformation] = useState<any[]>([]);
+    const [videoInWeb, setVideoInWeb] = useState<VideoInformation[]>([]);
 
     const handleCreateVideo = async () => {
         try {
@@ -41,7 +64,7 @@ function DashBoard() {
     };
 
     const handleDeleteVideo = (videoId: string) => {
-        setVideoInformation((prevVideos) => prevVideos.filter((video) => video.videoId !== videoId));
+        setVideoInWeb((prevVideos) => prevVideos.filter((video) => video.videoId !== videoId));
     };
 
     useEffect(() => {
@@ -64,17 +87,10 @@ function DashBoard() {
         aggregatedData[date].views += Number(video.views); // Dùng Number() để chuyển thành số
         aggregatedData[date].likes += Number(video.likes); // Dùng Number() để chuyển thành số
         aggregatedData[date].comments += Number(video.comments); // Dùng Number() để chuyển thành số
-
-        // Log ra từng video để kiểm tra dữ liệu
-        console.log(`Video ID: ${video.videoId}, Published At: ${video.publishedAt}`);
-        console.log(`Aggregated Data for ${date}:`, aggregatedData[date]);
     });
 
     // Chuyển sang dạng biểu đồ
     const sortedDates = Object.keys(aggregatedData).sort(); // Sắp xếp ngày theo thứ tự tăng dần
-
-    console.log('Sorted Dates:', sortedDates); // Log các ngày sau khi sắp xếp
-    console.log('Aggregated Data:', aggregatedData); // Log toàn bộ dữ liệu đã được gộp
 
     const chartData = {
         labels: sortedDates, // Các ngày làm trục X
@@ -103,6 +119,37 @@ function DashBoard() {
         ],
     };
 
+    useEffect(() => {
+        const fetchVideoInformation = async () => {
+            try {
+                setIsLoading(true);
+                const response = await request.get('/video/all');
+
+                if (response) {
+                    setVideoInWeb(
+                        response.videos.map((item: VideoConfigData) => ({
+                            videoId: item._id,
+                            scriptId: item.literature_work_id,
+                            voiceId: item.voice_config,
+                            imageId: item.image_config,
+                            is_finished: item.is_finished,
+                        })) || [],
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching video information:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchVideoInformation();
+
+        return () => {
+            setVideoInWeb([]);
+        };
+    }, []);
+
     return (
         <div className={clsx(styles.dashboard)}>
             <FloatingParticles />
@@ -114,7 +161,7 @@ function DashBoard() {
             )}
             <div className={clsx(styles.dashboardContainer)}>
                 <h2 className={clsx('text-light', 'mt-4', 'mb-4')}>Create your video in minutes</h2>
-                <div className={clsx('d-flex')} style={{ margin: '50px 0 0 0' }}>
+                <div className={clsx('d-flex')} style={{ margin: '50px 0 0 0', overflowX: 'hidden' }}>
                     <div
                         className={clsx(styles.videoContainer, 'd-flex', 'flex-column', 'justify-content-center')}
                         onClick={handleCreateVideo}
@@ -122,21 +169,11 @@ function DashBoard() {
                         <FontAwesomeIcon icon={faFilm} className={clsx(styles.icon, 'mb-3')} />
                         <h5>Create new video</h5>
                     </div>
-                </div>
-            </div>
-
-            <div className={clsx(styles.dashboardContainer)}>
-                <div className={clsx('d-flex')}>
-                    <div
-                        className={clsx(
-                            styles.imageGenerateContainer,
-                            'd-flex',
-                            'flex-column',
-                            'justify-content-center',
-                        )}
-                    >
-                        <FontAwesomeIcon icon={faImage} className={clsx(styles.icon, 'mb-3')} />
-                        <h5>Create new image</h5>
+                    <div style={{ overflowX: 'auto' }} className={clsx(styles.videoList)}>
+                        {videoInWeb.length > 0 &&
+                            videoInWeb.map((video) => (
+                                <DefaultVideoItem key={video.videoId} videoData={video} onDelete={handleDeleteVideo} />
+                            ))}
                     </div>
                 </div>
             </div>
@@ -144,6 +181,7 @@ function DashBoard() {
             {/* Biểu đồ */}
             <div className={clsx(styles.chart)}>
                 <h3 className={clsx('text-light', 'mt-4', 'mb-4')}>Video Statistics</h3>
+
                 <div className={clsx(styles.chartContainer)}>
                     <Line
                         data={chartData}
@@ -154,14 +192,14 @@ function DashBoard() {
                                 x: {
                                     ticks: {
                                         font: {
-                                            size: 24,
+                                            size: 18,
                                         },
                                     },
                                     title: {
                                         display: true,
                                         text: 'Time',
                                         font: {
-                                            size: 24,
+                                            size: 18,
                                         },
                                     },
                                 },
@@ -170,7 +208,7 @@ function DashBoard() {
                                     ticks: {
                                         stepSize: 1,
                                         font: {
-                                            size: 24,
+                                            size: 18,
                                         },
                                         callback: function (value) {
                                             return Number.isInteger(value) ? value : null;
@@ -180,7 +218,7 @@ function DashBoard() {
                                         display: true,
                                         text: 'Total Count',
                                         font: {
-                                            size: 24,
+                                            size: 18,
                                         },
                                     },
                                 },
@@ -189,13 +227,16 @@ function DashBoard() {
                                 legend: {
                                     labels: {
                                         font: {
-                                            size: 24,
+                                            size: 18,
                                         },
                                     },
                                 },
                             },
                         }}
                     />
+                </div>
+                <div className={clsx(styles.chartContainer)}>
+                    <DataChart />
                 </div>
             </div>
         </div>

@@ -198,7 +198,7 @@ function CreateVideo() {
 
     return (
         <>
-            <div className={clsx(styles.container, 'mb-4')} style={{ background: backgrounds[activeStep] }}>
+            <div className={clsx(styles.container)} style={{ background: backgrounds[activeStep] }}>
                 <Moon />
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
