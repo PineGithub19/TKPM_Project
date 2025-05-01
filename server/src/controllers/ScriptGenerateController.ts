@@ -28,6 +28,17 @@ interface ScriptConfig {
     duration: string;
 }
 
+interface ScriptSegment {
+    title: string;
+    content: string;
+    image_description: string;
+}
+
+interface ScriptJSON {
+    title: string;
+    segments: ScriptSegment[];
+}
+
 class ScriptGenerateController {
     async generateScript(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
@@ -79,38 +90,40 @@ class ScriptGenerateController {
             });
 
             // Tạo prompt cho việc tạo kịch bản với cấu hình
+
             const prompt = `
-                Create a detailed video script for the literary work: "${title}"
-                
-                Content to analyze:
-                ${content}
-
-                Script Configuration:
-                - Genre/Style: ${scriptConfig.genre}
-                - Target Audience: ${scriptConfig.audience}
-                - Tone: ${scriptConfig.tone}
-                - Video Duration: ${durationText}
-
-                Please provide:
-                1. A compelling video title that appeals to ${scriptConfig.audience} audience
-                2. Video purpose
-                3. Detailed script with:
-                   - Hook (0:00-0:15)
-                   - Introduction (0:15-1:00)
-                   - Main content (adjust based on ${durationText} duration)
-                   - Cultural significance
-                   - Conclusion
-                4. Visual suggestions that match the ${scriptConfig.genre} style
-                5. Audio recommendations that match the ${scriptConfig.tone} tone
-                6. Pacing notes
-                7. Tone guidelines consistent with ${scriptConfig.tone} presentation
-                
-                Make sure the script is appropriate for ${scriptConfig.audience} audience, using a ${scriptConfig.tone} tone, within a ${durationText} runtime, and presented in a ${scriptConfig.genre} style.
-            `;
+            Tạo kịch bản video chi tiết cho tác phẩm văn học: "${title}"
+            
+            Nội dung phân tích:
+            ${content}
+        
+            Cấu hình kịch bản:
+            - Thể loại/Phong cách: ${scriptConfig.genre}
+            - Đối tượng người xem: ${scriptConfig.audience}
+            - Giọng điệu: ${scriptConfig.tone}
+            - Thời lượng video: ${durationText}
+            
+            Yêu cầu đầu ra: Trả về JSON gồm 2 phần:
+            1. "title": Tiêu đề video hấp dẫn phù hợp với đối tượng "${scriptConfig.audience}"
+            2. "segments": Mảng gồm 10-13 phân đoạn. Mỗi phân đoạn là một object có các trường:
+               - "title": Tên phân đoạn ngắn gọn
+               - "content": Lời bình cho phân đoạn (tối đa 50 từ), súc tích và cảm xúc
+               - "image_description": Mô tả cảnh hoặc hình ảnh minh họa sống động và chi tiết, thể hiện rõ nội dung phân đoạn. Mô tả cần mang tính hình ảnh cao, nhấn mạnh vào yếu tố cảm xúc, bối cảnh, ánh sáng, màu sắc, biểu cảm nhân vật, và không khí tổng thể. Phong cách hình ảnh phải phù hợp với thể loại tác phẩm, chủ đề nội dung và thị hiếu của ${scriptConfig.audience}. Hướng đến việc tạo ra những bức ảnh giàu tính nghệ thuật, độc đáo và ấn tượng thị giác.            
+            Yêu cầu:
+            - Tạo ra một kịch bản video hấp dẫn, dễ hiểu và có tính giáo dục cao
+            - Luôn viết về tác phẩm văn học gốc, không viết về các chủ đề khác như phim ảnh, tác giả, chuyển thể,... quá nhiều
+            - Các phân đoạn có nội dung mạch lạc, kết nối thành một câu chuyện rõ ràng
+            - Ngôn ngữ tiếng Việt, dễ hiểu với đối tượng "${scriptConfig.audience}"
+            - Sử dụng giọng điệu "${scriptConfig.tone}" xuyên suốt
+            - Thể hiện được phong cách "${scriptConfig.genre}" và thời lượng "${durationText}"
+            - Tính sáng tạo và chất thơ cao, truyền cảm hứng và hình dung được cảnh tượng
+            
+            CHỈ TRẢ VỀ JSON THUẦN TÚY, KHÔNG CÓ MARKUP, KHÔNG CÓ BACKTICKS, KHÔNG CÓ TIÊU ĐỀ CODE BLOCK.
+        `;
 
             // Gửi prompt và nhận kết quả
             const result = await chatSession.sendMessage(prompt);
-            const script = result.response.text();
+            const script = result.response.text().replace(/```(?:json)?|```/g, '').trim();
 
             res.status(200).json({
                 success: true,
@@ -137,57 +150,62 @@ class ScriptGenerateController {
                 return;
             }
 
-            const chatSession = model.startChat({
-                generationConfig: {
-                    ...generationConfig,
-                    temperature: 0.2, // Lower temperature for more consistent splitting
-                },
-                history: [
-                    {
-                        role: 'user',
-                        parts: [
-                            {
-                                text: 'You are a professional video script segmenter. Your job is to break down scripts into segments that can be used to create images for a video.',
-                            },
-                        ],
-                    },
-                    {
-                        role: 'model',
-                        parts: [
-                            {
-                                text: "I understand my role as a professional video script segmenter. I'll help break down scripts into meaningful segments that can be paired with images to create an effective video narrative.",
-                            },
-                        ],
-                    },
-                ],
-            });
+            // const chatSession = model.startChat({
+            //     generationConfig: {
+            //         ...generationConfig,
+            //         temperature: 0.2, // Lower temperature for more consistent splitting
+            //     },
+            //     history: [
+            //         {
+            //             role: 'user',
+            //             parts: [
+            //                 {
+            //                     text: 'You are a professional video script segmenter. Your job is to break down scripts into segments that can be used to create images for a video.',
+            //                 },
+            //             ],
+            //         },
+            //         {
+            //             role: 'model',
+            //             parts: [
+            //                 {
+            //                     text: "I understand my role as a professional video script segmenter. I'll help break down scripts into meaningful segments that can be paired with images to create an effective video narrative.",
+            //                 },
+            //             ],
+            //         },
+            //     ],
+            // });
 
-            const prompt = `
-                Please analyze the following video script and break it down into 10-15 segments, each representing a key moment or scene that can be visualized with an image.
+            // const prompt = `
+            //     Please analyze the following video script and break it down into 10-15 segments, each representing a key moment or scene that can be visualized with an image.
 
-                Each segment should:
-                1. Be concise (1-3 sentences)
-                2. Describe a visual scene or concept
-                3. Be suitable for generating an image
-                4. When combined with other segments, tell a cohesive story
+            //     Each segment should:
+            //     1. Be concise (1-3 sentences)
+            //     2. Describe a visual scene or concept
+            //     3. Be suitable for generating an image
+            //     4. When combined with other segments, tell a cohesive story
 
-                The segments should follow the narrative flow of the original script. Try to extract the most visual and important scenes that would make compelling images for a video.
+            //     The segments should follow the narrative flow of the original script. Try to extract the most visual and important scenes that would make compelling images for a video.
 
-                Original script:
-                ${script}
+            //     Original script:
+            //     ${script}
 
-                Format your response as a list of segments separated by --- (triple dash), with no numbering or additional formatting. Just pure segments, each representing a scene or image to be created.
-            `;
+            //     Format your response as a list of segments separated by --- (triple dash), with no numbering or additional formatting. Just pure segments, each representing a scene or image to be created.
+            // `;
 
-            const result = await chatSession.sendMessage(prompt);
-            const segmentText = result.response.text();
+            // const result = await chatSession.sendMessage(prompt);
+            // const segmentText = result.response.text();
 
-            // Process the segments
-            const segments = segmentText
-                .split('---')
-                .map((segment) => segment.trim())
-                .filter((segment) => segment.length > 0);
+            // // Process the segments
+            // const segments = segmentText
+            //     .split('---')
+            //     .map((segment) => segment.trim())
+            //     .filter((segment) => segment.length > 0);
 
+
+            const scriptText: ScriptJSON = JSON.parse(script.replace(/```(?:json)?|```/g, '').trim());
+
+            const segments = scriptText.segments.map(seg => seg.content);
+            const imageDescriptions = scriptText.segments.map(seg => seg.image_description);
             // Ensure we have a reasonable number of segments
             let finalSegments = segments;
             if (segments.length < 5) {
@@ -214,6 +232,7 @@ class ScriptGenerateController {
             res.status(200).json({
                 success: true,
                 segments: finalSegments,
+                imageDescriptions: imageDescriptions,
             });
         } catch (error) {
             console.error('Error splitting script:', error);
@@ -255,7 +274,7 @@ class ScriptGenerateController {
                 Edit Instructions:
                 ${editInstructions}
 
-                Please provide the edited version of the script, maintaining its structure but incorporating the requested changes.
+                Please provide the edited version of the script, must keep its structure but incorporating the requested changes.
             `;
 
             const result = await chatSession.sendMessage(prompt);

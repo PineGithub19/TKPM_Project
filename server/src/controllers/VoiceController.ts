@@ -77,8 +77,8 @@ export class VoiceController {
                 // Update database
                 const savePath = `http://localhost:${process.env.PORT}/voices/${filename}`;
                 await DBService.updateDocumentById(VoiceConfig, promptId, {
-                    audio_content: [savePath],
-                });
+                    $push: { audio_content: savePath },
+                } as any);
             } catch (error) {
                 console.error('Lỗi sinh giọng nói:', error);
                 reject(new Error('Không thể sinh giọng nói'));

@@ -1,104 +1,98 @@
-// import React from "react";
-// import { useNavigate } from "react-router-dom";
-
-// const Login: React.FC = () => {
-//     const navigate = useNavigate();
-
-//     return (
-//         <div className="d-flex flex-row align-items-center rounded"
-//             style={{
-//                 backgroundImage: "url('loginbg.png')",
-//                 backgroundSize: "cover",
-//                 backgroundPosition: "center",
-//                 margin: "2rem",
-//                 marginLeft: "0",
-//                 height: "calc(100vh - 4rem)",
-//                 width: "calc(100vw - 2rem)",
-//             }}>
-//             {/* Left Section */}
-//             <div className="col-7 d-flex flex-column align-items-center justify-content-center text-white p-5"
-//                 style={{
-//                     height: "70vh",
-//                 }}>
-//                 <h1 className="display-4 fw-bold">Welcome to ChillUS</h1>
-//                 <p className="fs-5">Your journey starts here.</p>
-//             </div>
-
-//             {/* Right Section (Login Form) */}
-//             <div className="col-3 d-flex flex-column justify-content-center align-items-center p-4 bg-light shadow-lg rounded"
-//                 style={{
-//                     height: "70vh",
-//                 }}>
-//                 <div className="w-100" style={{ maxWidth: "400px", background: "#fff", padding: "30px", borderRadius: "10px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
-//                     <h2 className="text-center text-dark fw-bold">Sign In</h2>
-//                     <p className="text-center text-muted">Please enter your credentials</p>
-
-//                     <div className="mt-4">
-//                         <label htmlFor="email" className="form-label fw-medium">
-//                             Email
-//                         </label>
-//                         <input type="text" id="email" className="form-control" placeholder="Enter your email" />
-
-//                         <label htmlFor="password" className="form-label fw-medium mt-3">
-//                             Password
-//                         </label>
-//                         <input type="password" id="password" className="form-control" placeholder="Enter your password" />
-//                     </div>
-
-//                     <div className="d-flex justify-content-between align-items-center mt-3">
-//                         <a href="/forgot-password" className="text-primary text-decoration-none">
-//                             Forgot password?
-//                         </a>
-//                     </div>
-
-//                     <button className="btn btn-primary w-100 mt-4"  onClick={() => {
-//                         console.log("Navigating to /dashboard...");
-//                         navigate("/dashboard");
-//                     }}>Click to Dashboard</button>
-
-//                     <p className="mt-3 text-center">
-//                         Don't have an account?{" "}
-//                         <a href="/signup" className="text-primary fw-medium text-decoration-none">
-//                             Sign Up
-//                         </a>
-//                     </p>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default Login;
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as request from "../../utils/request"; // Import request API
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [videoInformation, setVideoInformation] = useState<any[]>([]);
 
-    const handleLogin = async () => {
-        try {
-            const response = await request.post("/user/signin", { email, password }); 
-            // const test = await request.get("user/test");
-            // console.log(test);
-
-            if (response.status === "OK") {
-                setError("");
-                navigate("/dashboard");
-            } else {
-                setError("Invalid email or password");
-            }
-        } catch (error) {
-            console.error("Login error:", error);
-            setError("Login failed. Please try again.");
-        }
+    const handleLogin = () => {
+        setError("Chưa hỗ trợ chức năng đăng nhập này");
+        setTimeout(() => setError(""), 10000);
     };
-    
-    
+
+    const handleGoogleLogin = useGoogleLogin({
+        scope: 'https://www.googleapis.com/auth/youtube.readonly',
+        onSuccess: async (tokenResponse) => {
+            try {
+                // Lấy thông tin người dùng từ Google API
+                const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+
+                const { email, name } = res.data;
+
+                // Gửi thông tin người dùng về server để đăng nhập
+                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/google-login`, { email, name }, {
+                    withCredentials: true,
+                });
+
+                if (response.data.status === 'OK') {
+                    // Lấy video từ tài khoản người dùng
+                    const youtubeResponse = await axios.get(
+                        'https://www.googleapis.com/youtube/v3/search',
+                        {
+                            params: {
+                                part: 'snippet',
+                                forMine: true,
+                                type: 'video',
+                                maxResults: 10,
+                            },
+                            headers: {
+                                Authorization: `Bearer ${tokenResponse.access_token}`,
+                            },
+                        }
+                    );
+
+                    const videoItems = youtubeResponse.data.items;
+                    console.log("Received user videos:", videoItems);
+
+                    // Lấy chi tiết video (view/like/comment)
+                    const videoIds = videoItems.map((v: any) => v.id.videoId).join(',');
+
+                    const statsResponse = await axios.get(
+                        'https://www.googleapis.com/youtube/v3/videos',
+                        {
+                            params: {
+                                part: 'snippet,statistics',
+                                id: videoIds,
+                            },
+                            headers: {
+                                Authorization: `Bearer ${tokenResponse.access_token}`,
+                            },
+                        }
+                    );
+
+                    const videoStats = statsResponse.data.items.map((video: any) => ({
+                        title: video.snippet.title,
+                        videoId: video.id,
+                        views: video.statistics.viewCount,
+                        likes: video.statistics.likeCount,
+                        comments: video.statistics.commentCount,
+                        publishedAt: video.snippet.publishedAt,
+                    }));
+
+                    setVideoInformation(videoStats);
+                    console.log("Video stats being sent to dashboard:", videoStats);
+                    navigate('/dashboard', { state: { videoInformation: videoStats } });
+                } else {
+                    setError('Google login failed on server');
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Google login failed');
+            }
+        },
+        onError: () => {
+            setError('Google login failed');
+        },
+    });
 
     return (
         <div className="d-flex flex-row align-items-center rounded"
@@ -118,10 +112,16 @@ const Login: React.FC = () => {
                 <p className="fs-5">Your journey starts here.</p>
             </div>
 
-            {/* Right Section (Login Form) */}
+            {/* Right Section */}
             <div className="col-3 d-flex flex-column justify-content-center align-items-center p-4 bg-light shadow-lg rounded"
                 style={{ height: "70vh" }}>
-                <div className="w-100" style={{ maxWidth: "400px", background: "#fff", padding: "30px", borderRadius: "10px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
+                <div className="w-100" style={{
+                    maxWidth: "400px",
+                    background: "#f0f0f0",
+                    padding: "30px",
+                    borderRadius: "10px",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)"
+                }}>
                     <h2 className="text-center text-dark fw-bold">Sign In</h2>
                     <p className="text-center text-muted">Please enter your credentials</p>
 
@@ -149,6 +149,25 @@ const Login: React.FC = () => {
 
                     <button className="btn btn-primary w-100 mt-4" onClick={handleLogin}>Login</button>
 
+                    {/* Google Sign In */}
+                    <button
+                        className="btn w-100 mt-3"
+                        onClick={() => handleGoogleLogin()}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            backgroundColor: '#fff',
+                            color: '#000',
+                            padding: '12px 0',
+                            borderRadius: '5px',
+                        }}
+                    >
+                        <img src="/iconGoogle.png" alt="Google Icon" style={{ width: '20px' }} />
+                        Sign in with Google
+                    </button>
+
                     <p className="mt-3 text-center">
                         Don't have an account?{" "}
                         <a href="/signup" className="text-primary fw-medium text-decoration-none">Sign Up</a>
@@ -160,4 +179,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-

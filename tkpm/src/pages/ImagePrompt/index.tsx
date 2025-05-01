@@ -1,22 +1,7 @@
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import styles from './ImagePrompt.module.css';
-import * as request from '../../utils/request';
-import LoadingComponent from '../../components/Loading';
-import CustomizedCheckbox from '../../components/CustomizedCheckbox';
-import { Button, Card, Tabs } from 'antd';
-
-interface ImagesSegment {
-    text: string;
-    images: string[];
-    status: string;
-}
-
-// interface ImagesListComplete {
-//     images: string[];
-//     localImages: string[];
-//     segment: string;
-// }
+import { useState } from 'react';
+import { Tabs } from 'antd';
+import ImagesConfiguration, { ImageConfig } from './ImagePromptComponents/ImagesConfiguration';
+import ImagesForVideo from './ImagePromptComponents/ImagesForVideo';
 
 const { TabPane } = Tabs;
 
@@ -31,33 +16,28 @@ function ImagePrompt({
     handleCheckedImagesListComplete?: (images: string[]) => void;
     checkedImagesList: string[];
 }) {
-    const [promptInfo, setPromptInfo] = useState<string>();
-    const [imageData, setImageData] = useState<ImagesSegment[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [selectedImages, setSelectedImages] = useState<
-        {
-            segmentId: number;
-            id: number;
-            path: string;
-        }[]
-    >([]);
-    const [batchProcessing, setBatchProcessing] = useState<boolean>(false);
-    const [customizedGenerationClick, setCustomizedGenerationClick] = useState<boolean>(false);
-    const [currentSegment, setCurrentSegment] = useState<ImagesSegment | null>(null);
     const [activeTab, setActiveTab] = useState<string>('1');
-    const [imageConfig, setImageConfig] = useState({
-        steps: 10,
-        width: 256,
-        height: 256,
-        cfg_scale: 7,
-        seed: -1,
-        sampler_name: 'Euler a',
-        batch_size: 2,
-        model: 'dreamshaper_8.safetensors',
-        fps: 8,
-        video_length: 16,
-        loop_number: 0,
-        latent_power: 1,
+    const [config, setConfig] = useState<{
+        imageConfig: ImageConfig;
+        generationType: 'static' | 'motion';
+        modelAIType: 'gemini' | 'stable_diffusion';
+    }>({
+        imageConfig: {
+            steps: 10,
+            width: 256,
+            height: 256,
+            cfg_scale: 7,
+            seed: -1,
+            sampler_name: 'Euler a',
+            batch_size: 2,
+            model: 'dreamshaper_8.safetensors',
+            fps: 8,
+            video_length: 16,
+            loop_number: 0,
+            latent_power: 1,
+        },
+        generationType: 'static',
+        modelAIType: 'gemini',
     });
 
     const [generationType, setGenerationType] = useState<'static' | 'motion'>('static');
@@ -84,140 +64,17 @@ function ImagePrompt({
         }
     }, [scriptSegments, checkedImagesList]);
 
+
     const handleTabChange = (key: string) => {
         setActiveTab(key);
     };
 
-    const handleGenerateImagesForSegments = async () => {
-        try {
-            setIsLoading(true);
-            setBatchProcessing(true);
-
-            // Set all segments to loading state
-            setImageData((prev) => prev.map((item) => ({ ...item, status: 'loading' })));
-
-            const endpoint =
-                generationType === 'static' ? '/image/text-to-multiple-images' : '/image/text-to-animation';
-
-            // Generate images for all segments
-            for (const segment of scriptSegments) {
-                const response = await request.post(endpoint, {
-                    prompt: segment,
-                    configuration: imageConfig,
-                });
-
-                const base64Images = response.imageList;
-                const imageSources = base64Images.map((base64Image: string) => `data:image/png;base64,${base64Image}`);
-
-                setImageData((prevData) =>
-                    prevData.map((item) =>
-                        item.text === segment
-                            ? {
-                                  ...item,
-                                  images: imageSources,
-                                  status: 'success',
-                              }
-                            : item,
-                    ),
-                );
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            // Set all segments to error state
-            setImageData((prev) => prev.map((item) => ({ ...item, status: 'error' })));
-        } finally {
-            setBatchProcessing(false);
-            setIsLoading(false);
-        }
-    };
-
-    const handleCustomizedGeneration = (dataItem: ImagesSegment) => {
-        setCustomizedGenerationClick(true);
-        setCurrentSegment(dataItem);
-        setPromptInfo(''); // Reset prompt info when starting new customization
-    };
-
-    const handleGenerateWithCustomPrompt = async () => {
-        if (currentSegment) {
-            await generateImagesForSegment(currentSegment, promptInfo);
-        }
-    };
-
-    const generateImagesForSegment = async (dataItem: ImagesSegment, additionalPrompt?: string): Promise<void> => {
-        const segment = dataItem.text;
-
-        try {
-            setIsLoading(true);
-
-            setImageData((prevImageData) =>
-                prevImageData.map((item) => (item.text === segment ? { ...item, status: 'loading' } : item)),
-            );
-
-            const enhancedPrompt = additionalPrompt
-                ? `${segment}, ${additionalPrompt}, (high quality:1.4), (detailed:1.2), (sharp focus:1.1), 4k, masterpiece`
-                : `${segment}, (high quality:1.4), (detailed:1.2), (sharp focus:1.1), 4k, masterpiece`;
-
-            const endpoint =
-                generationType === 'static' ? '/image/text-to-multiple-images' : '/image/text-to-animation';
-            const response = await request.post(endpoint, {
-                prompt: enhancedPrompt,
-                configuration: imageConfig,
-            });
-
-            const base64Images = response.imageList;
-            const imageSources = base64Images.map((base64Image: string) => `data:image/png;base64,${base64Image}`);
-
-            setImageData((prevImageData) =>
-                prevImageData.map((item) =>
-                    item.text === segment
-                        ? {
-                              ...item,
-                              images: [...item.images, ...imageSources],
-                              status: 'success',
-                          }
-                        : item,
-                ),
-            );
-        } catch (error) {
-            setImageData((prevImageData) =>
-                prevImageData.map((item) => (item.text === segment ? { ...item, status: 'error' } : item)),
-            );
-            console.error('Error generating images for segment:', error);
-        } finally {
-            setIsLoading(false);
-            setCustomizedGenerationClick(false);
-        }
-    };
-
-    const handleSelectImage = (imageSegmentIndex: number, imageId: number, limit: number = 1) => {
-        const index = selectedImages.findIndex(
-            (image) => image.segmentId === imageSegmentIndex && image.id === imageId,
-        );
-
-        if (index === -1) {
-            // Count how many images are already selected for this segment
-            const selectedForSegment = selectedImages.filter((img) => img.segmentId === imageSegmentIndex).length;
-
-            // If limit is -1, allow unlimited selections
-            // Otherwise, check if we've reached the limit for this segment
-            if (limit === -1 || selectedForSegment < limit) {
-                setSelectedImages([
-                    ...selectedImages,
-                    { segmentId: imageSegmentIndex, id: imageId, path: imageData[imageSegmentIndex].images[imageId] },
-                ]);
-            }
-        } else {
-            const newSelectedImages = selectedImages.filter(
-                (image) => !(image.segmentId === imageSegmentIndex && image.id === imageId),
-            );
-            setSelectedImages(newSelectedImages);
-        }
-    };
-
-    const handleFinishCustomizedGeneration = () => {
-        setCustomizedGenerationClick(false);
-        setCurrentSegment(null);
-        setPromptInfo('');
+    const handleConfigChange = (newConfig: {
+        imageConfig: ImageConfig;
+        generationType: 'static' | 'motion';
+        modelAIType: 'gemini' | 'stable_diffusion';
+    }) => {
+        setConfig(newConfig);
     };
 
     const handleFinishImagesGeneration = async () => {
@@ -601,10 +458,17 @@ function ImagePrompt({
     return (
         <Tabs activeKey={activeTab} onChange={handleTabChange}>
             <TabPane tab="Images Configuration" key="1">
-                {renderImagesConfiguration()}
+                <ImagesConfiguration onConfigChange={handleConfigChange} />
             </TabPane>
             <TabPane tab="Images Generation" key="2">
-                {renderImagesForVideo()}
+                <ImagesForVideo
+                    scriptSegments={scriptSegments}
+                    promptId={promptId}
+                    handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                    imageConfig={config.imageConfig}
+                    generationType={config.generationType}
+                    modelAIType={config.modelAIType}
+                />
             </TabPane>
         </Tabs>
     );

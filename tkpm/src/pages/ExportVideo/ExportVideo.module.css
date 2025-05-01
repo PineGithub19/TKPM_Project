@@ -7,6 +7,7 @@
     font-family: 'Alata', sans-serif;
     min-height: 100vh;
     overflow-y: auto;
+    position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -45,9 +46,13 @@
 }
 
 .title {
-    font-size: 24px;
-    margin: 0 0 5px 20px;
+    font-size: 30px;
+    margin: 0 0 5px 36px;
     color: white;
+}
+
+.titleBody{
+    font-size: 30px;
 }
 
 .body {
@@ -142,12 +147,21 @@
     display: flex;
     width: 50%;
     color: white;
+    margin-top: 30px;
+    padding-left: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .rightPanel {
     display: flex;
     width: 50%;
     color: white;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .style_buttons {
@@ -273,4 +287,140 @@
 .shareButton:hover {
     background-color: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
+}
+
+.optionsStoreShare {
+    display: flex;
+    gap: 70px;
+}
+
+.iconStoreShare {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.iconStoreShare:hover {
+    transform: scale(1.1);
+}
+.modal {
+    background: rgba(48, 48, 48, 0.9); 
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    opacity: 1;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal h3 {
+    font-size: 32px;
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+.modalInput {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #1e2a3d;
+    color: white;
+    font-size: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.modalInput:focus {
+    border-color: #8A2BE2;
+    outline: none;
+}
+
+.submitButton,
+.cancelButton {
+    background-color: #8A2BE2;
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 30px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.submitButton:hover,
+.cancelButton:hover {
+    background-color: #5f1ab3;
+    transform: scale(1.05);
+}
+
+.submitButton {
+    background-color: #4CAF50;
+}
+
+.cancelButton {
+    background-color: #FF4242;
+}
+
+.submitButton:hover {
+    background-color: #45a049;
+}
+
+.cancelButton:hover {
+    background-color: #e63946;
+}
+
+.modalInput,
+.submitButton,
+.cancelButton {
+    width: 100%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.successMessage {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 10px 10px 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin-top: 0px;
+    font-size: 24px;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 450px;
+}
+
+.successMessage .closeButton {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 40px;
+    margin-bottom: 5px;
+    cursor: pointer;
 }

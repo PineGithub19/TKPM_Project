@@ -4,6 +4,9 @@ import { Form, Input, Select, Button, message, Tabs, Card, Spin, Progress } from
 import { post } from '../../utils/request';
 import styles from './GenerateVoice.module.css';
 import { VoiceRecorder } from '../../components/RecordVoice';
+import clsx from 'clsx';
+import LoadingComponent from '../../components/Loading';
+
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -37,12 +40,16 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     voicesList = [],
     onComplete,
 }) => {
+
     useEffect(() => {
         console.log('Prompt ID:', promptId);
         console.log('Script Segments:', scriptSegments);
         console.log('Script Title:', scriptTitle);
         console.log('voice list: ', voicesList);
     }, [promptId, scriptSegments, scriptTitle, voicesList]);
+
+
+    const [isTranslating, setIsTranslating] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -53,15 +60,32 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     const [batchProcessing, setBatchProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [translatedSegments, setTranslatedSegments] = useState<string[]>([]);
+
     const [recordingMode, setRecordingMode] = useState(false); // State để kiểm soát chế độ ghi âm
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number | null>(null); // Segment đang được chọn để ghi âm
+
 
     useEffect(() => {
         const translateSegments = async () => {
             try {
+                if (currentLanguage === 'vi') {
+                    // Nếu là tiếng Việt, không cần dịch, chỉ set lại voiceSegments
+                    setVoiceSegments(
+                        scriptSegments.map((text: string, index: number) => ({
+                            text,
+                            audioUrl: null,
+                            status: 'idle',
+                            index,
+                        }))
+                    );
+                    return;
+                }
+
+                setIsTranslating(true);
+
                 const response = await post('/script_generate/edit', {
                     originalScript: scriptSegments.join('\n\n'),
-                    editInstructions: 'Translate to Vietnamese',
+                    editInstructions: `Translate to ${currentLanguage}`,
                 });
 
                 if (response.success) {
@@ -87,6 +111,8 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             } catch (error) {
                 console.log(error);
                 message.error('Error translating script segments.');
+            } finally {
+                setIsTranslating(false);
             }
         };
         
@@ -105,7 +131,8 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
         else if (scriptSegments && scriptSegments.length > 0) {
             translateSegments();
         }
-    }, [scriptSegments, voicesList]);
+
+    }, [scriptSegments, voicesList, currentLanguage]);
 
     const onFinish = async (values: VoiceGenerationForm) => {
         try {
@@ -507,6 +534,13 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
 
     return (
         <div className={styles.container}>
+            {isTranslating && (
+                <LoadingComponent
+                    customClassName={clsx('position-absolute', 'top-50', 'start-50')}
+                    description="Đang dịch kịch bản..."
+                    isOverlay={isTranslating}
+                />
+            )}
             <Tabs activeKey={activeTab} onChange={setActiveTab} className="custom-tabs">
                 <TabPane tab="Tạo Đơn Lẻ" key="single" className="custom-tab-pane">
                     {renderSingleVoiceGenerator()}

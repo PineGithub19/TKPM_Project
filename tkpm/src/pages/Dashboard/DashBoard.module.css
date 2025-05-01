@@ -1,22 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
+
 .dashboard {
-    background: linear-gradient(to top right, #011321 10%, #102632 88%);
+    position: relative;
+    background: linear-gradient(to top right, #2a2a72, #009ffd);
+    height: 100vh;
+    padding: 0px 40px 40px 40px;
+    font-family: 'Alata', sans-serif;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    transition: background-color 0.5s ease-in-out, width 0.5s, height 0.5s;
 }
 
 .dashboardContainer {
-    min-height: 100vh;
-    max-height: 100vh;
+    width: 100%;
+    margin: 30px 0 0 30px;
     overflow-y: scroll;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .dashboardContainer::-webkit-scrollbar {
     display: none;
 }
 
-.videoContainer,
-.imageContainer {
+.tag {
+    margin-top: 20px;
+}
+
+.videoContainer {
+    width: 240px;
+    height: 120px;
     background: linear-gradient(to top right, #00c6dd 2%, #13d8ec 32%, #bef3ff 100%);
+    color: #090c14;
+    padding: 24px 36px;
+    border-radius: 16px;
+    text-decoration: none;
+    text-wrap: nowrap;
+    cursor: pointer;
+}
+
+.videoList {
+    display: flex;
+    margin: 0 16px;
+}
+
+.videoList > * {
+    margin-right: 16px;
+}
+
+.videoList::-webkit-scrollbar {
+    display: none;
+}
+
+.icon {
+    font-size: 32px;
+}
+
+.imageGenerateContainer {
+    background: linear-gradient(to right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
     color: #090c14;
     padding: 24px 36px;
     border-radius: 16px;
@@ -24,10 +68,17 @@
     cursor: pointer;
 }
 
-.imageContainer {
-    background: linear-gradient(to top right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
+.chart {
+    display: flex;
+    flex-direction: column;
+    margin-left: 30px;
+    gap: 10px;
 }
 
-.icon {
-    font-size: 32px;
+.chartContainer {
+    background: linear-gradient(to top right, #e3f2fd, #ffffff);
+    padding: 20px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }

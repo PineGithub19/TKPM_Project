@@ -1,4 +1,11 @@
 .bodyContent {
     max-height: 100vh;
-    overflow-y: hidden;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.bodyContent::-webkit-scrollbar {
+    display: none;
 }

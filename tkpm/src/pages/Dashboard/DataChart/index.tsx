@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import * as request from '../../../utils/request';
 import { format } from 'date-fns';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface VideoInformation {
     is_finished: boolean;
@@ -34,11 +46,7 @@ function DataChart() {
                         const date = format(new Date(video.publish_date), 'dd/MM/yyyy');
 
                         if (!grouped[date]) {
-                            grouped[date] = {
-                                date,
-                                completed: 0,
-                                inProgress: 0,
-                            };
+                            grouped[date] = { date, completed: 0, inProgress: 0 };
                         }
 
                         if (video.is_finished) {
@@ -64,23 +72,77 @@ function DataChart() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        console.log('Chart Data:', chartData); // Log the chart data for debugging
-    }, [chartData]);
+    const data = {
+        labels: chartData.map((entry) => entry.date),
+        datasets: [
+            {
+                label: 'Completed',
+                data: chartData.map((entry) => entry.completed),
+                borderColor: '#8884d8',
+                backgroundColor: 'rgba(136, 132, 216, 0.2)',
+                fill: false,
+            },
+            {
+                label: 'In Progress',
+                data: chartData.map((entry) => entry.inProgress),
+                borderColor: '#82ca9d',
+                backgroundColor: 'rgba(130, 202, 157, 0.2)',
+                fill: false,
+            },
+        ],
+    };
 
-    return (
-        <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="completed" stroke="#8884d8" name="Completed" />
-                <Line type="monotone" dataKey="inProgress" stroke="#82ca9d" name="In Progress" />
-            </LineChart>
-        </ResponsiveContainer>
-    );
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top' as const,
+                labels: {
+                    font: {
+                        size: 18,
+                    },
+                },
+            },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    font: {
+                        size: 18,
+                    },
+                },
+                title: {
+                    display: true,
+                    text: 'Date',
+                    font: {
+                        size: 18,
+                    },
+                },
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    font: {
+                        size: 18,
+                    },
+                    callback: function (value: string | number) {
+                        return Number.isInteger(value) ? value : null;
+                    },
+                },
+                title: {
+                    display: true,
+                    text: 'Count',
+                    font: {
+                        size: 18,
+                    },
+                },
+            },
+        },
+    };
+
+    return <Line data={data} options={options} />;
 }
 
 export default DataChart;

@@ -16,6 +16,8 @@ router.post('/signin', (req, res, next) => {
 // POST - Create a new user
 router.post('/signup', (req, res, next) => userController.createUser(req, res, next));
 
+router.post('/google-login', userController.googleLogin);
+
 //PUT - Reset password
 router.put('/resetpassword/:token', (req, res, next) => userController.resetPassword(req, res, next));
 

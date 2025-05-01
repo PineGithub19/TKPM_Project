@@ -4,6 +4,7 @@ import { BlockerFunction, useBlocker, Blocker, useNavigate, useLocation } from '
 import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
+import Moon from './CreateVideoComponents/Moon/Moon';
 import FloatingParticles from './CreateVideoComponents/FloatingParticles/FloatingParticles';
 import WaitingEntertainment from './CreateVideoComponents/WaitingEntertainment/WaitingEntertainment';
 import PromptBody from './CreateVideoComponents/PromptBody/PromptBody';
@@ -23,13 +24,20 @@ const steps = [
         description: 'Configure and generate a script based on the selected literature.',
     },
     {
-        label: 'Create Images for Video',
+        label: 'Create Images',
         description: 'Generate images for your video based on the script segments.',
     },
     {
         label: 'Create Voice Narration',
         description: 'Generate voice narrations for each segment of your script.',
     },
+];
+
+const backgrounds = [
+    'linear-gradient(to top right, #2a2a72, #009ffd)',
+    'linear-gradient(to top right, #4b6cb7, #182848)',
+    'linear-gradient(to top right, #0d1b2a, #1b263b)',
+    'linear-gradient(to top right, #232526, #414345)',
 ];
 
 // interface ImagesListComplete {
@@ -94,6 +102,8 @@ function ImportantAlert({
             title="Wanna leave this page?"
             text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
+            confirmButtonText="Delete"
+            denyButtonText="Keep it"
             onConfirm={() => handleConfirmAlert(blocker)}
             onDenied={() => {
                 blocker.proceed?.();
@@ -134,6 +144,7 @@ function CreateVideo() {
 
     const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
+    const [imagepromptSegments, setImagePromptSegments] = useState<string[]>([]); // string array of headers
 
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>(state?.checkedImagesList || []);
 
@@ -160,6 +171,7 @@ function CreateVideo() {
             checkedImagesList,
             voicesList,
         });
+
         navigate('/edit-video', {
             state: {
                 scriptSegments,
@@ -175,31 +187,17 @@ function CreateVideo() {
                 imagePromptId,
             },
         });
-        // try {
-        //     await request.put('/information/update', {
-        //         promptId: promptId,
-        //     });
-        //     navigate('/edit-video', {
-        //         state: {
-        //             scriptSegments,
-        //             checkedImagesList,
-        //             voicesList,
-        //         },
-        //     });
-        // } catch (error) {
-        //     console.error('Error during finish:', error);
-        //     setIsFinishedVideo(false); // revert if needed
-        // }
     };
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
         handleNext(); // Move to the next step (ScriptAutoGenerate)
     };
 
-    const handleScriptComplete = (segments: string[], title: string = '') => {
+
+    const handleScriptComplete = (segments: string[], title: string = '', imagepromptSegments: string[]) => {
         setScriptSegments(segments);
-        console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
+        setImagePromptSegments(imagepromptSegments); 
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
@@ -261,13 +259,10 @@ function CreateVideo() {
         });
     }, [promptId, scriptPromptId, voicePromptId, imagePromptId]);
 
-    useEffect(() => {
-        if (checkedImagesList.length > 0) console.log(checkedImagesList);
-    }, [checkedImagesList]);
-
     return (
         <>
-            <div className={clsx(styles.container, 'mb-4')}>
+            <div className={clsx(styles.container)} style={{ background: backgrounds[activeStep] }}>
+                <Moon />
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
                     <div className={clsx(styles.otherThing)}>
@@ -312,7 +307,7 @@ function CreateVideo() {
                             <div className="create-video-image-container">
                                 <ImagePrompt
                                     promptId={imagePromptId}
-                                    scriptSegments={scriptSegments}
+                                    scriptSegments={imagepromptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                                     checkedImagesList={checkedImagesList}
                                 />

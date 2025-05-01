@@ -149,6 +149,61 @@ class UserController {
             next(error);
         }        
     }
+
+    // Trong UserController.ts
+    async googleLogin(req: Request, res: Response) {
+        const { email, name } = req.body;
+
+        try {
+            // Tìm user theo email
+            let user = await DBServices.getDocumentByQuery(UserModel, { email });
+
+            // Nếu user chưa tồn tại, tạo mới
+            if (!user) {
+                user = new UserModel({
+                    username: name,
+                    email,
+                    password_hash: '', // Google đăng nhập không cần mật khẩu
+                    role: 'user',
+                });
+                await user.save();
+            }
+
+            // Tạo JWT token
+            const token = jwt.sign(
+                {
+                    userId: user._id,
+                    username: user.username,
+                    role: user.role,
+                },
+                SECRET_KEY,
+                {
+                    expiresIn: '1h',
+                    algorithm: 'HS256',
+                }
+            );
+
+            // Set cookie chứa token
+            res.cookie('token', token, {
+                httpOnly: false, // Nếu muốn bảo mật hơn thì để true
+                secure: false, // Chỉ dùng HTTPS mới hoạt động nếu true
+                sameSite: 'lax',
+                maxAge: 3600000, // 1 tiếng
+            });
+
+            // Trả về response
+            res.status(200).json({
+                status: 'OK',
+                data: {
+                    email: user.email,
+                    name: user.username, // Trả lại để frontend lưu localStorage nếu muốn
+                },
+            });
+        } catch (error) {
+            console.error('Google login error:', error);
+            res.status(500).json({ status: 'ERROR', message: 'Internal Server Error' });
+        }
+    }
 }
 
 export default UserController;
