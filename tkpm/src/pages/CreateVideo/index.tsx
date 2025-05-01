@@ -24,7 +24,7 @@ const steps = [
         description: 'Configure and generate a script based on the selected literature.',
     },
     {
-        label: 'Create Images for Video',
+        label: 'Create Images',
         description: 'Generate images for your video based on the script segments.',
     },
     {
@@ -102,6 +102,8 @@ function ImportantAlert({
             title="Wanna leave this page?"
             text="Your video has not been created yet. Do you want to keep the progress?."
             icon="question"
+            confirmButtonText="Delete"
+            denyButtonText="Keep it"
             onConfirm={() => handleConfirmAlert(blocker)}
             onDenied={() => {
                 blocker.proceed?.();
@@ -145,6 +147,12 @@ function CreateVideo() {
 
     const handleFinish = async () => {
         setIsFinishedVideo(true); // preemptively allow
+        console.log('Finish video creation:', {
+            scriptSegments,
+            checkedImagesList,
+            voicesList,
+        });
+
         navigate('/edit-video', {
             state: {
                 scriptSegments,
@@ -152,21 +160,6 @@ function CreateVideo() {
                 voicesList,
             },
         });
-        // try {
-        //     await request.put('/information/update', {
-        //         promptId: promptId,
-        //     });
-        //     navigate('/edit-video', {
-        //         state: {
-        //             scriptSegments,
-        //             checkedImagesList,
-        //             voicesList,
-        //         },
-        //     });
-        // } catch (error) {
-        //     console.error('Error during finish:', error);
-        //     setIsFinishedVideo(false); // revert if needed
-        // }
     };
     const handleLiteratureSelected = (content: string, title: string) => {
         setSelectedLiterature({ content, title });
@@ -175,7 +168,6 @@ function CreateVideo() {
 
     const handleScriptComplete = (segments: string[], title: string) => {
         setScriptSegments(segments);
-        console.log('check scripts: ', scriptSegments);
         setScriptTitle(title);
         handleNext(); // Move to the next step (GenerateVoice)
     };
@@ -204,14 +196,10 @@ function CreateVideo() {
         }
     }, []);
 
-    useEffect(() => {
-        if (checkedImagesList.length > 0) console.log(checkedImagesList);
-    }, [checkedImagesList]);
-
     return (
         <>
             <div className={clsx(styles.container, 'mb-4')} style={{ background: backgrounds[activeStep] }}>
-                <Moon/>
+                <Moon />
                 <FloatingParticles />
                 <div className={clsx(styles.left)}>
                     <div className={clsx(styles.otherThing)}>

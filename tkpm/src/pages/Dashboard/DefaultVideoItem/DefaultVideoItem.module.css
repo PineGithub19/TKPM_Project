@@ -6,9 +6,50 @@
     background: linear-gradient(to top right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
 }
 
-.imageContainer {
+.noBackgroundContainer {
+    width: 240px;
+    height: 120px;
     padding: 24px 36px;
     border-radius: 16px;
     text-decoration: none;
     cursor: pointer;
+}
+
+.backgroundContainer {
+    width: 240px;
+    height: 120px;
+    border-radius: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.imageConfig {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.pendingICon,
+.completedIcon {
+    background-color: #fff;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.pendingICon {
+    color: #ff5c5c;
+}
+
+.completedIcon {
+    color: #00d600;
+}
+
+.iconContainer {
+    cursor: pointer;
+}
+
+.iconContainer:hover {
+    color: #d60000;
 }

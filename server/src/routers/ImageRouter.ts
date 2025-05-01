@@ -9,5 +9,6 @@ router.post('/text-to-multiple-images', imageController.handleTextToMultipleImag
 router.post('/text-to-animation', imageController.handleTextToAnimation);
 router.post('/image-to-text', imageController.handleImageToText);
 router.post('/image-storage-batch', imageController.saveImageBatchToLocal);
+router.post('/text-to-multiple-images-gemini', imageController.handleTextToMultipleImagesWithGemini);
 
 export default router;

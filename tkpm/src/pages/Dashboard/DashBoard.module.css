@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
 
-
 .dashboard {
     position: relative;
     background: linear-gradient(to top right, #2a2a72, #009ffd);
@@ -28,12 +27,14 @@
     display: none;
 }
 
-.tag{
+.tag {
     margin-top: 20px;
 }
 
 .videoContainer,
 .imageContainer {
+    width: 240px;
+    height: 120px;
     background: linear-gradient(to top right, #00c6dd 2%, #13d8ec 32%, #bef3ff 100%);
     color: #090c14;
     padding: 24px 36px;
@@ -52,7 +53,7 @@
 
 .imageGenerateContainer,
 .imageContainer {
-    background: linear-gradient(to right, #D60000 2%, #FF5C5C 32%, #FFC2C2 100%);
+    background: linear-gradient(to right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
     color: #090c14;
     padding: 24px 36px;
     border-radius: 16px;
@@ -60,7 +61,33 @@
     cursor: pointer;
 }
 
-.chart{
+.chart {
+    display: flex;
+    flex-direction: column;
+    margin-left: 30px;
+    gap: 10px;
+}
+
+.chartContainer {
+    background: linear-gradient(to top right, #e3f2fd, #ffffff);
+    padding: 20px;
+    border-radius: 16px;
+    height: 40vh;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.imageGenerateContainer,
+.imageContainer {
+    background: linear-gradient(to right, #d60000 2%, #ff5c5c 32%, #ffc2c2 100%);
+    color: #090c14;
+    padding: 24px 36px;
+    border-radius: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.chart {
     display: flex;
     flex-direction: column;
     margin-left: 30px;

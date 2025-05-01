@@ -8,7 +8,16 @@ import styles from './DashBoard.module.css';
 import LoadingComponent from '../../components/Loading';
 import FloatingParticles from '../CreateVideo/CreateVideoComponents/FloatingParticles/FloatingParticles';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
 import dayjs from 'dayjs'; // Cài đặt dayjs để làm việc với ngày tháng
 
 // Register chart.js components
@@ -37,20 +46,20 @@ function DashBoard() {
 
     useEffect(() => {
         if (location.state && location.state.videoInformation) {
-            console.log("Received video information:", location.state.videoInformation);
-            setVideoInformation(location.state.videoInformation);  // Nhận dữ liệu video từ state
+            console.log('Received video information:', location.state.videoInformation);
+            setVideoInformation(location.state.videoInformation); // Nhận dữ liệu video từ state
         }
     }, [location.state]);
 
     // Gộp dữ liệu theo ngày
-    const aggregatedData: Record<string, { views: number, likes: number, comments: number }> = {};
+    const aggregatedData: Record<string, { views: number; likes: number; comments: number }> = {};
 
     videoInformation.forEach((video) => {
         const date = dayjs(video.publishedAt).format('YYYY-MM-DD');
         if (!aggregatedData[date]) {
             aggregatedData[date] = { views: 0, likes: 0, comments: 0 };
         }
-        
+
         // Chuyển các giá trị chuỗi sang kiểu số nguyên
         aggregatedData[date].views += Number(video.views); // Dùng Number() để chuyển thành số
         aggregatedData[date].likes += Number(video.likes); // Dùng Number() để chuyển thành số
@@ -64,29 +73,29 @@ function DashBoard() {
     // Chuyển sang dạng biểu đồ
     const sortedDates = Object.keys(aggregatedData).sort(); // Sắp xếp ngày theo thứ tự tăng dần
 
-    console.log("Sorted Dates:", sortedDates);  // Log các ngày sau khi sắp xếp
-    console.log("Aggregated Data:", aggregatedData);  // Log toàn bộ dữ liệu đã được gộp
+    console.log('Sorted Dates:', sortedDates); // Log các ngày sau khi sắp xếp
+    console.log('Aggregated Data:', aggregatedData); // Log toàn bộ dữ liệu đã được gộp
 
     const chartData = {
         labels: sortedDates, // Các ngày làm trục X
         datasets: [
             {
                 label: 'Views',
-                data: sortedDates.map(date => aggregatedData[date].views), // Tổng views theo từng ngày
+                data: sortedDates.map((date) => aggregatedData[date].views), // Tổng views theo từng ngày
                 borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 fill: true,
             },
             {
                 label: 'Likes',
-                data: sortedDates.map(date => aggregatedData[date].likes), // Tổng likes theo từng ngày
+                data: sortedDates.map((date) => aggregatedData[date].likes), // Tổng likes theo từng ngày
                 borderColor: 'rgba(255, 159, 64, 1)',
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 fill: true,
             },
             {
                 label: 'Comments',
-                data: sortedDates.map(date => aggregatedData[date].comments), // Tổng comments theo từng ngày
+                data: sortedDates.map((date) => aggregatedData[date].comments), // Tổng comments theo từng ngày
                 borderColor: 'rgba(153, 102, 255, 1)',
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                 fill: true,
@@ -119,7 +128,12 @@ function DashBoard() {
             <div className={clsx(styles.dashboardContainer)}>
                 <div className={clsx('d-flex')}>
                     <div
-                        className={clsx(styles.imageGenerateContainer, 'd-flex', 'flex-column', 'justify-content-center')}
+                        className={clsx(
+                            styles.imageGenerateContainer,
+                            'd-flex',
+                            'flex-column',
+                            'justify-content-center',
+                        )}
                     >
                         <FontAwesomeIcon icon={faImage} className={clsx(styles.icon, 'mb-3')} />
                         <h5>Create new image</h5>
@@ -160,7 +174,7 @@ function DashBoard() {
                                         },
                                         callback: function (value) {
                                             return Number.isInteger(value) ? value : null;
-                                        }
+                                        },
                                     },
                                     title: {
                                         display: true,

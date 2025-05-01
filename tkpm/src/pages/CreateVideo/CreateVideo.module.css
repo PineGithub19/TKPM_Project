@@ -14,13 +14,14 @@
     transition: background-color 0.5s ease-in-out, width 0.5s, height 0.5s;
 }
 
-.left, .right {
+.left,
+.right {
     flex: 1;
     padding: 40px 20px 20px 20px;
     position: relative;
     z-index: 1;
     box-sizing: border-box;
-    overflow-y: hidden;
+    overflow: hidden;
     color: white;
     overflow-x: hidden;
 }
@@ -32,7 +33,9 @@
     margin-bottom: 30px;
 }
 
-.contentStyle, .voiceStyle, .voiceGender {
+.contentStyle,
+.voiceStyle,
+.voiceGender {
     font-size: 30px;
     font-weight: 600;
     color: white;
@@ -99,20 +102,20 @@
 }
 
 .activeContent {
-    background-color: #8A2BE2;
-    border-color: #FFFFFF;
+    background-color: #8a2be2;
+    border-color: #ffffff;
     color: white;
 }
 
 .activeVoice {
-    background-color: #FF510C;
-    border-color: #FFFFFF;
+    background-color: #ff510c;
+    border-color: #ffffff;
     color: white;
 }
 
 .activeVoiceGender {
-    background-color: #FF00FF;
-    border-color: #FFFFFF;
+    background-color: #ff00ff;
+    border-color: #ffffff;
     color: white;
 }
 
@@ -159,7 +162,7 @@
     appearance: none;
     width: 20px;
     height: 20px;
-    background: #8A2BE2;
+    background: #8a2be2;
     border-radius: 50%;
     cursor: pointer;
 }
@@ -167,13 +170,13 @@
 .slider::-moz-range-thumb {
     width: 20px;
     height: 20px;
-    background: #8A2BE2;
+    background: #8a2be2;
     border-radius: 50%;
     cursor: pointer;
 }
 
 .previewButton {
-    background-color: #FF1717;
+    background-color: #ff1717;
     color: white;
     border: none;
     border-radius: 50px;
@@ -189,23 +192,23 @@
     display: none;
 }
 
-.left{
+.left {
     flex: 0 0 25%; /* Phần bên trái chiếm 1/4 chiều rộng */
     display: flex;
     flex-direction: column;
-    gap: 100px;
+    gap: 20px;
 }
 .right {
     flex: 0 0 75%; /* Phần bên phải chiếm 3/4 chiều rộng */
 }
 
-.stepBar{
+.stepBar {
     flex: 0 0 70%;
     width: 100%;
     height: auto;
 }
 
-.otherThing{
+.otherThing {
     flex: 0 0 30%;
     width: 100%;
     height: 40%;
