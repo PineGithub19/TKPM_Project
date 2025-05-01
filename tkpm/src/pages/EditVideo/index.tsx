@@ -15,6 +15,12 @@ interface LocationState {
     scriptSegments?: string[];
     checkedImagesList?: string[];
     voicesList?: string[];
+    selectedLiterature?: { content: string; title: string };
+
+    promptId?: string,
+    scriptPromptId?: string,
+    voicePromptId?: string,
+    imagePromptId?: string,
 }
 
 type IconKeys =
@@ -38,12 +44,18 @@ const EditVideo: React.FC = () => {
     const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []);
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>(state?.checkedImagesList || []);
     const [voicesList, setVoicesList] = useState<string[]>(state?.voicesList || []);
+    const [selectedLiterature] = useState<{ content: string; title: string } | null>(state?.selectedLiterature || null);
+
+    const [promptId] = useState<string>(state?.promptId || '');
+    const [scriptPromptId] = useState<string>(state?.scriptPromptId || '');
+    const [voicePromptId] = useState<string>(state?.voicePromptId || '');
+    const [imagePromptId] = useState<string>(state?.imagePromptId || '');
 
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number>(0);
 
     const [selectedIcon, setSelectedIcon] = useState<IconKeys>('iconStyle');
     const [selectedRatio, setSelectedRatio] = useState<string>('16:9');
-
+    
     const introImageRef = useRef<HTMLDivElement | null>(null);
 
     const [height, setHeight] = useState<number>(0);
@@ -81,6 +93,14 @@ const EditVideo: React.FC = () => {
             scriptSegments,
             checkedImagesList,
             voicesList,
+            selectedLiterature,
+
+            //các id của phiên làm việc:
+            promptId,
+            scriptPromptId,
+            voicePromptId,
+            imagePromptId,
+            
         });
     }, [scriptSegments, checkedImagesList, voicesList]);
 
@@ -460,15 +480,35 @@ const EditVideo: React.FC = () => {
         }
     };
 
+    //quay lại create video và vẫn giữ các thông tin cũ:
+    const backToEditPage = () => {
+        const hasFetchedPromptId:boolean = true;
+        navigate('/create-video', {
+            state: {
+                scriptSegments,
+                checkedImagesList,
+                voicesList,
+                hasFetchedPromptId,
+                selectedLiterature,
+
+                //các id của phiên làm việc:
+                promptId,
+                scriptPromptId,
+                voicePromptId,
+                imagePromptId,
+            },
+        });
+    }
+
     return (
         <div className={styles.container}>
             <FloatingParticles />
             <div className={styles.header}>
                 <div className={styles.left}>
-                    {/* <button onClick={() => navigate('/create-video')} className={styles.backButton}>
+                    <button onClick={backToEditPage} className={styles.backButton}>
                         <img src="/arrow_left_black.png" alt="Back" className={styles.arrowIcon} />
                     </button>
-                    <span className={styles.title}>Edit Video</span> */}
+                    <span className={styles.title}>Edit Video</span> 
                 </div>
 
                 <HeaderCategory selectedIcon={selectedIcon} />

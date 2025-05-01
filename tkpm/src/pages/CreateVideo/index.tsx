@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { BlockerFunction, useBlocker, Blocker, useNavigate } from 'react-router-dom';
+import { BlockerFunction, useBlocker, Blocker, useNavigate, useLocation } from 'react-router-dom';
 import SweetAlert from '../../components/SweetAlert';
 import styles from './CreateVideo.module.css';
 import StepBar from './CreateVideoComponents/StepBar/StepBar';
@@ -113,24 +113,42 @@ function ImportantAlert({
     ) : null;
 }
 
+interface LocationState {
+    scriptSegments?: string[];
+    checkedImagesList?: string[];
+    voicesList?: string[];
+    hasFetchedPromptId?: boolean;
+    selectedLiterature?: { content: string; title: string };
+
+    //cho các id của phiên làm việc:
+    promptId?: string,
+    scriptPromptId?: string,
+    voicePromptId?: string,
+    imagePromptId?: string,
+}
+
 function CreateVideo() {
-    const [promptId, setPromptId] = useState<string>('');
-    const [scriptPromptId, setScriptPromptId] = useState<string>('');
-    const [voicePromptId, setVoicePromptId] = useState<string>('');
-    const [imagePromptId, setImagePromptId] = useState<string>('');
+
+    const location = useLocation();
+    const state = location.state as LocationState;
+
+    const [promptId, setPromptId] = useState<string>(state?.promptId || '');
+    const [scriptPromptId, setScriptPromptId] = useState<string>(state?.scriptPromptId || '');
+    const [voicePromptId, setVoicePromptId] = useState<string>(state?.voicePromptId || '');
+    const [imagePromptId, setImagePromptId] = useState<string>(state?.imagePromptId || '');
 
     const [activeStep, setActiveStep] = useState(0);
-    const hasFetchedPromptId = useRef(false);
-    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
+    const hasFetchedPromptId = useRef<boolean>(state?.hasFetchedPromptId || false); // Fixed initialization
+    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(state?.selectedLiterature || null);
     const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
 
-    const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
+    const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
     const [imagepromptSegments, setImagePromptSegments] = useState<string[]>([]); // string array of headers
 
-    const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
+    const [checkedImagesList, setCheckedImagesList] = useState<string[]>(state?.checkedImagesList || []);
 
-    const [voicesList, setVoicesList] = useState<string[]>([]); // string array of voice
+    const [voicesList, setVoicesList] = useState<string[]>(state?.voicesList || []); // string array of voice
 
     const navigate = useNavigate();
 
@@ -148,7 +166,7 @@ function CreateVideo() {
 
     const handleFinish = async () => {
         setIsFinishedVideo(true); // preemptively allow
-        console.log('Finish video creation:', {
+        console.log('Received in CreateVideo before navigate:', {
             scriptSegments,
             checkedImagesList,
             voicesList,
@@ -159,6 +177,14 @@ function CreateVideo() {
                 scriptSegments,
                 checkedImagesList,
                 voicesList,
+                hasFetchedPromptId,
+                selectedLiterature,
+
+                //các id của phiên làm việc:
+                promptId,
+                scriptPromptId,
+                voicePromptId,
+                imagePromptId,
             },
         });
     };
@@ -167,7 +193,8 @@ function CreateVideo() {
         handleNext(); // Move to the next step (ScriptAutoGenerate)
     };
 
-    const handleScriptComplete = (segments: string[], title: string, imagepromptSegments: string[]) => {
+
+    const handleScriptComplete = (segments: string[], title: string = '', imagepromptSegments: string[]) => {
         setScriptSegments(segments);
         setScriptTitle(title);
         setImagePromptSegments(imagepromptSegments); 
@@ -185,18 +212,52 @@ function CreateVideo() {
     };
 
     useEffect(() => {
+        console.log("CHECK hasFetchedPromptId in createVideo: ", hasFetchedPromptId.current);
+
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
-                const response = await request.post('/information/create');
-                setPromptId(response?.promptId || '');
-                setScriptPromptId(response?.scriptPromptId || '');
-                setVoicePromptId(response?.voicePromptId || '');
-                setImagePromptId(response?.imagePromptId || '');
+                try {
+                    const response = await request.post('/information/create');
+                    console.log("API Response:", response); // Log the full response
+
+                    if (response) {
+                        setPromptId(response.promptId || '');
+                        setScriptPromptId(response.scriptPromptId || '');
+                        setVoicePromptId(response.voicePromptId || '');
+                        setImagePromptId(response.imagePromptId || '');
+
+                        // Log after setting state (but remember state updates are asynchronous)
+                        console.log("IDs set from response:", {
+                            promptId: response.promptId,
+                            scriptPromptId: response.scriptPromptId,
+                            voicePromptId: response.voicePromptId,
+                            imagePromptId: response.imagePromptId
+                        });
+                    } else {
+                        console.error("Empty response received from server");
+                    }
+                } catch (error) {
+                    console.error("Error fetching prompt IDs:", error);
+                    // Handle error appropriately (show message to user, etc.)
+                }
             }
             fetchPromptId();
             hasFetchedPromptId.current = true;
         }
-    }, []);
+
+        console.log("CHECK id in CreateVideo: ", {
+            promptId,
+            scriptPromptId,
+            voicePromptId,
+            imagePromptId,
+        })
+
+        console.log('Editvideo -> CreateVideo', {
+            scriptSegments,
+            checkedImagesList,
+            voicesList,
+        });
+    }, [promptId, scriptPromptId, voicePromptId, imagePromptId]);
 
     return (
         <>
@@ -222,7 +283,10 @@ function CreateVideo() {
                     <PromptBody>
                         {activeStep === 0 && (
                             <div className="create-video-literature-container">
-                                <Literature onSelectLiterature={handleLiteratureSelected} />
+                                <Literature
+                                    onSelectLiterature={handleLiteratureSelected}
+                                    selectedLiterature={selectedLiterature}
+                                />
                             </div>
                         )}
                         {activeStep === 1 && selectedLiterature && (
@@ -232,6 +296,10 @@ function CreateVideo() {
                                     literatureContent={selectedLiterature.content}
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}
+                                    scriptSegment={scriptSegments}
+
+                                    selectedLiterature={selectedLiterature}
+
                                 />
                             </div>
                         )}
@@ -241,6 +309,7 @@ function CreateVideo() {
                                     promptId={imagePromptId}
                                     scriptSegments={imagepromptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                    checkedImagesList={checkedImagesList}
                                 />
                             </div>
                         )}
@@ -251,6 +320,7 @@ function CreateVideo() {
                                     scriptSegments={scriptSegments}
                                     scriptTitle={scriptTitle}
                                     onComplete={handleVoiceComplete}
+                                    voicesList={voicesList}
                                 />
                             </div>
                         )}

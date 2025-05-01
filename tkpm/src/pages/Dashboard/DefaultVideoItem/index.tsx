@@ -27,6 +27,7 @@ function DefaultVideoItem({
     const [scriptSegments, setScriptSegments] = useState<string[]>([]);
     const [voicesList, setVoicesList] = useState<string[]>([]);
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
+    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(null);
     const [background, setBackground] = useState<string | undefined>(videoData.background);
 
     useEffect(() => {
@@ -38,6 +39,7 @@ function DefaultVideoItem({
         ]).then((response) => {
             if (!isMounted) return;
             setScriptSegments(response[0].scriptList || []);
+            setSelectedLiterature(response[0].selectedLiterature || null);
             setVoicesList(response[1].voiceList || []);
             setCheckedImagesList(response[2].imageList || []);
             if (!videoData.background && response[2].imageList && response[2].imageList.length > 0) {
@@ -55,6 +57,12 @@ function DefaultVideoItem({
                 scriptSegments: scriptSegments,
                 voicesList: voicesList,
                 checkedImagesList: checkedImagesList,
+                selectedLiterature: selectedLiterature,
+
+                promptId: videoData.videoId,
+                scriptPromptId: videoData.scriptId,
+                voicePromptId: videoData.voiceId,
+                imagePromptId: videoData.imageId,
             },
         });
 

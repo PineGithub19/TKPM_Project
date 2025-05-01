@@ -27,7 +27,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 interface VideoInformation {
     videoId: string;
-    scriptId: string;
+    scriptId: string; 
     voiceId: string;
     imageId: string;
     is_finished: boolean;

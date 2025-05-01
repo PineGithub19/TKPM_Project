@@ -25,9 +25,11 @@ interface ScriptConfig {
 }
 
 interface ScriptAutoGenerateProps {
-    promptId: string;
+    promptId?: string;
     literatureContent?: string;
     literatureTitle?: string;
+    scriptSegment?: string[];
+    selectedLiterature?: { content: string; title: string };
     onComplete?: (segments: string[], title: string, imagepromptSegments: string[]) => void;
 }
 
@@ -42,7 +44,7 @@ interface ScriptJSON {
     segments: ScriptSegment[];
 }
 
-const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onComplete }: ScriptAutoGenerateProps) => {
+const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scriptSegment, selectedLiterature, onComplete }: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [script, setScript] = useState<string>('');
@@ -59,7 +61,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
         tone: 'formal',
         duration: 'standard',
     });
-    const [scriptSegments, setScriptSegments] = useState<string[]>([]);
+    const [scriptSegments, setScriptSegments] = useState<string[]>(scriptSegment? scriptSegment : []);
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
     const [scriptTitle, setScriptTitle] = useState<string>('');
@@ -174,10 +176,13 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
     const generateSegments = async (scriptText: string) => {
         setSegmentLoading(true);
 
+        console.log("CHECK PROMPT_ID before split in generateSegments: ", promptId);
+
         try {
             const response = (await request.post('/script_generate/split', {
                 promptId: promptId,
                 script: scriptText,
+                full_content: selectedLiterature,
             })) as ScriptSegmentsResponse | null;
 
             if (response !== null && response.success) {
@@ -245,11 +250,14 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
         setSegmentLoading(true);
         setError(null);
 
+        console.log("CHECK PROMPT_ID before split - in handleSplitScript: ", promptId);
+
         try {
             const textToSplit = editedScript || script;
             const response = (await request.post('/script_generate/split', {
                 promptId: promptId,
                 script: textToSplit,
+                full_content: selectedLiterature,
             })) as ScriptSegmentsResponse | null;
 
             if (response !== null && response.success) {

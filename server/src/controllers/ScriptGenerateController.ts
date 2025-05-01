@@ -141,7 +141,9 @@ class ScriptGenerateController {
 
     async splitScript(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { promptId, script } = req.body;
+            const { promptId, script, full_content } = req.body;
+
+            console.log("CHECK full_content backend: ", full_content);
 
             if (!script) {
                 res.status(400).json({ message: 'Script content is required' });
@@ -219,6 +221,7 @@ class ScriptGenerateController {
 
             const data = await DBServices.updateDocumentById(ScriptModel, promptId as string, {
                 content: finalSegments,
+                full_content: full_content,
             });
 
             if (!data) {
@@ -306,7 +309,7 @@ class ScriptGenerateController {
                 return;
             }
 
-            res.status(200).json({ scriptList: data.content });
+            res.status(200).json({ scriptList: data.content, selectedLiterature: data.full_content });
         } catch (error) {
             console.error('Error getting script:', error);
             res.status(500).json({ message: 'Error getting script' });

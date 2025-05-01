@@ -5,16 +5,16 @@ import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import ExportVideo from '../pages/ExportVideo';
 import Management from '../pages/Management';
-import Literature from '../pages/Literature';
-import ScriptAutoGenerate from '../pages/ScriptAutoGenerate';
+// import Literature from '../pages/Literature';
+// import ScriptAutoGenerate from '../pages/ScriptAutoGenerate';
 import ImagePrompt from '../pages/ImagePrompt';
 import { OutSideLayout } from '../layouts';
 import Login from '../pages/Login';
 import Signup from '../pages/SignUp';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
-import GenerateVoice from '../pages/GenerateVoice';
-import SRTVoice from '../pages/SRTGenerateVoicePage';
+// import GenerateVoice from '../pages/GenerateVoice';
+// import SRTVoice from '../pages/SRTGenerateVoicePage';
 
 interface Route {
     path: string;
@@ -36,10 +36,10 @@ const publicRoutes: Route[] = [
     { path: '/signup', component: Signup, layout: OutSideLayout, private: true },
     { path: '/forgot-password', component: ForgotPassword, layout: OutSideLayout, private: true },
     { path: '/reset-password', component: ResetPassword, layout: OutSideLayout, private: true },
-    { path: '/literature', component: Literature, layout: OutSideLayout, private: true },
-    { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
-    { path: '/voice', component: GenerateVoice, layout: DefaultLayout, private: true },
-    { path: '/srt-voice', component: SRTVoice, layout: DefaultLayout, private: true},
+    // { path: '/literature', component: Literature, layout: OutSideLayout, private: true },
+    // { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
+    // { path: '/voice', component: GenerateVoice, layout: DefaultLayout, private: true },
+    // { path: '/srt-voice', component: SRTVoice, layout: DefaultLayout, private: true},
 ];
 
 // with authentication
