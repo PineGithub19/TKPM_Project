@@ -45,15 +45,27 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     const [batchProcessing, setBatchProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [translatedSegments, setTranslatedSegments] = useState<string[]>([]);
-
     useEffect(() => {
         const translateSegments = async () => {
             try {
+                if (currentLanguage === 'vi') {
+                    // Nếu là tiếng Việt, không cần dịch, chỉ set lại voiceSegments
+                    setVoiceSegments(
+                        scriptSegments.map((text: string, index: number) => ({
+                            text,
+                            audioUrl: null,
+                            status: 'idle',
+                            index,
+                        }))
+                    );
+                    return;
+                }
+
                 setIsTranslating(true);
 
                 const response = await post('/script_generate/edit', {
                     originalScript: scriptSegments.join('\n\n'),
-                    editInstructions: 'Translate to Vietnamese',
+                    editInstructions: `Translate to ${currentLanguage}`,
                 });
 
                 if (response.success) {
@@ -81,7 +93,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
         if (scriptSegments && scriptSegments.length > 0) {
             translateSegments();
         }
-    }, [scriptSegments]);
+    }, [scriptSegments, currentLanguage]);
 
     const onFinish = async (values: VoiceGenerationForm) => {
         try {

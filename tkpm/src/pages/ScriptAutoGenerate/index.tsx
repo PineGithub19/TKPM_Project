@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 // import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as request from '../../utils/request';
 import styles from './ScriptAutoGenerate.module.css';
 import clsx from 'clsx';
+import ReactMarkdown from 'react-markdown';
 
 interface ScriptResponse {
     success: boolean;
@@ -13,6 +14,7 @@ interface ScriptResponse {
 interface ScriptSegmentsResponse {
     success: boolean;
     segments: string[];
+    imageDescriptions: string[];
 }
 
 interface ScriptConfig {
@@ -26,7 +28,18 @@ interface ScriptAutoGenerateProps {
     promptId: string;
     literatureContent?: string;
     literatureTitle?: string;
-    onComplete?: (segments: string[], title: string) => void;
+    onComplete?: (segments: string[], title: string, imagepromptSegments: string[]) => void;
+}
+
+interface ScriptSegment {
+    title: string;
+    content: string;
+    image_description: string;
+}
+
+interface ScriptJSON {
+    title: string;
+    segments: ScriptSegment[];
 }
 
 const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onComplete }: ScriptAutoGenerateProps) => {
@@ -50,7 +63,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
     const [scriptTitle, setScriptTitle] = useState<string>('');
-
+    const [imagepromptSegments, setImgPromptSegments] = useState<string[]>([]);
     // Danh sách các tùy chọn
     const genreOptions = [
         { value: 'educational', label: 'Giáo dục' },
@@ -140,6 +153,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
                 setScript(response.script);
                 // Reset segmented script when generating a new script
                 setScriptSegments([]);
+                setImgPromptSegments([]);
                 setShowSegments(false);
 
                 // Automatically generate segments after script generation
@@ -168,6 +182,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
 
             if (response !== null && response.success) {
                 setScriptSegments(response.segments);
+                setImgPromptSegments(response.imageDescriptions)
             }
         } catch (err) {
             console.error('Error auto-splitting script:', err);
@@ -197,6 +212,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
                 setEditMode(false);
                 // Reset segmented script when editing script
                 setScriptSegments([]);
+                setImgPromptSegments([]);
                 setShowSegments(false);
 
                 // Automatically generate segments after script edit
@@ -238,6 +254,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
 
             if (response !== null && response.success) {
                 setScriptSegments(response.segments);
+                setImgPromptSegments(response.imageDescriptions);
                 setShowSegments(true);
             } else {
                 setError('Không thể tách kịch bản thành các phân đoạn');
@@ -276,22 +293,22 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
                     .then((response: ScriptSegmentsResponse | null) => {
                         if (response !== null && response.success) {
                             // Call onComplete with the generated segments
-                            onComplete(response.segments, scriptTitle);
+                            onComplete(response.segments, scriptTitle, response.imageDescriptions);
                         } else {
                             // If splitting fails, create a single segment from the full script
-                            onComplete([textToSplit], scriptTitle);
+                            onComplete([textToSplit], scriptTitle, response?.imageDescriptions || imagepromptSegments);
                         }
                     })
                     .catch(() => {
                         // If error occurs, use full script as a single segment
-                        onComplete([textToSplit], scriptTitle);
+                        onComplete([textToSplit], scriptTitle, imagepromptSegments);
                     })
                     .finally(() => {
                         setSegmentLoading(false);
                     });
             } else {
                 // Use already generated segments
-                onComplete(scriptSegments, scriptTitle);
+                onComplete(scriptSegments, scriptTitle, imagepromptSegments);
             }
         }
     };
@@ -409,6 +426,18 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
         </div>
     );
 
+    const markdownFormatter = (text: string) => {
+        const jsonText: ScriptJSON = JSON.parse(text);
+        let md = `# 📖 ${jsonText.title}\n\n---\n`;
+        jsonText.segments.forEach((seg, idx) => {
+          md += `## ${idx + 1}. ${seg.title}\n\n`;
+          md += `${seg.content}\n\n`;
+          md += `> _🖼️ ${seg.image_description}_\n\n`;
+          md += `---\n`;
+        });
+        return md;
+    }
+
     return (
         <div className={clsx(styles.container)}>
             <div className={clsx(styles.header)}>
@@ -501,7 +530,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, onCo
                             <h5 className={clsx(styles.cardTitle)}>Kịch bản đã tạo</h5>
                         </div>
                         <div className={clsx(styles.cardBody)}>
-                            <pre className={clsx(styles.preWrap)}>{editedScript || script}</pre>
+                            <ReactMarkdown>{editedScript ? markdownFormatter(editedScript) : markdownFormatter(script)}</ReactMarkdown>
                         </div>
                     </div>
                 </>

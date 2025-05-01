@@ -126,6 +126,7 @@ function CreateVideo() {
 
     const [scriptSegments, setScriptSegments] = useState<string[]>([]); // string array of headers
     const [scriptTitle, setScriptTitle] = useState<string>('');
+    const [imagepromptSegments, setImagePromptSegments] = useState<string[]>([]); // string array of headers
 
     const [checkedImagesList, setCheckedImagesList] = useState<string[]>([]);
 
@@ -166,9 +167,10 @@ function CreateVideo() {
         handleNext(); // Move to the next step (ScriptAutoGenerate)
     };
 
-    const handleScriptComplete = (segments: string[], title: string) => {
+    const handleScriptComplete = (segments: string[], title: string, imagepromptSegments: string[]) => {
         setScriptSegments(segments);
         setScriptTitle(title);
+        setImagePromptSegments(imagepromptSegments); 
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
@@ -237,7 +239,7 @@ function CreateVideo() {
                             <div className="create-video-image-container">
                                 <ImagePrompt
                                     promptId={imagePromptId}
-                                    scriptSegments={scriptSegments}
+                                    scriptSegments={imagepromptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                                 />
                             </div>

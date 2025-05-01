@@ -101,9 +101,13 @@ class ImageService {
             throw new Error('Prompt is required');
         }
 
+        const basePrompt = "Create a rich, vivid, cinematic visual description for a story. Must NOT include any text. Based on the following:";
+        const fullPrompt = `${basePrompt} ${prompt}`;
+
+
         const response = await imageGoogleAI.models.generateContent({
             model: 'gemini-2.0-flash-exp-image-generation',
-            contents: [{ text: prompt }],
+            contents: [{ text: fullPrompt }],
             config: {
                 responseModalities: [Modality.TEXT, Modality.IMAGE],
             },
