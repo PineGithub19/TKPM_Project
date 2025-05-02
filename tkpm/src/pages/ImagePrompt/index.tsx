@@ -51,11 +51,11 @@ function ImagePrompt({
     };
 
     return (
-        <Tabs activeKey={activeTab} onChange={handleTabChange}>
-            <TabPane tab="Images Configuration" key="1">
+        <Tabs activeKey={activeTab} onChange={handleTabChange} className="custom-tabs">
+            <TabPane tab="Images Configuration" key="1" className="custom-tab-pane">
                 <ImagesConfiguration onConfigChange={handleConfigChange} />
             </TabPane>
-            <TabPane tab="Images Generation" key="2">
+            <TabPane tab="Images Generation" key="2" className="custom-tab-pane">
                 <ImagesForVideo
                     scriptSegments={scriptSegments}
                     promptId={promptId}

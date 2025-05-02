@@ -5,6 +5,7 @@ import { ImageConfig } from '../ImagesConfiguration';
 
 import { Card, Button } from 'antd';
 import styles from '../../ImagePrompt.module.css';
+import ownStyles from './ImagesForVideo.module.css';
 import LoadingComponent from '../../../../components/Loading';
 import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
 import SweetAlert from '../../../../components/SweetAlert';
@@ -238,7 +239,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                     <p className="mb-4">
                         <strong>{currentSegment?.text}</strong>
                     </p>
-                    <div className={clsx('form-floating', 'w-100')}>
+                    <div className={clsx('form-floating', 'w-100', ownStyles.formItem)}>
                         <textarea
                             className={clsx('form-control')}
                             placeholder="Leave a comment here"
@@ -248,7 +249,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                             disabled={!customizedGenerationClick}
                             onChange={(e) => setPromptInfo(e.target.value)}
                         ></textarea>
-                        <label htmlFor="floatingTextarea2">Prompt Here</label>
+                        <label htmlFor="floatingTextarea2">Nhập yêu cầu tại đây</label>
                     </div>
                     <div
                         className={clsx(
@@ -261,32 +262,32 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                         )}
                     >
                         <button
-                            className={clsx('btn', 'btn-info')}
+                            className={clsx('btn', 'btn-info', ownStyles.customButton)}
                             onClick={handleGenerateImagesForSegments}
                             disabled={batchProcessing}
                         >
-                            Full-script Generation
+                            Tạo hình ảnh cho tất cả các phân đoạn
                         </button>
                         <div className={clsx('d-flex', 'flex-row-reverse', 'align-items-center')}>
                             <button
-                                className={clsx('btn', 'btn-warning', 'float-right', 'me-2')}
+                                className={clsx('btn', 'btn-warning', 'float-right', 'me-2', ownStyles.customButton)}
                                 onClick={handleFinishCustomizedGeneration}
                             >
-                                Finish
+                                Hoàn thành
                             </button>
                             <button
-                                className={clsx('btn', 'btn-primary', 'float-right', 'me-2')}
+                                className={clsx('btn', 'btn-primary', 'float-right', 'me-2', ownStyles.customButton)}
                                 disabled={isLoading || !customizedGenerationClick}
                                 onClick={handleGenerateWithCustomPrompt}
                             >
-                                Generate Images
+                                Tạo ảnh
                             </button>
                             <button
-                                className={clsx('btn', 'btn-success', 'float-right', 'me-2')}
+                                className={clsx('btn', 'btn-success', 'float-right', 'me-2', ownStyles.customButton)}
                                 disabled={isLoading || selectedImages.length === 0}
                                 onClick={handleFinishImagesGeneration}
                             >
-                                Save Images
+                                Lưu ảnh đã chọn
                             </button>
                         </div>
                     </div>
