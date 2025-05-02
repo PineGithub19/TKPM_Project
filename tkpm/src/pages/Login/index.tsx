@@ -25,16 +25,30 @@ const Login: React.FC = () => {
                         Authorization: `Bearer ${tokenResponse.access_token}`,
                     },
                 });
-
+    
                 const { email, name } = res.data;
+    
+                // Lưu token vào localStorage để sử dụng cho các lần truy cập sau
+                localStorage.setItem('googleToken', tokenResponse.access_token);
 
-                // Gửi thông tin người dùng về server để đăng nhập
+                // Lưu thời gian hết hạn token (ví dụ: 30 phút từ thời điểm đăng nhập)
+                const expirationTime = new Date().getTime() + 30 * 60 * 1000; // 30 phút
+                localStorage.setItem('tokenExpiration', expirationTime.toString());
+
+                // Cài đặt hẹn giờ để tự động xóa token sau 30 phút
+                setTimeout(() => {
+                    localStorage.removeItem('googleToken');
+                    localStorage.removeItem('tokenExpiration');
+                    navigate('/login'); // Chuyển hướng về trang login
+                }, 30 * 60 * 1000); // 30 phút
+    
+                // Gửi thông tin người dùng về server để đăng nhập (nếu cần thiết)
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/google-login`, { email, name }, {
                     withCredentials: true,
                 });
-
+    
                 if (response.data.status === 'OK') {
-                    // Lấy video từ tài khoản người dùng
+                    // Lấy video từ tài khoản người dùng thông qua YouTube API
                     const youtubeResponse = await axios.get(
                         'https://www.googleapis.com/youtube/v3/search',
                         {
@@ -49,13 +63,13 @@ const Login: React.FC = () => {
                             },
                         }
                     );
-
+    
                     const videoItems = youtubeResponse.data.items;
                     console.log("Received user videos:", videoItems);
-
-                    // Lấy chi tiết video (view/like/comment)
+    
+                    // Lấy chi tiết video (view/like/comment) từ videoIds
                     const videoIds = videoItems.map((v: any) => v.id.videoId).join(',');
-
+    
                     const statsResponse = await axios.get(
                         'https://www.googleapis.com/youtube/v3/videos',
                         {
@@ -68,7 +82,7 @@ const Login: React.FC = () => {
                             },
                         }
                     );
-
+    
                     const videoStats = statsResponse.data.items.map((video: any) => ({
                         title: video.snippet.title,
                         videoId: video.id,
@@ -77,22 +91,33 @@ const Login: React.FC = () => {
                         comments: video.statistics.commentCount,
                         publishedAt: video.snippet.publishedAt,
                     }));
-
+    
+                    // Lưu dữ liệu video vào localStorage để sử dụng cho các lần tải lại trang
+                    localStorage.setItem('videoInformation', JSON.stringify(videoStats));
+    
+                    // Cập nhật state videoInformation trong component
                     setVideoInformation(videoStats);
+    
                     console.log("Video stats being sent to dashboard:", videoStats);
+    
+                    // Điều hướng người dùng đến trang dashboard, và truyền video information
                     navigate('/dashboard', { state: { videoInformation: videoStats } });
                 } else {
+                    // Nếu login với Google không thành công
                     setError('Google login failed on server');
                 }
             } catch (err) {
                 console.error(err);
+                // Thông báo lỗi nếu có lỗi trong quá trình đăng nhập hoặc lấy thông tin
                 setError('Google login failed');
             }
         },
         onError: () => {
+            // Nếu có lỗi xảy ra trong quá trình đăng nhập với Google
             setError('Google login failed');
         },
     });
+    
 
     return (
         <div className="d-flex flex-row align-items-center rounded"

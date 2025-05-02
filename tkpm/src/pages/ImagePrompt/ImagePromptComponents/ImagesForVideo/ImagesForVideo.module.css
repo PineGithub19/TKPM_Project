@@ -1,0 +1,20 @@
+.formItem {
+    margin-bottom: 8px;
+}
+
+.formItem label {
+    color: #f0f2f5;
+    font-size: 18px !important;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.customButton {
+    color: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
