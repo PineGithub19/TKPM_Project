@@ -16,20 +16,20 @@ import * as request from '../../utils/request';
 
 const steps = [
     {
-        label: 'Select Literature',
-        description: `Find and select a literary work to use as the basis for your video.`,
+        label: 'Chọn tác phẩm văn học',
+        description: `Tìm và chọn một tác phẩm văn học để làm cơ sở cho video của bạn.`,
     },
     {
-        label: 'Generate Script',
-        description: 'Configure and generate a script based on the selected literature.',
+        label: 'Tạo kịch bản',
+        description: 'Cấu hình và tạo kịch bản dựa trên tác phẩm văn học đã chọn.',
     },
     {
-        label: 'Create Images',
-        description: 'Generate images for your video based on the script segments.',
+        label: 'Tạo ảnh',
+        description: 'Tạo hình ảnh cho video của bạn dựa trên các phân đoạn kịch bản.',
     },
     {
-        label: 'Create Voice Narration',
-        description: 'Generate voice narrations for each segment of your script.',
+        label: 'Tạo tường thuật bằng giọng nói',
+        description: 'Tạo lời tường thuật bằng giọng nói cho từng phân đoạn trong kịch bản của bạn.',
     },
 ];
 
@@ -121,14 +121,13 @@ interface LocationState {
     selectedLiterature?: { content: string; title: string };
 
     //cho các id của phiên làm việc:
-    promptId?: string,
-    scriptPromptId?: string,
-    voicePromptId?: string,
-    imagePromptId?: string,
+    promptId?: string;
+    scriptPromptId?: string;
+    voicePromptId?: string;
+    imagePromptId?: string;
 }
 
 function CreateVideo() {
-
     const location = useLocation();
     const state = location.state as LocationState;
 
@@ -139,7 +138,9 @@ function CreateVideo() {
 
     const [activeStep, setActiveStep] = useState(0);
     const hasFetchedPromptId = useRef<boolean>(state?.hasFetchedPromptId || false); // Fixed initialization
-    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(state?.selectedLiterature || null);
+    const [selectedLiterature, setSelectedLiterature] = useState<{ content: string; title: string } | null>(
+        state?.selectedLiterature || null,
+    );
     const [isFinishedVideo, setIsFinishedVideo] = useState<boolean>(false);
 
     const [scriptSegments, setScriptSegments] = useState<string[]>(state?.scriptSegments || []); // string array of headers
@@ -193,11 +194,10 @@ function CreateVideo() {
         handleNext(); // Move to the next step (ScriptAutoGenerate)
     };
 
-
     const handleScriptComplete = (segments: string[], title: string = '', imagepromptSegments: string[]) => {
         setScriptSegments(segments);
         setScriptTitle(title);
-        setImagePromptSegments(imagepromptSegments); 
+        setImagePromptSegments(imagepromptSegments);
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
@@ -212,13 +212,13 @@ function CreateVideo() {
     };
 
     useEffect(() => {
-        console.log("CHECK hasFetchedPromptId in createVideo: ", hasFetchedPromptId.current);
+        console.log('CHECK hasFetchedPromptId in createVideo: ', hasFetchedPromptId.current);
 
         if (!hasFetchedPromptId.current) {
             async function fetchPromptId() {
                 try {
                     const response = await request.post('/information/create');
-                    console.log("API Response:", response); // Log the full response
+                    console.log('API Response:', response); // Log the full response
 
                     if (response) {
                         setPromptId(response.promptId || '');
@@ -227,17 +227,17 @@ function CreateVideo() {
                         setImagePromptId(response.imagePromptId || '');
 
                         // Log after setting state (but remember state updates are asynchronous)
-                        console.log("IDs set from response:", {
+                        console.log('IDs set from response:', {
                             promptId: response.promptId,
                             scriptPromptId: response.scriptPromptId,
                             voicePromptId: response.voicePromptId,
-                            imagePromptId: response.imagePromptId
+                            imagePromptId: response.imagePromptId,
                         });
                     } else {
-                        console.error("Empty response received from server");
+                        console.error('Empty response received from server');
                     }
                 } catch (error) {
-                    console.error("Error fetching prompt IDs:", error);
+                    console.error('Error fetching prompt IDs:', error);
                     // Handle error appropriately (show message to user, etc.)
                 }
             }
@@ -245,12 +245,12 @@ function CreateVideo() {
             hasFetchedPromptId.current = true;
         }
 
-        console.log("CHECK id in CreateVideo: ", {
+        console.log('CHECK id in CreateVideo: ', {
             promptId,
             scriptPromptId,
             voicePromptId,
             imagePromptId,
-        })
+        });
 
         console.log('Editvideo -> CreateVideo', {
             scriptSegments,
@@ -297,9 +297,7 @@ function CreateVideo() {
                                     literatureTitle={selectedLiterature.title}
                                     onComplete={handleScriptComplete}
                                     scriptSegment={scriptSegments}
-
                                     selectedLiterature={selectedLiterature}
-
                                 />
                             </div>
                         )}
@@ -309,7 +307,6 @@ function CreateVideo() {
                                     promptId={imagePromptId}
                                     scriptSegments={imagepromptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
-                                    checkedImagesList={checkedImagesList}
                                 />
                             </div>
                         )}
