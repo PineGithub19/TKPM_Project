@@ -5,7 +5,6 @@ import { ImageConfig } from '../ImagesConfiguration';
 
 import { Card, Button } from 'antd';
 import styles from '../../ImagePrompt.module.css';
-import ownStyles from './ImagesForVideo.module.css';
 import LoadingComponent from '../../../../components/Loading';
 import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
 import SweetAlert from '../../../../components/SweetAlert';
@@ -67,6 +66,8 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                 })),
             );
         }
+
+        
 
         if (checkedImagesList && checkedImagesList.length > 0) {
             setLocalPath(checkedImagesList);
@@ -255,7 +256,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                     <p className="mb-4">
                         <strong>{currentSegment?.text}</strong>
                     </p>
-                    <div className={clsx('form-floating', 'w-100', ownStyles.formItem)}>
+                    <div className={clsx('form-floating', 'w-100')}>
                         <textarea
                             className={clsx('form-control')}
                             placeholder="Leave a comment here"
@@ -265,7 +266,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                             disabled={!customizedGenerationClick}
                             onChange={(e) => setPromptInfo(e.target.value)}
                         ></textarea>
-                        <label htmlFor="floatingTextarea2">Nhập yêu cầu tại đây</label>
+                        <label htmlFor="floatingTextarea2">Prompt Here</label>
                     </div>
                     <div
                         className={clsx(
@@ -278,32 +279,32 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                         )}
                     >
                         <button
-                            className={clsx('btn', 'btn-info', ownStyles.customButton)}
+                            className={clsx('btn', 'btn-info')}
                             onClick={handleGenerateImagesForSegments}
                             disabled={batchProcessing}
                         >
-                            Tạo hình ảnh cho tất cả các phân đoạn
+                            Full-script Generation
                         </button>
                         <div className={clsx('d-flex', 'flex-row-reverse', 'align-items-center')}>
                             <button
-                                className={clsx('btn', 'btn-warning', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('btn', 'btn-warning', 'float-right', 'me-2')}
                                 onClick={handleFinishCustomizedGeneration}
                             >
-                                Hoàn thành
+                                Finish
                             </button>
                             <button
-                                className={clsx('btn', 'btn-primary', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('btn', 'btn-primary', 'float-right', 'me-2')}
                                 disabled={isLoading || !customizedGenerationClick}
                                 onClick={handleGenerateWithCustomPrompt}
                             >
-                                Tạo ảnh
+                                Generate Images
                             </button>
                             <button
-                                className={clsx('btn', 'btn-success', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('btn', 'btn-success', 'float-right', 'me-2')}
                                 disabled={isLoading || selectedImages.length === 0}
                                 onClick={handleFinishImagesGeneration}
                             >
-                                Lưu ảnh đã chọn
+                                Save Images
                             </button>
                         </div>
                     </div>

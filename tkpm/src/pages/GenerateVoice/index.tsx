@@ -218,8 +218,11 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             voiceSegments.forEach((voice) => {
                 if (voice.status === 'success' && voice.audioUrl) list_voice.push(voice.audioUrl);
             });
-
-            onComplete(list_voice, translatedSegments);
+            if (translatedSegments.length > 0) {
+                onComplete(list_voice, translatedSegments);
+            }else {
+                onComplete(list_voice, scriptSegments);
+            }
         }
     };
 
