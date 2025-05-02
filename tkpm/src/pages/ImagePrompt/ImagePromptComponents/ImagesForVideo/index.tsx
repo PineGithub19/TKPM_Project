@@ -22,6 +22,7 @@ interface ImagesForVideoProps {
     imageConfig: ImageConfig;
     generationType: 'static' | 'motion';
     modelAIType: 'gemini' | 'stable_diffusion';
+    checkedImagesList?: string[];
 }
 
 const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
@@ -31,6 +32,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
     imageConfig,
     generationType,
     modelAIType,
+    checkedImagesList,
 }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
@@ -47,18 +49,28 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
     const [batchProcessing, setBatchProcessing] = useState<boolean>(false);
     const [customizedGenerationClick, setCustomizedGenerationClick] = useState<boolean>(false);
     const [currentSegment, setCurrentSegment] = useState<ImagesSegment | null>(null);
+    const [localPath, setLocalPath] = useState<string[]>([]);
 
     useEffect(() => {
+        console.log(scriptSegments.length);
         if (scriptSegments && scriptSegments.length > 0) {
             setImageData(
-                scriptSegments.map((segment) => ({
+                scriptSegments.map((segment, index) => ({
                     text: segment,
-                    images: [],
-                    status: 'idle',
+                    images: checkedImagesList && index < checkedImagesList.length 
+                        ? [checkedImagesList[index]] 
+                        : [],
+                    status: checkedImagesList && index < checkedImagesList.length 
+                        ? 'success' 
+                        : 'idle',
                 })),
             );
         }
-    }, [scriptSegments]);
+
+        if (checkedImagesList && checkedImagesList.length > 0) {
+            setLocalPath(checkedImagesList);
+        }
+    }, [scriptSegments, checkedImagesList]);
 
     const handleGenerateImagesForSegments = async () => {
         try {
@@ -194,7 +206,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
             setIsDownloading(true);
 
             const base64Paths = selectedImages.map((item) => item.path);
-            const localImagePaths: string[] = [];
+            var localImagePaths: string[] = [];
             const uploadSessionId = Date.now().toString();
             const batchSize = 5;
             const totalBatches = Math.ceil(base64Paths.length / batchSize);
@@ -214,7 +226,11 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                     localImagePaths.push(...batchResponse.paths);
                 }
             }
+            // Pass the result to parent component
             if (handleCheckedImagesListComplete) {
+                if (localImagePaths.length === 0) {
+                    localImagePaths = localPath;
+                }
                 handleCheckedImagesListComplete(localImagePaths);
             }
         } catch {
