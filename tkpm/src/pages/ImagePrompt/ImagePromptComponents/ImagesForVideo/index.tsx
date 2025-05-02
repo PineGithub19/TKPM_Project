@@ -5,6 +5,7 @@ import { ImageConfig } from '../ImagesConfiguration';
 
 import { Card, Button } from 'antd';
 import styles from '../../ImagePrompt.module.css';
+import ownStyles from './ImagesForVideo.module.css';
 import LoadingComponent from '../../../../components/Loading';
 import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
 import SweetAlert from '../../../../components/SweetAlert';
