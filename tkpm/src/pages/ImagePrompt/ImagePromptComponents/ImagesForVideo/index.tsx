@@ -5,7 +5,6 @@ import { ImageConfig } from '../ImagesConfiguration';
 
 import { Card, Button } from 'antd';
 import styles from '../../ImagePrompt.module.css';
-import ownStyles from './ImagesForVideo.module.css';
 import LoadingComponent from '../../../../components/Loading';
 import CustomizedCheckbox from '../../../../components/CustomizedCheckbox';
 import SweetAlert from '../../../../components/SweetAlert';
@@ -262,7 +261,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                     <p className="mb-4">
                         <strong>{currentSegment?.text}</strong>
                     </p>
-                    <div className={clsx('form-floating', 'w-100', ownStyles.formItem)}>
+                    <div className={clsx('form-floating', 'w-100')}>
                         <textarea
                             className={clsx('form-control')}
                             placeholder="Leave a comment here"
@@ -272,7 +271,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                             disabled={!customizedGenerationClick}
                             onChange={(e) => setPromptInfo(e.target.value)}
                         ></textarea>
-                        <label htmlFor="floatingTextarea2">Nhập yêu cầu tại đây</label>
+                        <label htmlFor="floatingTextarea2">Prompt Here</label>
                     </div>
                     <div
                         className={clsx(
@@ -289,7 +288,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                             onClick={handleGenerateImagesForSegments}
                             disabled={batchProcessing}
                         >
-                            Tạo hình ảnh cho tất cả các phân đoạn
+                            Full-script Generation
                         </button>
                         <div className={clsx('d-flex', 'flex-row-reverse', 'align-items-center')}>
                             <button
@@ -319,7 +318,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                                 disabled={isLoading || selectedImages.length === 0}
                                 onClick={handleFinishImagesGeneration}
                             >
-                                Lưu ảnh đã chọn
+                                Save Images
                             </button>
                         </div>
                     </div>

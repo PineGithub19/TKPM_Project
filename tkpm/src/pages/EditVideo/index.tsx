@@ -148,7 +148,7 @@ const EditVideo: React.FC = () => {
     // Generate image list from checkedImagesList if available
     const images =
         checkedImagesList.length > 0
-            ? checkedImagesList.slice(0, 8).map((item, index) => ({
+            ? checkedImagesList.map((item, index) => ({
                   name: `Image ${index + 1}`,
                   src: item || `/anime${index + 1}.png`,
               }))

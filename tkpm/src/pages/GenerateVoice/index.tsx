@@ -218,8 +218,11 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             voiceSegments.forEach((voice) => {
                 if (voice.status === 'success' && voice.audioUrl) list_voice.push(voice.audioUrl);
             });
-
-            onComplete(list_voice, translatedSegments);
+            if (translatedSegments.length > 0) {
+                onComplete(list_voice, translatedSegments);
+            }else {
+                onComplete(list_voice, scriptSegments);
+            }
         }
     };
 
@@ -316,27 +319,6 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             )}
         </Form>
     );
-
-    const renderRecorder = () => {
-        if (!recordingMode) return null;
-
-        return (
-            <div className={styles.recorderOverlay}>
-                <Card className={styles.recorderCard}>
-                    <h3 className={styles.recorderTitle}>
-                        Ghi âm cho phân đoạn #{(selectedSegmentIndex !== null ? selectedSegmentIndex : 0) + 1}
-                    </h3>
-                    <p className={styles.recorderText}>
-                        {selectedSegmentIndex !== null && voiceSegments[selectedSegmentIndex]?.text}
-                    </p>
-                    <VoiceRecorder onRecordingComplete={handleRecordingComplete} singleRecordingMode={true} />
-                    <Button onClick={cancelRecording} className={styles.cancelButton}>
-                        Hủy ghi âm
-                    </Button>
-                </Card>
-            </div>
-        );
-    };
 
     const renderBatchVoiceGenerator = () => (
         <div className={styles.batchContainer}>
@@ -516,12 +498,25 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                 {segment.isRecorded && <div className={styles.recordBadge}>Đã ghi âm</div>}
                             </div>
                         )}
+
+                        {/* Show the recorder component directly under this segment if it's selected */}
+                        {recordingMode && selectedSegmentIndex === index && (
+                            <div className={styles.recorderContainer}>
+                                <Card className={styles.recorderCard}>
+                                    <h3 className={styles.recorderTitle}>
+                                        Ghi âm cho phân đoạn #{index + 1}
+                                    </h3>
+                                    <p className={styles.recorderText}>{segment.text}</p>
+                                    <VoiceRecorder onRecordingComplete={handleRecordingComplete} singleRecordingMode={true} />
+                                    <Button onClick={cancelRecording} className={styles.cancelButton}>
+                                        Hủy ghi âm
+                                    </Button>
+                                </Card>
+                            </div>
+                        )}
                     </Card>
                 ))}
             </div>
-
-            {/* Phần hiển thị component ghi âm khi được kích hoạt */}
-            {renderRecorder()}
         </div>
     );
 
