@@ -21,13 +21,14 @@ import dayjs from 'dayjs'; // Cài đặt dayjs để làm việc với ngày th
 import DefaultVideoItem from './DefaultVideoItem';
 import * as request from '../../utils/request';
 import DataChart from './DataChart';
+import axios from 'axios';
 
 // Register chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface VideoInformation {
     videoId: string;
-    scriptId: string; 
+    scriptId: string;
     voiceId: string;
     imageId: string;
     is_finished: boolean;
@@ -68,11 +69,95 @@ function DashBoard() {
     };
 
     useEffect(() => {
-        if (location.state && location.state.videoInformation) {
-            console.log('Received video information:', location.state.videoInformation);
-            setVideoInformation(location.state.videoInformation); // Nhận dữ liệu video từ state
+        const token = localStorage.getItem('googleToken');
+        const tokenExpiration = localStorage.getItem('tokenExpiration'); // Lấy thời gian hết hạn token
+    
+        if (!token || !tokenExpiration) {
+            // Nếu không có token hoặc không có thời gian hết hạn, điều hướng người dùng đến trang login
+            navigate('/login');
+        } else {
+            const currentTime = new Date().getTime();
+    
+            // Kiểm tra xem token đã hết hạn chưa
+            if (currentTime > parseInt(tokenExpiration)) {
+                // Nếu hết hạn, xóa token và yêu cầu người dùng đăng nhập lại
+                localStorage.removeItem('googleToken');
+                localStorage.removeItem('tokenExpiration');
+                navigate('/login');
+            } else {
+                // Nếu token vẫn còn hiệu lực, lấy video stats mới nhất từ API của YouTube
+                const fetchVideoStats = async () => {
+                    try {
+                        setIsLoading(true);
+    
+                        // Gọi API của YouTube để lấy video mới nhất
+                        const youtubeResponse = await axios.get(
+                            'https://www.googleapis.com/youtube/v3/search',
+                            {
+                                params: {
+                                    part: 'snippet',
+                                    forMine: true,
+                                    type: 'video',
+                                    maxResults: 10,
+                                },
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            }
+                        );
+    
+                        const videoItems = youtubeResponse.data.items;
+                        console.log("Received user videos:", videoItems);
+    
+                        // Lọc video có #ChillUS trong description
+                        const filteredVideoItems = videoItems.filter((video: any) =>
+                            video.snippet.description.includes("#ChillUS")
+                        );
+    
+                        // Nếu có video hợp lệ, lấy chi tiết video (view/like/comment) từ videoIds
+                        if (filteredVideoItems.length > 0) {
+                            const videoIds = filteredVideoItems.map((v: any) => v.id.videoId).join(',');
+    
+                            const statsResponse = await axios.get(
+                                'https://www.googleapis.com/youtube/v3/videos',
+                                {
+                                    params: {
+                                        part: 'snippet,statistics',
+                                        id: videoIds,
+                                    },
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }
+                            );
+    
+                            const videoStats = statsResponse.data.items.map((video: any) => ({
+                                title: video.snippet.title,
+                                videoId: video.id,
+                                views: video.statistics.viewCount,
+                                likes: video.statistics.likeCount,
+                                comments: video.statistics.commentCount,
+                                publishedAt: video.snippet.publishedAt,
+                            }));
+    
+                            // Cập nhật video stats vào state và localStorage
+                            setVideoInformation(videoStats);
+                            localStorage.setItem('videoInformation', JSON.stringify(videoStats));
+                        } else {
+                            console.log("No videos found with #ChillUS in description.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+    
+                fetchVideoStats();
+            }
         }
-    }, [location.state]);
+    }, [navigate]);
+    
 
     // Gộp dữ liệu theo ngày
     const aggregatedData: Record<string, { views: number; likes: number; comments: number }> = {};
