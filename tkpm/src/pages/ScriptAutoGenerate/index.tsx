@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as request from '../../utils/request';
@@ -44,7 +44,14 @@ interface ScriptJSON {
     segments: ScriptSegment[];
 }
 
-const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scriptSegment, selectedLiterature, onComplete }: ScriptAutoGenerateProps) => {
+const ScriptAutoGenerate = ({
+    promptId,
+    literatureContent,
+    literatureTitle,
+    scriptSegment,
+    selectedLiterature,
+    onComplete,
+}: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [script, setScript] = useState<string>('');
@@ -61,7 +68,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
         tone: 'formal',
         duration: 'standard',
     });
-    const [scriptSegments, setScriptSegments] = useState<string[]>(scriptSegment? scriptSegment : []);
+    const [scriptSegments, setScriptSegments] = useState<string[]>(scriptSegment ? scriptSegment : []);
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
     const [scriptTitle, setScriptTitle] = useState<string>('');
@@ -176,7 +183,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
     const generateSegments = async (scriptText: string) => {
         setSegmentLoading(true);
 
-        console.log("CHECK PROMPT_ID before split in generateSegments: ", promptId);
+        console.log('CHECK PROMPT_ID before split in generateSegments: ', promptId);
 
         try {
             const response = (await request.post('/script_generate/split', {
@@ -187,7 +194,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
 
             if (response !== null && response.success) {
                 setScriptSegments(response.segments);
-                setImgPromptSegments(response.imageDescriptions)
+                setImgPromptSegments(response.imageDescriptions);
             }
         } catch (err) {
             console.error('Error auto-splitting script:', err);
@@ -250,7 +257,7 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
         setSegmentLoading(true);
         setError(null);
 
-        console.log("CHECK PROMPT_ID before split - in handleSplitScript: ", promptId);
+        console.log('CHECK PROMPT_ID before split - in handleSplitScript: ', promptId);
 
         try {
             const textToSplit = editedScript || script;
@@ -438,13 +445,13 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
         const jsonText: ScriptJSON = JSON.parse(text);
         let md = `# 📖 ${jsonText.title}\n\n---\n`;
         jsonText.segments.forEach((seg, idx) => {
-          md += `## ${idx + 1}. ${seg.title}\n\n`;
-          md += `${seg.content}\n\n`;
-          md += `> _🖼️ ${seg.image_description}_\n\n`;
-          md += `---\n`;
+            md += `## ${idx + 1}. ${seg.title}\n\n`;
+            md += `${seg.content}\n\n`;
+            md += `> _🖼️ ${seg.image_description}_\n\n`;
+            md += `---\n`;
         });
         return md;
-    }
+    };
 
     return (
         <div className={clsx(styles.container)}>
@@ -538,7 +545,9 @@ const ScriptAutoGenerate = ({ promptId, literatureContent, literatureTitle, scri
                             <h5 className={clsx(styles.cardTitle)}>Kịch bản đã tạo</h5>
                         </div>
                         <div className={clsx(styles.cardBody)}>
-                            <ReactMarkdown>{editedScript ? markdownFormatter(editedScript) : markdownFormatter(script)}</ReactMarkdown>
+                            <ReactMarkdown>
+                                {editedScript ? markdownFormatter(editedScript) : markdownFormatter(script)}
+                            </ReactMarkdown>
                         </div>
                     </div>
                 </>
