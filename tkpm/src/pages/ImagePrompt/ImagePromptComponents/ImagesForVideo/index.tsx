@@ -38,6 +38,10 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
+    const [isShowingDownload, setIsShowingDownload] = useState<boolean>(false);
+    const [isShowingCustomPrompt, setIsShowingCustomPrompt] = useState<boolean>(false);
+    const [isShowingFinishCustomPrompt, setIsShowingFinishCustomPrompt] = useState<boolean>(false);
+
     const [promptInfo, setPromptInfo] = useState<string>('');
     const [imageData, setImageData] = useState<ImagesSegment[]>([]);
     const [selectedImages, setSelectedImages] = useState<
@@ -53,17 +57,12 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
     const [localPath, setLocalPath] = useState<string[]>([]);
 
     useEffect(() => {
-        console.log(scriptSegments.length);
         if (scriptSegments && scriptSegments.length > 0) {
             setImageData(
                 scriptSegments.map((segment, index) => ({
                     text: segment,
-                    images: checkedImagesList && index < checkedImagesList.length 
-                        ? [checkedImagesList[index]] 
-                        : [],
-                    status: checkedImagesList && index < checkedImagesList.length 
-                        ? 'success' 
-                        : 'idle',
+                    images: checkedImagesList && index < checkedImagesList.length ? [checkedImagesList[index]] : [],
+                    status: checkedImagesList && index < checkedImagesList.length ? 'success' : 'idle',
                 })),
             );
         }
@@ -120,6 +119,8 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
         setCustomizedGenerationClick(true);
         setCurrentSegment(dataItem);
         setPromptInfo('');
+        setIsShowingCustomPrompt(true);
+        setIsShowingFinishCustomPrompt(true);
     };
 
     const handleGenerateWithCustomPrompt = async () => {
@@ -200,6 +201,8 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
         setCustomizedGenerationClick(false);
         setCurrentSegment(null);
         setPromptInfo('');
+        setIsShowingCustomPrompt(false);
+        setIsShowingFinishCustomPrompt(false);
     };
 
     const handleFinishImagesGeneration = async () => {
@@ -207,7 +210,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
             setIsDownloading(true);
 
             const base64Paths = selectedImages.map((item) => item.path);
-            var localImagePaths: string[] = [];
+            let localImagePaths: string[] = [];
             const uploadSessionId = Date.now().toString();
             const batchSize = 5;
             const totalBatches = Math.ceil(base64Paths.length / batchSize);
@@ -240,6 +243,10 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
             setIsDownloading(false);
         }
     };
+
+    useEffect(() => {
+        setIsShowingDownload(selectedImages.length > 0);
+    }, [selectedImages]);
 
     return (
         <div className="p-4">
@@ -278,7 +285,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                         )}
                     >
                         <button
-                            className={clsx('btn', 'btn-info', ownStyles.customButton)}
+                            className={clsx(ownStyles.customButton, ownStyles.btnPrimary)}
                             onClick={handleGenerateImagesForSegments}
                             disabled={batchProcessing}
                         >
@@ -286,20 +293,29 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                         </button>
                         <div className={clsx('d-flex', 'flex-row-reverse', 'align-items-center')}>
                             <button
-                                className={clsx('btn', 'btn-warning', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('float-right', 'me-2', ownStyles.customButton, ownStyles.btnWarning, {
+                                    [ownStyles.btnDisabled]: !isShowingFinishCustomPrompt,
+                                    disabled: !isShowingFinishCustomPrompt,
+                                })}
                                 onClick={handleFinishCustomizedGeneration}
                             >
-                                Hoàn thành
+                                Xong
                             </button>
                             <button
-                                className={clsx('btn', 'btn-primary', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('float-right', 'me-2', ownStyles.customButton, ownStyles.btnDanger, {
+                                    [ownStyles.btnDisabled]: !isShowingCustomPrompt,
+                                    disabled: !isShowingCustomPrompt,
+                                })}
                                 disabled={isLoading || !customizedGenerationClick}
                                 onClick={handleGenerateWithCustomPrompt}
                             >
-                                Tạo ảnh
+                                Tạo ảnh sau khi tùy chỉnh
                             </button>
                             <button
-                                className={clsx('btn', 'btn-success', 'float-right', 'me-2', ownStyles.customButton)}
+                                className={clsx('float-right', 'me-2', ownStyles.customButton, ownStyles.btnSucess, {
+                                    [ownStyles.btnDisabled]: !isShowingDownload,
+                                    disabled: !isShowingDownload,
+                                })}
                                 disabled={isLoading || selectedImages.length === 0}
                                 onClick={handleFinishImagesGeneration}
                             >
@@ -325,7 +341,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                                             }
                                             className={styles.segmentCardButton}
                                         >
-                                            Customized Generation
+                                            Tùy chỉnh phân đoạn
                                         </Button>
                                         <Button
                                             type="link"
@@ -337,7 +353,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                                             }
                                             className={styles.segmentCardButton}
                                         >
-                                            {dataItem.status === 'success' ? 'Re-generate' : 'Generate Images'}
+                                            {dataItem.status === 'success' ? 'Tạo lại hình ảnh' : 'Tạo ảnh'}
                                         </Button>
                                     </div>
                                 }
@@ -346,7 +362,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
                                 {dataItem.status === 'loading' && (
                                     <div className="text-center py-3">
                                         <LoadingComponent />
-                                        <p className={styles.segmentCardLoading}>Images are being generated...</p>
+                                        <p className={styles.segmentCardLoading}>Đang tạo ảnh...</p>
                                     </div>
                                 )}
                                 {dataItem.status === 'error' && (
@@ -385,8 +401,8 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
             </div>
             {isDownloading && (
                 <SweetAlert
-                    title="Downloading all images successfully!"
-                    text="Now, you can move to the next step."
+                    title="Tải tất cả ảnh thành công!"
+                    text="Bây giờ bạn có thể sang bước tiếp theo."
                     icon="success"
                     confirmButtonText="OK"
                 />

@@ -86,7 +86,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                 onChange={() => handleGenerationTypeChange('static')}
                             />
                             <label className="form-check-label text-white fs-5" htmlFor="staticType">
-                                Static Image
+                                Ảnh tĩnh
                             </label>
                         </div>
                         <div className="form-check">
@@ -99,7 +99,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                 onChange={() => handleGenerationTypeChange('motion')}
                             />
                             <label className="form-check-label text-white fs-5" htmlFor="motionType">
-                                Motion Image (GIF)
+                                Ảnh động (GIF)
                             </label>
                         </div>
                     </div>

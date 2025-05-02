@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import styles from './Header.module.css';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import SeearchBar from './HeaderComponenets/SearchBar/SearchBar';
 
 interface UserI {
     username: string;
@@ -14,7 +15,7 @@ function Header() {
     useEffect(() => {
         const token = document.cookie
             .split('; ')
-            .find(row => row.startsWith('token='))
+            .find((row) => row.startsWith('token='))
             ?.split('=')[1];
 
         if (token) {
@@ -25,13 +26,14 @@ function Header() {
                     role: decoded.role || 'User',
                 });
             } catch (error) {
-                console.error("Invalid token:", error);
+                console.error('Invalid token:', error);
             }
         }
     }, []);
 
     return (
-        <div className={clsx('w-100', 'd-flex', 'justify-content-end', styles.headerContainer)}>
+        <div className={clsx('w-100', 'd-flex', 'justify-content-between', styles.headerContainer)}>
+            <SeearchBar />
             <div className={clsx('d-flex')}>
                 <img
                     src="https://www.marktechpost.com/wp-content/uploads/2023/05/7309681-scaled.jpg"
@@ -39,8 +41,8 @@ function Header() {
                     alt="Avatar"
                 />
                 <div className={clsx('d-flex', 'flex-column', 'ms-2')}>
-                    <h6>{user ? user.username : "Guest"}</h6>
-                    <h6>{user ? user.role : "No Role"}</h6>
+                    <h6>{user ? user.username : 'Guest'}</h6>
+                    <h6>{user ? user.role : 'No Role'}</h6>
                 </div>
             </div>
         </div>

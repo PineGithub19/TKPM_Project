@@ -13,4 +13,8 @@ router.get('/all', (req, res, next) => {
     videoController.getAllVideos(req, res, next);
 });
 
+router.get('/search', (req, res, next) => {
+    videoController.searchVideos(req, res, next);
+});
+
 export default router;

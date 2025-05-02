@@ -1,0 +1,41 @@
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.searchInput {
+    min-width: 400px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.searchResult {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    translate: 0 100%;
+
+    width: 400px;
+    max-height: 300px; /* Set a maximum height for the dropdown */
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* Ensure it appears above other elements */
+
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.searchResultItem:hover {
+    cursor: pointer;
+    background-color: #f0f0f0;
+}
+
+.searchResultImage {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+}
