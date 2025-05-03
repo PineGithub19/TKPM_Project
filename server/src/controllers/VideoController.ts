@@ -3,6 +3,7 @@ import SlideshowGenerator from '../services/VideoService/SlideshowGenerator';
 import * as DBService from '../services/DBServices';
 import Video from '../models/Video';
 import LiteratureWork from '../models/LiteratureWork';
+import path from 'path';
 
 class VideoController {
     public async createSlideshow(req: Request, res: Response, next: NextFunction) {
@@ -14,7 +15,18 @@ class VideoController {
         const slideshowGenerator = new SlideshowGenerator(config);
         try {
             const videoUrl = await slideshowGenerator.generate();
-            res.status(200).json({ videoUrl });
+            console.log("CHECK VIDEO URL COMPLETE IN BE: ", videoUrl);
+            
+            // Get the filename from the full path
+            const filename = path.basename(videoUrl.outputPath || '');
+            
+            console.log("CHECK VIDEO URL COMPLETE IN BE: ", filename);
+
+            // Construct URL using PORT from environment variables
+            const port = process.env.PORT || '3000';
+            const outputUrl = `http://localhost:${port}/videos/${filename}`;
+            
+            res.status(200).json({ outputPath: outputUrl });
         } catch (error) {
             next(error);
         }
