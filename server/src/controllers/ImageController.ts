@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { imageService } from '../services/ImageService/image.service';
+import { translate } from '@vitalets/google-translate-api';
+
 
 class ImageController {
     constructor() {
@@ -28,8 +30,9 @@ class ImageController {
 
     async handleTextToMultipleImages(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt, configuration } = req.body;
-
+            let { prompt, configuration } = req.body;
+            prompt = await translate(prompt);
+            console.log('Translated prompt:', prompt); // Log the translated prompt
             const response = await imageService.getMultipleImages(prompt, configuration);
 
             res.status(200).json({ imageList: response });
@@ -54,8 +57,9 @@ class ImageController {
 
     async handleTextToAnimation(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt, configuration } = req.body;
-
+            let { prompt, configuration } = req.body;
+            prompt = await translate(prompt);
+            console.log('Translated prompt:', prompt); // Log the translated prompt
             const response = await imageService.generateAnimation(prompt, configuration);
             res.status(200).json({ imageList: response });
         } catch (error) {
@@ -66,8 +70,9 @@ class ImageController {
 
     async handleImageToText(req: Request, res: Response, next: NextFunction) {
         try {
-            const { prompt, image } = req.body;
-
+            let { prompt, image } = req.body;
+            prompt = await translate(prompt);
+            console.log('Translated prompt:', prompt); // Log the translated prompt
             const generatedText = await imageService.generateTextFromImage(prompt, image);
 
             res.status(200).send(generatedText);
@@ -114,6 +119,18 @@ class ImageController {
             });
         }
     }
+
+    async translateText (text: string, targetLanguage: string = 'en') {
+        try {
+            const translated = await translate(text, { to: targetLanguage });
+            return translated.text;
+        } catch (error) {
+            console.error('Error translating text:', error);
+            throw new Error('Translation failed');
+        }
+    }
 }
 
 export default ImageController;
+
+
