@@ -26,7 +26,11 @@ interface ChartData {
     inProgress: number;
 }
 
-function DataChart() {
+interface DataChartProps {
+    videosLength: number;
+}
+
+function DataChart({ videosLength }: DataChartProps) {
     const [chartData, setChartData] = useState<ChartData[]>([]);
 
     useEffect(() => {
@@ -70,7 +74,7 @@ function DataChart() {
         };
 
         fetchData();
-    }, []);
+    }, [videosLength]);
 
     const data = {
         labels: chartData.map((entry) => entry.date),

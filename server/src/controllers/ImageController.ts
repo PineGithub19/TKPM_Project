@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { imageService } from '../services/ImageService/image.service';
 import { translate } from '@vitalets/google-translate-api';
 
-
 class ImageController {
     constructor() {
         this.handleTextToMultipleImages = this.handleTextToMultipleImages.bind(this);
@@ -33,7 +32,7 @@ class ImageController {
             let { prompt, configuration } = req.body;
             prompt = await translate(prompt);
             console.log('Translated prompt:', prompt); // Log the translated prompt
-            const response = await imageService.getMultipleImages(prompt, configuration);
+            const response = await imageService.getMultipleImages(prompt.text, configuration);
 
             res.status(200).json({ imageList: response });
         } catch (error) {
@@ -120,7 +119,7 @@ class ImageController {
         }
     }
 
-    async translateText (text: string, targetLanguage: string = 'en') {
+    async translateText(text: string, targetLanguage: string = 'en') {
         try {
             const translated = await translate(text, { to: targetLanguage });
             return translated.text;
@@ -132,5 +131,3 @@ class ImageController {
 }
 
 export default ImageController;
-
-

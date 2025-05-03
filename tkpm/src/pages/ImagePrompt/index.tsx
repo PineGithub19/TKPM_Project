@@ -14,7 +14,7 @@ function ImagePrompt({
     promptId?: string;
     scriptSegments?: string[];
     handleCheckedImagesListComplete?: (images: string[]) => void;
-    checkedImagesList: string[];
+    checkedImagesList?: string[];
 }) {
     const [activeTab, setActiveTab] = useState<string>('1');
     const [config, setConfig] = useState<{

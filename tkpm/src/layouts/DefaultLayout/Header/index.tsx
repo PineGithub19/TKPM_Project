@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import styles from './Header.module.css';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import SeearchBar from './HeaderComponenets/SearchBar/SearchBar';
 
@@ -12,7 +11,6 @@ interface UserI {
 
 function Header() {
     const [user, setUser] = useState<UserI | null>(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const token = document.cookie
@@ -33,15 +31,6 @@ function Header() {
         }
     }, []);
 
-    const handleLogout = () => {
-        // Xóa token và thời gian hết hạn khỏi localStorage
-        localStorage.removeItem('googleToken');
-        localStorage.removeItem('tokenExpiration');
-        
-        // Điều hướng người dùng về trang login
-        navigate('/login');
-    };
-
     return (
         <div className={clsx('w-100', 'd-flex', 'justify-content-between', styles.headerContainer)}>
             <SeearchBar />
@@ -56,11 +45,6 @@ function Header() {
                     <h6>{user ? user.role : 'No Role'}</h6>
                 </div>
             </div>
-
-            {/* Nút Logout */}
-            <button className={clsx('btn', 'btn-danger', 'ms-3')} onClick={handleLogout}>
-                Logout
-            </button>
         </div>
     );
 }

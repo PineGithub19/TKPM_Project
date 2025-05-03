@@ -57,6 +57,7 @@ class VideoController {
                 imageId: video.image_config._id,
                 title: video.literature_work_id?.title,
                 author: video.literature_work_id?.author,
+                genre: video.literature_work_id?.genre,
                 createdAt: video.createdAt
                     ? new Date(video.createdAt).toLocaleString('en-GB', {
                           year: 'numeric',
