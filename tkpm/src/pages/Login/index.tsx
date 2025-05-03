@@ -11,8 +11,23 @@ const Login: React.FC = () => {
     const [videoInformation, setVideoInformation] = useState<any[]>([]);
 
     const handleLogin = () => {
-        setError("Chưa hỗ trợ chức năng đăng nhập này");
-        setTimeout(() => setError(""), 10000);
+        // Xử lý đăng nhập với email và mật khẩu
+        axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/signin`, { email, password }, {
+            withCredentials: true,
+        })
+            .then((response) => {
+                if (response.data.status === 'OK') {
+                    // Lưu token vào localStorage để sử dụng cho các lần truy cập sau
+                    localStorage.setItem('token', response.data.token);
+                    navigate('/dashboard'); // Chuyển hướng đến trang dashboard
+                } else {
+                    setError('Login failed');
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                setError('Login failed');
+            });
     };
 
     const handleGoogleLogin = useGoogleLogin({
