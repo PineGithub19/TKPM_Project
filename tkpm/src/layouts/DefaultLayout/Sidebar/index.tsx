@@ -2,7 +2,10 @@ import clsx from 'clsx';
 import { useState, useEffect } from 'react';
 import styles from './Sidebar.module.css';
 import { publicRoutes } from '../../../routes';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarItem {
     name: string;
@@ -17,6 +20,8 @@ function formatName(str: string): string {
 }
 
 function Sidebar() {
+    const navigate = useNavigate();
+
     const location = useLocation();
     const [routes, setRoutes] = useState<SidebarItem[]>([]);
     const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
@@ -31,7 +36,7 @@ function Sidebar() {
     useEffect(() => {
         const newRoutes = publicRoutes
             .filter((route) => !route.private) // Filter out non-private routes
-            .map((route) =>( {
+            .map((route) => ({
                 name: formatName(route.path.slice(1)), // Format the name
                 route: route.path, // Keep the route path
             }));
@@ -48,9 +53,18 @@ function Sidebar() {
         }
     }, [location, routes]);
 
+    const handleLogout = () => {
+        // Xóa token và thời gian hết hạn khỏi localStorage
+        localStorage.removeItem('googleToken');
+        localStorage.removeItem('tokenExpiration');
+
+        // Điều hướng người dùng về trang login
+        navigate('/login');
+    };
+
     return (
         <div className={clsx('d-flex', 'flex-column', styles.sidebar)}>
-            <h3 className={clsx('text-light', 'mb-4')}>Sidebar</h3>
+            <h3 className={clsx('text-light', 'mb-4', 'ms-auto', 'me-auto')}>ChillUS</h3>
             {routes.map((route, index) => (
                 <Link
                     to={route.route}
@@ -63,6 +77,13 @@ function Sidebar() {
                     {route.name}
                 </Link>
             ))}
+            <div
+                className={clsx('d-flex', 'align-items-center', 'mt-auto', styles.sidebarItem, styles.logoutBtn)}
+                onClick={handleLogout}
+            >
+                <FontAwesomeIcon icon={faRightFromBracket} className={clsx('me-2')} />
+                <p className={clsx('m-0')}>Logout</p>
+            </div>
         </div>
     );
 }

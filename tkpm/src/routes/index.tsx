@@ -4,7 +4,7 @@ import DashBoard from '../pages/Dashboard';
 import CreateVideo from '../pages/CreateVideo';
 import EditVideo from '../pages/EditVideo';
 import ExportVideo from '../pages/ExportVideo';
-import Management from '../pages/Management';
+// import Management from '../pages/Management';
 // import Literature from '../pages/Literature';
 // import ScriptAutoGenerate from '../pages/ScriptAutoGenerate';
 import ImagePrompt from '../pages/ImagePrompt';
@@ -30,7 +30,7 @@ const publicRoutes: Route[] = [
     { path: '/create-video', component: CreateVideo, layout: DefaultLayout },
     { path: '/edit-video', component: EditVideo, layout: DefaultLayout },
     { path: '/export-video', component: ExportVideo, layout: DefaultLayout },
-    { path: '/management', component: Management, layout: DefaultLayout },
+    // { path: '/management', component: Management, layout: DefaultLayout },
     { path: '/image-prompt', component: ImagePrompt, private: true, layout: DefaultLayout },
     { path: '/login', component: Login, layout: OutSideLayout, private: true },
     { path: '/signup', component: Signup, layout: OutSideLayout, private: true },

@@ -71,13 +71,13 @@ function DashBoard() {
     useEffect(() => {
         const token = localStorage.getItem('googleToken');
         const tokenExpiration = localStorage.getItem('tokenExpiration'); // Lấy thời gian hết hạn token
-    
+
         if (!token || !tokenExpiration) {
             // Nếu không có token hoặc không có thời gian hết hạn, điều hướng người dùng đến trang login
             navigate('/login');
         } else {
             const currentTime = new Date().getTime();
-    
+
             // Kiểm tra xem token đã hết hạn chưa
             if (currentTime > parseInt(tokenExpiration)) {
                 // Nếu hết hạn, xóa token và yêu cầu người dùng đăng nhập lại
@@ -89,48 +89,42 @@ function DashBoard() {
                 const fetchVideoStats = async () => {
                     try {
                         setIsLoading(true);
-    
+
                         // Gọi API của YouTube để lấy video mới nhất
-                        const youtubeResponse = await axios.get(
-                            'https://www.googleapis.com/youtube/v3/search',
-                            {
+                        const youtubeResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+                            params: {
+                                part: 'snippet',
+                                forMine: true,
+                                type: 'video',
+                                maxResults: 10,
+                            },
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+
+                        const videoItems = youtubeResponse.data.items;
+                        console.log('Received user videos:', videoItems);
+
+                        // Lọc video có #ChillUS trong description
+                        const filteredVideoItems = videoItems.filter((video: any) =>
+                            video.snippet.description.includes('#ChillUS'),
+                        );
+
+                        // Nếu có video hợp lệ, lấy chi tiết video (view/like/comment) từ videoIds
+                        if (filteredVideoItems.length > 0) {
+                            const videoIds = filteredVideoItems.map((v: any) => v.id.videoId).join(',');
+
+                            const statsResponse = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
                                 params: {
-                                    part: 'snippet',
-                                    forMine: true,
-                                    type: 'video',
-                                    maxResults: 10,
+                                    part: 'snippet,statistics',
+                                    id: videoIds,
                                 },
                                 headers: {
                                     Authorization: `Bearer ${token}`,
                                 },
-                            }
-                        );
-    
-                        const videoItems = youtubeResponse.data.items;
-                        console.log("Received user videos:", videoItems);
-    
-                        // Lọc video có #ChillUS trong description
-                        const filteredVideoItems = videoItems.filter((video: any) =>
-                            video.snippet.description.includes("#ChillUS")
-                        );
-    
-                        // Nếu có video hợp lệ, lấy chi tiết video (view/like/comment) từ videoIds
-                        if (filteredVideoItems.length > 0) {
-                            const videoIds = filteredVideoItems.map((v: any) => v.id.videoId).join(',');
-    
-                            const statsResponse = await axios.get(
-                                'https://www.googleapis.com/youtube/v3/videos',
-                                {
-                                    params: {
-                                        part: 'snippet,statistics',
-                                        id: videoIds,
-                                    },
-                                    headers: {
-                                        Authorization: `Bearer ${token}`,
-                                    },
-                                }
-                            );
-    
+                            });
+
                             const videoStats = statsResponse.data.items.map((video: any) => ({
                                 title: video.snippet.title,
                                 videoId: video.id,
@@ -139,12 +133,12 @@ function DashBoard() {
                                 comments: video.statistics.commentCount,
                                 publishedAt: video.snippet.publishedAt,
                             }));
-    
+
                             // Cập nhật video stats vào state và localStorage
                             setVideoInformation(videoStats);
                             localStorage.setItem('videoInformation', JSON.stringify(videoStats));
                         } else {
-                            console.log("No videos found with #ChillUS in description.");
+                            console.log('No videos found with #ChillUS in description.');
                         }
                     } catch (err) {
                         console.error(err);
@@ -152,12 +146,11 @@ function DashBoard() {
                         setIsLoading(false);
                     }
                 };
-    
+
                 fetchVideoStats();
             }
         }
     }, [navigate]);
-    
 
     // Gộp dữ liệu theo ngày
     const aggregatedData: Record<string, { views: number; likes: number; comments: number }> = {};
@@ -321,7 +314,7 @@ function DashBoard() {
                     />
                 </div>
                 <div className={clsx(styles.chartContainer)}>
-                    <DataChart />
+                    <DataChart videosLength={videoInWeb.length} />
                 </div>
             </div>
         </div>

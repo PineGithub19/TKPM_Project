@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import styles from './SearchBar.module.css';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass, faClockRotateLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDebounce from '../../../../../hooks/useDebounce';
 
@@ -16,6 +16,7 @@ interface VideoInformation {
     imageId: string;
     title: string;
     author: string;
+    genre: string;
     background: string;
     createdAt: string;
     isFinished: boolean;
@@ -131,7 +132,25 @@ function SeearchBar() {
                         )}
                         onClick={() => handleInputSelection(video)}
                     >
-                        <img src={video.background} className={clsx(styles.searchResultImage)} />
+                        <div className={clsx('position-relative')}>
+                            <img src={video.background} className={clsx(styles.searchResultImage)} />
+                            <FontAwesomeIcon
+                                icon={video.isFinished ? faCheck : faClockRotateLeft}
+                                className={clsx(
+                                    'fs-5',
+                                    'position-absolute',
+                                    'start-0',
+                                    'bottom-0',
+                                    'ms-1',
+                                    'mb-1',
+                                    'fs-6',
+                                    {
+                                        [styles.pendingICon]: !video.isFinished,
+                                        [styles.completedIcon]: video.isFinished,
+                                    },
+                                )}
+                            />
+                        </div>
                         <div
                             className={clsx(
                                 'd-flex',
@@ -144,9 +163,7 @@ function SeearchBar() {
                         >
                             <div className={clsx('d-flex', 'justify-content-between', 'w-100')}>
                                 <h5 className={clsx('text-black')}>{video.title}</h5>
-                                <span className={clsx('text-black', 'text-black-50')}>
-                                    {video.isFinished ? 'Finished' : 'Unfinished'}
-                                </span>
+                                <span className={clsx('text-black', 'text-black-50')}>{video.genre}</span>
                             </div>
                             <div className={clsx('d-flex', 'justify-content-between', 'w-100')}>
                                 <span className={clsx('text-black')}>{video.author}</span>

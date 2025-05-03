@@ -17,10 +17,10 @@ interface LocationState {
     voicesList?: string[];
     selectedLiterature?: { content: string; title: string };
 
-    promptId?: string,
-    scriptPromptId?: string,
-    voicePromptId?: string,
-    imagePromptId?: string,
+    promptId?: string;
+    scriptPromptId?: string;
+    voicePromptId?: string;
+    imagePromptId?: string;
 }
 
 type IconKeys =
@@ -46,16 +46,16 @@ const EditVideo: React.FC = () => {
     const [voicesList, setVoicesList] = useState<string[]>(state?.voicesList || []);
     const [selectedLiterature] = useState<{ content: string; title: string } | null>(state?.selectedLiterature || null);
 
-    const [promptId] = useState<string>(state?.promptId || '');
-    const [scriptPromptId] = useState<string>(state?.scriptPromptId || '');
-    const [voicePromptId] = useState<string>(state?.voicePromptId || '');
-    const [imagePromptId] = useState<string>(state?.imagePromptId || '');
+    const [promptId, setPromptId] = useState<string>(state?.promptId || '');
+    const [scriptPromptId, setScriptId] = useState<string>(state?.scriptPromptId || '');
+    const [voicePromptId, setVoicePromptId] = useState<string>(state?.voicePromptId || '');
+    const [imagePromptId, setImagePromptId] = useState<string>(state?.imagePromptId || '');
 
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number>(0);
 
     const [selectedIcon, setSelectedIcon] = useState<IconKeys>('iconStyle');
     const [selectedRatio, setSelectedRatio] = useState<string>('16:9');
-    
+
     const introImageRef = useRef<HTMLDivElement | null>(null);
 
     const [height, setHeight] = useState<number>(0);
@@ -87,6 +87,27 @@ const EditVideo: React.FC = () => {
         checkedImagesList.length > 0 && checkedImagesList[0] ? checkedImagesList[0] : '/anime.png',
     );
 
+    useEffect(() => {
+        if (state) {
+            setScriptSegments(state?.scriptSegments || []);
+            setCheckedImagesList(state?.checkedImagesList || []);
+            setVoicesList(state?.voicesList || []);
+
+            setPromptId(state?.promptId || '');
+            setScriptId(state?.scriptPromptId || '');
+            setVoicePromptId(state?.voicePromptId || '');
+            setImagePromptId(state?.imagePromptId || '');
+        }
+    }, [state]);
+
+    useEffect(() => {
+        if (checkedImagesList.length > 0) {
+            setSelectedImage(checkedImagesList[0]);
+        } else {
+            setSelectedImage(null);
+        }
+    }, [checkedImagesList]);
+
     // Log data from CreateVideo if needed
     useEffect(() => {
         console.log('Received from CreateVideo:', {
@@ -100,7 +121,6 @@ const EditVideo: React.FC = () => {
             scriptPromptId,
             voicePromptId,
             imagePromptId,
-            
         });
     }, [scriptSegments, checkedImagesList, voicesList]);
 
@@ -494,7 +514,7 @@ const EditVideo: React.FC = () => {
 
     //quay lại create video và vẫn giữ các thông tin cũ:
     const backToEditPage = () => {
-        const hasFetchedPromptId:boolean = true;
+        const hasFetchedPromptId: boolean = true;
         navigate('/create-video', {
             state: {
                 scriptSegments,
@@ -510,7 +530,7 @@ const EditVideo: React.FC = () => {
                 imagePromptId,
             },
         });
-    }
+    };
 
     return (
         <div className={styles.container}>
@@ -520,7 +540,7 @@ const EditVideo: React.FC = () => {
                     <button onClick={backToEditPage} className={styles.backButton}>
                         <img src="/arrow_left_black.png" alt="Back" className={styles.arrowIcon} />
                     </button>
-                    <span className={styles.title}>Edit Video</span> 
+                    <span className={styles.title}>Edit Video</span>
                 </div>
 
                 <HeaderCategory selectedIcon={selectedIcon} />
