@@ -432,7 +432,7 @@ const EditVideo: React.FC = () => {
                 images,
                 resolution: getResolutionFromRatio(selectedRatio),
                 videoDuration: 5,
-                backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/video/audios/background.mp3`,
+                backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
                 backgroundMusicVolume: volume / 100,
                 cleanupTemp: false,
             };
@@ -444,10 +444,22 @@ const EditVideo: React.FC = () => {
                 throw new Error('Failed to create video');
             }
 
-            const data = await response.json();
+            // Handle response based on its type
+            let data;
+            if (response.json && typeof response.json === 'function') {
+                data = await response.json();
+            } else {
+                data = response; // Response is already JSON
+            }
+
+            console.log('Video creation response:', data);
 
             // Navigate to export video with the video URL
-            if (response.status === 200) navigate('/export-video', { state: { videoUrl: data.videoUrl } });
+            if (data.outputPath) {
+                navigate('/export-video', { state: { videoUrl: data.outputPath } });
+            } else {
+                throw new Error('No video URL received from server');
+            }
         } catch (error) {
             console.error('Error creating video:', error);
             alert('Failed to create video. Please try again.');

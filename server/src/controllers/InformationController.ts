@@ -20,7 +20,7 @@ interface VideoConfigData {
 interface LiteratureWorkData {
     _id?: string;
     title: string;
-    full_content: { content: string; title: string };
+    full_content: string;
     author: string;
     genre: string;
     summary: string;
@@ -62,7 +62,7 @@ class InformationController {
         try {
             const scriptData: LiteratureWorkData = {
                 title: 'title',
-                full_content: { content: 'default', title: 'default' },
+                full_content: 'default',
                 author: 'author',
                 genre: 'gerne',
                 summary: 'summary',
