@@ -31,24 +31,25 @@ const Login: React.FC = () => {
                 // Lưu token vào localStorage để sử dụng cho các lần truy cập sau
                 localStorage.setItem('googleToken', tokenResponse.access_token);
 
-                // Lưu thời gian hết hạn token (ví dụ: 30 phút từ thời điểm đăng nhập)
-                const expirationTime = new Date().getTime() + 30 * 60 * 1000; // 30 phút
+                // Lưu thời gian hết hạn token
+                const expirationTime = new Date().getTime() + 10 * 24 * 60 * 60 * 1000; // 10 ngày
                 localStorage.setItem('tokenExpiration', expirationTime.toString());
 
-                // Cài đặt hẹn giờ để tự động xóa token sau 30 phút
                 setTimeout(() => {
                     localStorage.removeItem('googleToken');
                     localStorage.removeItem('tokenExpiration');
                     navigate('/login'); // Chuyển hướng về trang login
-                }, 30 * 60 * 1000); // 30 phút
+                }, 10 * 24 * 60 * 60 * 1000); // 10 ngày
     
                 // Gửi thông tin người dùng về server để đăng nhập (nếu cần thiết)
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/google-login`, { email, name }, {
                     withCredentials: true,
                 });
     
+                console.log("Google login response:", response.data);
                 if (response.data.status === 'OK') {
                     // Lấy video từ tài khoản người dùng thông qua YouTube API
+                    console.log("Fetching user videos from YouTube API...");
                     const youtubeResponse = await axios.get(
                         'https://www.googleapis.com/youtube/v3/search',
                         {
@@ -64,6 +65,7 @@ const Login: React.FC = () => {
                         }
                     );
     
+                    console.log("Received user videos:", youtubeResponse.data.items);
                     const videoItems = youtubeResponse.data.items;
                     console.log("Received user videos:", videoItems);
     
