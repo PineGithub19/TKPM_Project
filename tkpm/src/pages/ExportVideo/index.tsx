@@ -4,11 +4,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import clsx from "clsx";
 
 const resolutionOptions = ["360p", "720p", "1080p", "4k"];
-const videoUrl = "../../public/videodemo.mp4";
 
 function ExportVideo() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { videoUrl } = location.state || {}; // Lấy videoUrl từ state đã truyền
 
     const [selectedResolution, setResolution] = useState<string>("720p");
     const [showModal, setShowModal] = useState(false);
@@ -48,9 +48,11 @@ function ExportVideo() {
     const handleSubmit = () => {
         const updatedDescription = description + " #ChillUS";
         
+        // Truyền cả videoUrl để server có thể sử dụng đúng video
         const query = new URLSearchParams({
             title,
-            description: updatedDescription
+            description: updatedDescription,
+            videoUrl: encodeURIComponent(videoUrl) // Encode để tránh vấn đề với ký tự đặc biệt
         }).toString();
     
         window.location.href = `http://localhost:3000/api/upload/auth?${query}`;
@@ -78,10 +80,14 @@ function ExportVideo() {
 
             <div className={styles.body}>
                 <div className={styles.introImageWrapper}>
-                    <video controls className={`${styles.previewImage}`} src={videoUrl}>
-                        <source src={videoUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
+                    {videoUrl ? (
+                        <video controls className={`${styles.previewImage}`} src={videoUrl}>
+                            <source src={videoUrl} type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    ) : (
+                        <div className={styles.noVideo}>Không có video để hiển thị</div>
+                    )}
                 </div>
             </div>
 
@@ -138,7 +144,7 @@ function ExportVideo() {
                         onChange={(e) => setDescription(e.target.value)}
                     />
                     <div style={{ marginTop: "10px", display: "flex", gap: "30px" }}>
-                        <button className={styles.submitButton} onClick={handleSubmit}>
+                        <button className={styles.submitButton} onClick={handleSubmit} disabled={!videoUrl}>
                             Đăng lên YouTube
                         </button>
                         <button className={styles.cancelButton} onClick={handleCancel}>
