@@ -9,17 +9,7 @@ interface LoadingComponentProps {
 
 function LoadingComponent({ customClassName, description = '', isOverlay = false }: LoadingComponentProps) {
     const loader = (
-        <div
-            className={clsx(
-                'd-flex',
-                'flex-column',
-                'align-items-center',
-                'justify-content-center',
-                'mb-4',
-                'mt-4',
-                customClassName,
-            )}
-        >
+        <div className={clsx('d-flex', 'flex-column', 'align-items-center', 'justify-content-center', customClassName)}>
             <div className={styles.loader}></div>
             <p className={clsx('mt-2', 'text-white', 'fs-5')}>{description}</p>
         </div>

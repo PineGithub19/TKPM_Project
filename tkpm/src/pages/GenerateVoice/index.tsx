@@ -7,7 +7,6 @@ import { VoiceRecorder } from '../../components/RecordVoice';
 import clsx from 'clsx';
 import LoadingComponent from '../../components/Loading';
 
-
 const { Option } = Select;
 const { TabPane } = Tabs;
 
@@ -40,14 +39,12 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     voicesList = [],
     onComplete,
 }) => {
-
     useEffect(() => {
         console.log('Prompt ID:', promptId);
         console.log('Script Segments:', scriptSegments);
         console.log('Script Title:', scriptTitle);
         console.log('voice list: ', voicesList);
     }, [promptId, scriptSegments, scriptTitle, voicesList]);
-
 
     const [isTranslating, setIsTranslating] = useState(false);
 
@@ -64,7 +61,6 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     const [recordingMode, setRecordingMode] = useState(false); // State để kiểm soát chế độ ghi âm
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number | null>(null); // Segment đang được chọn để ghi âm
 
-
     useEffect(() => {
         const translateSegments = async () => {
             try {
@@ -76,7 +72,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                             audioUrl: null,
                             status: 'idle',
                             index,
-                        }))
+                        })),
                     );
                     return;
                 }
@@ -93,7 +89,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                     setTranslatedSegments(translatedSegments);
 
                     const segmentFromThird = translatedSegments.slice(2);
-                    
+
                     // Nếu không có voicesList, sử dụng translatedSegments để tạo voiceSegments
                     if (!voicesList || voicesList.length === 0) {
                         setVoiceSegments(
@@ -115,7 +111,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 setIsTranslating(false);
             }
         };
-        
+
         // Nếu có voicesList, sử dụng nó để tạo voiceSegments với text từ scriptSegments
         if (voicesList && voicesList.length > 0 && scriptSegments && scriptSegments.length > 0) {
             setVoiceSegments(
@@ -126,12 +122,11 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                     index,
                 })),
             );
-        } 
+        }
         // Nếu chỉ có scriptSegments mà không có voicesList
         else if (scriptSegments && scriptSegments.length > 0) {
             translateSegments();
         }
-
     }, [scriptSegments, voicesList, currentLanguage]);
 
     const onFinish = async (values: VoiceGenerationForm) => {
@@ -223,8 +218,11 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             voiceSegments.forEach((voice) => {
                 if (voice.status === 'success' && voice.audioUrl) list_voice.push(voice.audioUrl);
             });
-
-            onComplete(list_voice, translatedSegments);
+            if (translatedSegments.length > 0) {
+                onComplete(list_voice, translatedSegments);
+            }else {
+                onComplete(list_voice, scriptSegments);
+            }
         }
     };
 
@@ -321,27 +319,6 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             )}
         </Form>
     );
-
-    const renderRecorder = () => {
-        if (!recordingMode) return null;
-
-        return (
-            <div className={styles.recorderOverlay}>
-                <Card className={styles.recorderCard}>
-                    <h3 className={styles.recorderTitle}>
-                        Ghi âm cho phân đoạn #{(selectedSegmentIndex !== null ? selectedSegmentIndex : 0) + 1}
-                    </h3>
-                    <p className={styles.recorderText}>
-                        {selectedSegmentIndex !== null && voiceSegments[selectedSegmentIndex]?.text}
-                    </p>
-                    <VoiceRecorder onRecordingComplete={handleRecordingComplete} singleRecordingMode={true} />
-                    <Button onClick={cancelRecording} className={styles.cancelButton}>
-                        Hủy ghi âm
-                    </Button>
-                </Card>
-            </div>
-        );
-    };
 
     const renderBatchVoiceGenerator = () => (
         <div className={styles.batchContainer}>
@@ -518,17 +495,28 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                         Tải xuống
                                     </a>
                                 </div>
-                                {segment.isRecorded && (
-                                    <div className={styles.recordBadge}>Đã ghi âm</div>
-                                )}
+                                {segment.isRecorded && <div className={styles.recordBadge}>Đã ghi âm</div>}
+                            </div>
+                        )}
+
+                        {/* Show the recorder component directly under this segment if it's selected */}
+                        {recordingMode && selectedSegmentIndex === index && (
+                            <div className={styles.recorderContainer}>
+                                <Card className={styles.recorderCard}>
+                                    <h3 className={styles.recorderTitle}>
+                                        Ghi âm cho phân đoạn #{index + 1}
+                                    </h3>
+                                    <p className={styles.recorderText}>{segment.text}</p>
+                                    <VoiceRecorder onRecordingComplete={handleRecordingComplete} singleRecordingMode={true} />
+                                    <Button onClick={cancelRecording} className={styles.cancelButton}>
+                                        Hủy ghi âm
+                                    </Button>
+                                </Card>
                             </div>
                         )}
                     </Card>
                 ))}
             </div>
-
-        {/* Phần hiển thị component ghi âm khi được kích hoạt */}
-        {renderRecorder()}
         </div>
     );
 

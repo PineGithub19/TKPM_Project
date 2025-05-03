@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import StableDiffusionConfiguration from '../StableDiffusionConfiguration/StableDiffusionConfiguration';
+import './ImagesConfiguration.module.css';
 
 export interface ImageConfig {
     steps: number;
@@ -72,7 +73,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
     return (
         <div className="p-4">
             <div className="container">
-                <h4 className="mb-4">Image Generation Settings</h4>
+                <h3 className="mb-4">Chọn loại ảnh</h3>
                 <div className="mb-4">
                     <div className="d-flex gap-3">
                         <div className="form-check">
@@ -84,8 +85,8 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                 checked={generationType === 'static'}
                                 onChange={() => handleGenerationTypeChange('static')}
                             />
-                            <label className="form-check-label" htmlFor="staticType">
-                                Static Image
+                            <label className="form-check-label text-white fs-5" htmlFor="staticType">
+                                Ảnh tĩnh
                             </label>
                         </div>
                         <div className="form-check">
@@ -97,14 +98,14 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                 checked={generationType === 'motion'}
                                 onChange={() => handleGenerationTypeChange('motion')}
                             />
-                            <label className="form-check-label" htmlFor="motionType">
-                                Motion Image (GIF)
+                            <label className="form-check-label text-white fs-5" htmlFor="motionType">
+                                Ảnh động (GIF)
                             </label>
                         </div>
                     </div>
                 </div>
                 <div className="mb-4">
-                    <h5>Model AI Type</h5>
+                    <h3 className="mb-4">Chọn mô hình AI</h3>
                     <div className="d-flex gap-3">
                         {generationType === 'static' && (
                             <div className="form-check">
@@ -116,7 +117,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                     checked={modelAIType === 'gemini'}
                                     onChange={() => handleModelAITypeChange('gemini')}
                                 />
-                                <label className="form-check-label" htmlFor="geminiType">
+                                <label className="form-check-label text-white fs-5" htmlFor="geminiType">
                                     Gemini
                                 </label>
                             </div>
@@ -130,7 +131,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                                 checked={modelAIType === 'stable_diffusion'}
                                 onChange={() => handleModelAITypeChange('stable_diffusion')}
                             />
-                            <label className="form-check-label" htmlFor="stableDiffusionType">
+                            <label className="form-check-label text-white fs-5" htmlFor="stableDiffusionType">
                                 Stable Diffusion
                             </label>
                         </div>
@@ -145,7 +146,7 @@ const ImagesConfiguration: React.FC<ImagesConfigurationProps> = ({ onConfigChang
                     />
                 )}
                 {modelAIType === 'gemini' && generationType === 'static' && (
-                    <div className="alert alert-info">Gemini model configuration is not available yet.</div>
+                    <div className="alert alert-info">Cấu hình cho mô hình Gemini chưa có sẵn.</div>
                 )}
             </div>
         </div>

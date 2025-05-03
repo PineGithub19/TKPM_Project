@@ -305,8 +305,9 @@ function CreateVideo() {
                             <div className="create-video-image-container">
                                 <ImagePrompt
                                     promptId={imagePromptId}
-                                    scriptSegments={imagepromptSegments}
+                                    scriptSegments={imagepromptSegments.length > 0 ? imagepromptSegments : scriptSegments} // Kiểm tra và gán giá trị
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
+                                    checkedImagesList={checkedImagesList}
                                 />
                             </div>
                         )}

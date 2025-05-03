@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
 import ImagesConfiguration, { ImageConfig } from './ImagePromptComponents/ImagesConfiguration';
 import ImagesForVideo from './ImagePromptComponents/ImagesForVideo';
@@ -9,10 +9,12 @@ function ImagePrompt({
     promptId,
     scriptSegments = [],
     handleCheckedImagesListComplete,
+    checkedImagesList,
 }: {
     promptId?: string;
     scriptSegments?: string[];
     handleCheckedImagesListComplete?: (images: string[]) => void;
+    checkedImagesList: string[];
 }) {
     const [activeTab, setActiveTab] = useState<string>('1');
     const [config, setConfig] = useState<{
@@ -50,12 +52,19 @@ function ImagePrompt({
         setConfig(newConfig);
     };
 
+    useEffect(() => {
+        console.log('CHECK THONG TIN TRONG ImagePrompt: ', {
+            checkedImagesList,
+            scriptSegments,
+        });
+    }, [checkedImagesList, scriptSegments]);
+
     return (
-        <Tabs activeKey={activeTab} onChange={handleTabChange}>
-            <TabPane tab="Images Configuration" key="1">
+        <Tabs activeKey={activeTab} onChange={handleTabChange} className="custom-tabs">
+            <TabPane tab="Cấu hình" key="1" className="custom-tab-pane">
                 <ImagesConfiguration onConfigChange={handleConfigChange} />
             </TabPane>
-            <TabPane tab="Images Generation" key="2">
+            <TabPane tab="Tạo ảnh" key="2" className="custom-tab-pane">
                 <ImagesForVideo
                     scriptSegments={scriptSegments}
                     promptId={promptId}
@@ -63,6 +72,7 @@ function ImagePrompt({
                     imageConfig={config.imageConfig}
                     generationType={config.generationType}
                     modelAIType={config.modelAIType}
+                    checkedImagesList={checkedImagesList}
                 />
             </TabPane>
         </Tabs>
