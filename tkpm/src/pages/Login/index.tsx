@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+declare global {
+    interface Window {
+        google?: any;
+        gapi?: any;
+    }
+}
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
@@ -9,6 +16,19 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [videoInformation, setVideoInformation] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Xóa dữ liệu lưu trữ mỗi khi trang login được truy cập
+        localStorage.removeItem('googleToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('videoInformation');
+        sessionStorage.clear();  // Clear sessionStorage nếu cần
+
+        // Reset state để đảm bảo không có dữ liệu cũ
+        setEmail('');
+        setPassword('');
+        setError('');
+    }, []);
 
     const handleLogin = () => {
         // Xử lý đăng nhập với email và mật khẩu
@@ -31,10 +51,13 @@ const Login: React.FC = () => {
     };
 
     const handleGoogleLogin = useGoogleLogin({
-        scope: 'https://www.googleapis.com/auth/youtube.readonly',
+        scope: 'https://www.googleapis.com/auth/youtube.force-ssl',
+        prompt: 'consent',
         onSuccess: async (tokenResponse) => {
+            clearGoogleSession(); // Xoá session trước khi làm gì
+    
             try {
-                // Lấy thông tin người dùng từ Google API
+                // Lấy thông tin người dùng
                 const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: {
                         Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -43,64 +66,56 @@ const Login: React.FC = () => {
     
                 const { email, name } = res.data;
     
-                // Lưu token vào localStorage để sử dụng cho các lần truy cập sau
+                // Lưu token và thời gian hết hạn
                 localStorage.setItem('googleToken', tokenResponse.access_token);
-
-                // Lưu thời gian hết hạn token
-                const expirationTime = new Date().getTime() + 10 * 24 * 60 * 60 * 1000; // 10 ngày
+                const expirationTime = new Date().getTime() + 10 * 24 * 60 * 60 * 1000;
                 localStorage.setItem('tokenExpiration', expirationTime.toString());
-
-                setTimeout(() => {
-                    localStorage.removeItem('googleToken');
-                    localStorage.removeItem('tokenExpiration');
-                    navigate('/login'); // Chuyển hướng về trang login
-                }, 10 * 24 * 60 * 60 * 1000); // 10 ngày
     
-                // Gửi thông tin người dùng về server để đăng nhập (nếu cần thiết)
+                // Gửi thông tin user về server để xử lý
                 const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/google-login`, { email, name }, {
                     withCredentials: true,
                 });
     
-                console.log("Google login response:", response.data);
                 if (response.data.status === 'OK') {
-                    // Lấy video từ tài khoản người dùng thông qua YouTube API
-                    console.log("Fetching user videos from YouTube API...");
-                    const youtubeResponse = await axios.get(
-                        'https://www.googleapis.com/youtube/v3/search',
-                        {
-                            params: {
-                                part: 'snippet',
-                                forMine: true,
-                                type: 'video',
-                                maxResults: 10,
-                            },
-                            headers: {
-                                Authorization: `Bearer ${tokenResponse.access_token}`,
-                            },
-                        }
-                    );
+                    // Lấy thông tin kênh YouTube
+                    const channelRes = await axios.get("https://www.googleapis.com/youtube/v3/channels", {
+                        params: {
+                            part: "contentDetails",
+                            mine: true
+                        },
+                        headers: {
+                            Authorization: `Bearer ${tokenResponse.access_token}`,
+                        },
+                    });
     
-                    console.log("Received user videos:", youtubeResponse.data.items);
-                    const videoItems = youtubeResponse.data.items;
-                    console.log("Received user videos:", videoItems);
+                    const uploadsPlaylistId = channelRes.data.items[0].contentDetails.relatedPlaylists.uploads;
     
-                    // Lấy chi tiết video (view/like/comment) từ videoIds
-                    const videoIds = videoItems.map((v: any) => v.id.videoId).join(',');
+                    const playlistItemsRes = await axios.get("https://www.googleapis.com/youtube/v3/playlistItems", {
+                        params: {
+                            part: "snippet",
+                            maxResults: 10,
+                            playlistId: uploadsPlaylistId,
+                        },
+                        headers: {
+                            Authorization: `Bearer ${tokenResponse.access_token}`,
+                        },
+                    });
     
-                    const statsResponse = await axios.get(
-                        'https://www.googleapis.com/youtube/v3/videos',
-                        {
-                            params: {
-                                part: 'snippet,statistics',
-                                id: videoIds,
-                            },
-                            headers: {
-                                Authorization: `Bearer ${tokenResponse.access_token}`,
-                            },
-                        }
-                    );
+                    const videoIds = playlistItemsRes.data.items.map(
+                        (item: any) => item.snippet.resourceId.videoId
+                    ).join(',');
     
-                    const videoStats = statsResponse.data.items.map((video: any) => ({
+                    const statsRes = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
+                        params: {
+                            part: "snippet,statistics",
+                            id: videoIds,
+                        },
+                        headers: {
+                            Authorization: `Bearer ${tokenResponse.access_token}`,
+                        },
+                    });
+    
+                    const videoStats = statsRes.data.items.map((video: any) => ({
                         title: video.snippet.title,
                         videoId: video.id,
                         views: video.statistics.viewCount,
@@ -109,31 +124,42 @@ const Login: React.FC = () => {
                         publishedAt: video.snippet.publishedAt,
                     }));
     
-                    // Lưu dữ liệu video vào localStorage để sử dụng cho các lần tải lại trang
                     localStorage.setItem('videoInformation', JSON.stringify(videoStats));
-    
-                    // Cập nhật state videoInformation trong component
                     setVideoInformation(videoStats);
     
-                    console.log("Video stats being sent to dashboard:", videoStats);
-    
-                    // Điều hướng người dùng đến trang dashboard, và truyền video information
                     navigate('/dashboard', { state: { videoInformation: videoStats } });
                 } else {
-                    // Nếu login với Google không thành công
                     setError('Google login failed on server');
                 }
             } catch (err) {
                 console.error(err);
-                // Thông báo lỗi nếu có lỗi trong quá trình đăng nhập hoặc lấy thông tin
                 setError('Google login failed');
             }
         },
         onError: () => {
-            // Nếu có lỗi xảy ra trong quá trình đăng nhập với Google
             setError('Google login failed');
         },
     });
+    
+    
+    const clearGoogleSession = () => {
+        localStorage.removeItem('googleToken');
+        localStorage.removeItem('tokenExpiration');
+        localStorage.removeItem('videoInformation');
+    
+        // Xoá session tự động ghi nhớ tài khoản Google
+        if (window.google?.accounts?.id) {
+            window.google.accounts.id.disableAutoSelect();
+        }
+    
+        // Nếu dùng gapi
+        if (window.gapi?.auth2) {
+            const auth2 = window.gapi.auth2.getAuthInstance();
+            if (auth2) {
+                auth2.signOut().then(() => auth2.disconnect());
+            }
+        }
+    };
     
 
     return (
@@ -194,7 +220,9 @@ const Login: React.FC = () => {
                     {/* Google Sign In */}
                     <button
                         className="btn w-100 mt-3"
-                        onClick={() => handleGoogleLogin()}
+                        onClick={
+                            
+                            () => handleGoogleLogin()}
                         style={{
                             display: 'flex',
                             alignItems: 'center',

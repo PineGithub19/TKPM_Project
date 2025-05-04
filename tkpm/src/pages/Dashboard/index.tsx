@@ -67,90 +67,60 @@ function DashBoard() {
     const handleDeleteVideo = (videoId: string) => {
         setVideoInWeb((prevVideos) => prevVideos.filter((video) => video.videoId !== videoId));
     };
-
+    
     useEffect(() => {
         const token = localStorage.getItem('googleToken');
-        const tokenExpiration = localStorage.getItem('tokenExpiration'); // Lấy thời gian hết hạn token
+        const tokenExpiration = localStorage.getItem('tokenExpiration');
 
-        if (!token || !tokenExpiration) {
-            // Nếu không có token hoặc không có thời gian hết hạn, điều hướng người dùng đến trang login
+        if (!token || !tokenExpiration || new Date().getTime() > parseInt(tokenExpiration)) {
+            localStorage.removeItem('googleToken');
+            localStorage.removeItem('tokenExpiration');
             navigate('/login');
         } else {
-            const currentTime = new Date().getTime();
+            const videosFromState = location.state?.videoInformation;
+            const videosFromStorage = localStorage.getItem('videoInformation');
 
-            // Kiểm tra xem token đã hết hạn chưa
-            if (currentTime > parseInt(tokenExpiration)) {
-                // Nếu hết hạn, xóa token và yêu cầu người dùng đăng nhập lại
-                localStorage.removeItem('googleToken');
-                localStorage.removeItem('tokenExpiration');
-                navigate('/login');
+            if (videosFromState) {
+                setVideoInformation(videosFromState);
+            } else if (videosFromStorage) {
+                try {
+                    setVideoInformation(JSON.parse(videosFromStorage));
+                } catch (err) {
+                    console.error('Failed to parse videoInformation from localStorage', err);
+                }
             } else {
-                // Nếu token vẫn còn hiệu lực, lấy video stats mới nhất từ API của YouTube
-                const fetchVideoStats = async () => {
-                    try {
-                        setIsLoading(true);
-
-                        // Gọi API của YouTube để lấy video mới nhất
-                        const youtubeResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-                            params: {
-                                part: 'snippet',
-                                forMine: true,
-                                type: 'video',
-                                maxResults: 10,
-                            },
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                            },
-                        });
-
-                        const videoItems = youtubeResponse.data.items;
-                        console.log('Received user videos:', videoItems);
-
-                        // Lọc video có #ChillUS trong description
-                        const filteredVideoItems = videoItems.filter((video: any) =>
-                            video.snippet.description.includes('#ChillUS'),
-                        );
-
-                        // Nếu có video hợp lệ, lấy chi tiết video (view/like/comment) từ videoIds
-                        if (filteredVideoItems.length > 0) {
-                            const videoIds = filteredVideoItems.map((v: any) => v.id.videoId).join(',');
-
-                            const statsResponse = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
-                                params: {
-                                    part: 'snippet,statistics',
-                                    id: videoIds,
-                                },
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            });
-
-                            const videoStats = statsResponse.data.items.map((video: any) => ({
-                                title: video.snippet.title,
-                                videoId: video.id,
-                                views: video.statistics.viewCount,
-                                likes: video.statistics.likeCount,
-                                comments: video.statistics.commentCount,
-                                publishedAt: video.snippet.publishedAt,
-                            }));
-
-                            // Cập nhật video stats vào state và localStorage
-                            setVideoInformation(videoStats);
-                            localStorage.setItem('videoInformation', JSON.stringify(videoStats));
-                        } else {
-                            console.log('No videos found with #ChillUS in description.');
-                        }
-                    } catch (err) {
-                        console.error(err);
-                    } finally {
-                        setIsLoading(false);
-                    }
-                };
-
-                fetchVideoStats();
+                console.warn('No videoInformation found in state or storage.');
             }
         }
-    }, [navigate]);
+    }, [navigate, location.state]);
+
+    useEffect(() => {
+        const fetchVideoInformation = async () => {
+            try {
+                setIsLoading(true);
+                const response = await request.get('/video/all');
+
+                if (response) {
+                    setVideoInWeb(
+                        response.videos.map((item: VideoConfigData) => ({
+                            videoId: item._id,
+                            scriptId: item.literature_work_id,
+                            voiceId: item.voice_config,
+                            imageId: item.image_config,
+                            is_finished: item.is_finished,
+                        })) || [],
+                    );
+                }
+            } catch (error) {
+                console.error('Error fetching video information:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchVideoInformation();
+        return () => setVideoInWeb([]);
+    }, []);
 
     // Gộp dữ liệu theo ngày
     const aggregatedData: Record<string, { views: number; likes: number; comments: number }> = {};
