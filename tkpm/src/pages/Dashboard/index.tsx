@@ -67,60 +67,81 @@ function DashBoard() {
     const handleDeleteVideo = (videoId: string) => {
         setVideoInWeb((prevVideos) => prevVideos.filter((video) => video.videoId !== videoId));
     };
-    
+
     useEffect(() => {
         const token = localStorage.getItem('googleToken');
-        const tokenExpiration = localStorage.getItem('tokenExpiration');
+        const tokenExpiration = localStorage.getItem('tokenExpiration'); // Lấy thời gian hết hạn token
 
-        if (!token || !tokenExpiration || new Date().getTime() > parseInt(tokenExpiration)) {
-            localStorage.removeItem('googleToken');
-            localStorage.removeItem('tokenExpiration');
+        if (!token || !tokenExpiration) {
             navigate('/login');
         } else {
-            const videosFromState = location.state?.videoInformation;
-            const videosFromStorage = localStorage.getItem('videoInformation');
+            const currentTime = new Date().getTime();
 
-            if (videosFromState) {
-                setVideoInformation(videosFromState);
-            } else if (videosFromStorage) {
-                try {
-                    setVideoInformation(JSON.parse(videosFromStorage));
-                } catch (err) {
-                    console.error('Failed to parse videoInformation from localStorage', err);
-                }
+            if (currentTime > parseInt(tokenExpiration)) {
+                localStorage.removeItem('googleToken');
+                localStorage.removeItem('tokenExpiration');
+                navigate('/login');
             } else {
-                console.warn('No videoInformation found in state or storage.');
+                const fetchVideoStats = async () => {
+                    try {
+                        setIsLoading(true);
+
+                        console.log('Fetching video stats...');
+                        const youtubeResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+                            params: {
+                                part: 'snippet',
+                                forMine: true,
+                                type: 'video',
+                                maxResults: 10,
+                            },
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+                        console.log('Youtube response:', youtubeResponse.data);
+                        const videoItems = youtubeResponse.data.items;
+
+                        // Lọc video có #ChillUS trong description
+                        const filteredVideoItems = videoItems.filter((video: any) =>
+                            video.snippet.description.includes('#ChillUS'),
+                        );
+
+                        if (filteredVideoItems.length > 0) {
+                            const videoIds = filteredVideoItems.map((v: any) => v.id.videoId).join(',');
+
+                            const statsResponse = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+                                params: {
+                                    part: 'snippet,statistics',
+                                    id: videoIds,
+                                },
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            });
+
+                            const videoStats = statsResponse.data.items.map((video: any) => ({
+                                videoId: video.id,
+                                views: video.statistics.viewCount,
+                                likes: video.statistics.likeCount,
+                                comments: video.statistics.commentCount,
+                                publishedAt: video.snippet.publishedAt,
+                            }));
+
+                            setVideoInformation(videoStats);
+                        } else {
+                            console.log('No videos found with #ChillUS in description.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+
+                fetchVideoStats();
             }
         }
-    }, [navigate, location.state]);
-
-    useEffect(() => {
-        const fetchVideoInformation = async () => {
-            try {
-                setIsLoading(true);
-                const response = await request.get('/video/all');
-
-                if (response) {
-                    setVideoInWeb(
-                        response.videos.map((item: VideoConfigData) => ({
-                            videoId: item._id,
-                            scriptId: item.literature_work_id,
-                            voiceId: item.voice_config,
-                            imageId: item.image_config,
-                            is_finished: item.is_finished,
-                        })) || [],
-                    );
-                }
-            } catch (error) {
-                console.error('Error fetching video information:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchVideoInformation();
-        return () => setVideoInWeb([]);
-    }, []);
+    }, [navigate]);
 
     // Gộp dữ liệu theo ngày
     const aggregatedData: Record<string, { views: number; likes: number; comments: number }> = {};

@@ -15,12 +15,10 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [videoInformation, setVideoInformation] = useState<any[]>([]);
 
     useEffect(() => {
         localStorage.removeItem('googleToken');
         localStorage.removeItem('token');
-        localStorage.removeItem('videoInformation');
         sessionStorage.clear();
 
         setEmail('');
@@ -49,8 +47,6 @@ const Login: React.FC = () => {
     };
 
     const handleGoogleLogin = useGoogleLogin({
-        scope: 'https://www.googleapis.com/auth/youtube.force-ssl',
-        prompt: 'consent',
         onSuccess: async (tokenResponse) => {
             clearGoogleSession(); 
             try {
@@ -74,57 +70,7 @@ const Login: React.FC = () => {
                 });
     
                 if (response.data.status === 'OK') {
-                    // Lấy thông tin kênh YouTube
-                    const channelRes = await axios.get("https://www.googleapis.com/youtube/v3/channels", {
-                        params: {
-                            part: "contentDetails",
-                            mine: true
-                        },
-                        headers: {
-                            Authorization: `Bearer ${tokenResponse.access_token}`,
-                        },
-                    });
-    
-                    const uploadsPlaylistId = channelRes.data.items[0].contentDetails.relatedPlaylists.uploads;
-    
-                    const playlistItemsRes = await axios.get("https://www.googleapis.com/youtube/v3/playlistItems", {
-                        params: {
-                            part: "snippet",
-                            maxResults: 10,
-                            playlistId: uploadsPlaylistId,
-                        },
-                        headers: {
-                            Authorization: `Bearer ${tokenResponse.access_token}`,
-                        },
-                    });
-    
-                    const videoIds = playlistItemsRes.data.items.map(
-                        (item: any) => item.snippet.resourceId.videoId
-                    ).join(',');
-    
-                    const statsRes = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
-                        params: {
-                            part: "snippet,statistics",
-                            id: videoIds,
-                        },
-                        headers: {
-                            Authorization: `Bearer ${tokenResponse.access_token}`,
-                        },
-                    });
-    
-                    const videoStats = statsRes.data.items.map((video: any) => ({
-                        title: video.snippet.title,
-                        videoId: video.id,
-                        views: video.statistics.viewCount,
-                        likes: video.statistics.likeCount,
-                        comments: video.statistics.commentCount,
-                        publishedAt: video.snippet.publishedAt,
-                    }));
-    
-                    localStorage.setItem('videoInformation', JSON.stringify(videoStats));
-                    setVideoInformation(videoStats);
-    
-                    navigate('/dashboard', { state: { videoInformation: videoStats } });
+                    navigate('/dashboard'); // Chuyển hướng đến trang dashboard
                 } else {
                     setError('Google login failed on server');
                 }
@@ -138,17 +84,15 @@ const Login: React.FC = () => {
         },
     });
     
-    
     const clearGoogleSession = () => {
         localStorage.removeItem('googleToken');
         localStorage.removeItem('tokenExpiration');
-        localStorage.removeItem('videoInformation');
-    
+
         // Xoá session tự động ghi nhớ tài khoản Google
         if (window.google?.accounts?.id) {
             window.google.accounts.id.disableAutoSelect();
         }
-    
+
         // Nếu dùng gapi
         if (window.gapi?.auth2) {
             const auth2 = window.gapi.auth2.getAuthInstance();
@@ -157,7 +101,6 @@ const Login: React.FC = () => {
             }
         }
     };
-    
 
     return (
         <div className="d-flex flex-row align-items-center rounded"
@@ -218,7 +161,6 @@ const Login: React.FC = () => {
                     <button
                         className="btn w-100 mt-3"
                         onClick={
-                            
                             () => handleGoogleLogin()}
                         style={{
                             display: 'flex',
