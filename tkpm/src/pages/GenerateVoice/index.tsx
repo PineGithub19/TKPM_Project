@@ -234,6 +234,9 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 const formData = new FormData();
                 formData.append('voice', blob, `recording_${Date.now()}.mp3`);
                 
+                // Thêm flag để server biết đây là file cần chuẩn hóa
+                formData.append('needNormalization', 'true');
+                
                 // Upload file lên server
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/voice/upload`, {
                     method: 'POST',

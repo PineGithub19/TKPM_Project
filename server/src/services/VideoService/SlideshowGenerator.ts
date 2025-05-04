@@ -545,7 +545,7 @@ const user_config: Partial<SlideshowConfig> = {
         height: 1080,
     },
     videoDuration: 5, // Duration per image (seconds)
-    backgroundMusic: 'audios/background.mp3',
+    backgroundMusic: 'videos/audios/background.mp3',
     backgroundMusicVolume: 0.3, // Volume level for background music (0.0 to 1.0)
 };
 
@@ -558,7 +558,7 @@ export default SlideshowGenerator;
 //               {
 //                 "path": "C:/Users/qthan/OneDrive/Desktop/TKPM_new/TKPM_Project/server/src/services/VideoService/images/i1.jpg",
 //                 "audioPath": "C:/Users/qthan/OneDrive/Desktop/TKPM_new/TKPM_Project/server/src/services/VideoService/audios/audio1.mp3",
-//                 "subtitle": "Hoàng hôn buông xuống, lòng người nhẹ tênh long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long",
+//                 "subtitleng hôn buông xuống, lòng người nhẹ tênh long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long",
 //                 "effects": {
 //                   "brightness": 0,
 //                   "contrast": 1,
