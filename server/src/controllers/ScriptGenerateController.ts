@@ -105,7 +105,7 @@ class ScriptGenerateController {
             
             Yêu cầu đầu ra: Trả về JSON gồm 2 phần:
             1. "title": Tiêu đề video hấp dẫn phù hợp với đối tượng "${scriptConfig.audience}"
-            2. "segments": Mảng gồm 10-13 phân đoạn. Mỗi phân đoạn là một object có các trường:
+            2. "segments": Mảng gồm 8 - 10 phân đoạn. Mỗi phân đoạn là một object có các trường:
                - "title": Tên phân đoạn ngắn gọn
                - "content": Lời bình cho phân đoạn (tối đa 50 từ), súc tích và cảm xúc
                - "image_description": Mô tả cảnh hoặc hình ảnh minh họa sống động và chi tiết, thể hiện rõ nội dung phân đoạn. Mô tả cần mang tính hình ảnh cao, nhấn mạnh vào yếu tố cảm xúc, bối cảnh, ánh sáng, màu sắc, biểu cảm nhân vật, và không khí tổng thể. Phong cách hình ảnh phải phù hợp với thể loại tác phẩm, chủ đề nội dung và thị hiếu của ${scriptConfig.audience}. Hướng đến việc tạo ra những bức ảnh giàu tính nghệ thuật, độc đáo và ấn tượng thị giác.            

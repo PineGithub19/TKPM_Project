@@ -452,8 +452,8 @@ const EditVideo: React.FC = () => {
                 images,
                 resolution: getResolutionFromRatio(selectedRatio),
                 videoDuration: 5,
-                backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
-                backgroundMusicVolume: volume / 100,
+                // backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
+                // backgroundMusicVolume: volume / 100,
                 cleanupTemp: false,
             };
 

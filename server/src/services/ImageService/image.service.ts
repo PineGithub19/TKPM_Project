@@ -101,7 +101,7 @@ class ImageService {
             throw new Error('Prompt is required');
         }
 
-        const basePrompt = "Create a rich, vivid, cinematic visual description for a story. Must NOT include any text. Based on the following:";
+        const basePrompt = "Create a rich, vivid, cinematic visual description for a story. Must NOT include any text, any subtitle, any note, ... Based on the following:";
         const fullPrompt = `${basePrompt} ${prompt}`;
 
 

@@ -22,6 +22,10 @@ interface ScriptConfig {
     audience: string;
     tone: string;
     duration: string;
+    customGenre?: string;
+    customAudience?: string;
+    customTone?: string;
+    customDuration?: string;
 }
 
 interface ScriptAutoGenerateProps {
@@ -67,6 +71,10 @@ const ScriptAutoGenerate = ({
         audience: 'general',
         tone: 'formal',
         duration: 'standard',
+        customGenre: '',
+        customAudience: '',
+        customTone: '',
+        customDuration: '',
     });
     const [scriptSegments, setScriptSegments] = useState<string[]>(scriptSegment ? scriptSegment : []);
     const [showSegments, setShowSegments] = useState(false);
@@ -81,6 +89,7 @@ const ScriptAutoGenerate = ({
         { value: 'historical', label: 'Lịch sử' },
         { value: 'dramatic', label: 'Kịch tính' },
         { value: 'comedy', label: 'Hài hước' },
+        { value: 'custom', label: 'Khác' },
     ];
 
     const audienceOptions = [
@@ -90,6 +99,7 @@ const ScriptAutoGenerate = ({
         { value: 'adults', label: 'Người lớn' },
         { value: 'students', label: 'Học sinh / Sinh viên' },
         { value: 'educators', label: 'Giáo viên / Giảng viên' },
+        { value: 'custom', label: 'Khác' },
     ];
 
     const toneOptions = [
@@ -99,12 +109,14 @@ const ScriptAutoGenerate = ({
         { value: 'nostalgic', label: 'Hoài niệm' },
         { value: 'analytical', label: 'Phân tích' },
         { value: 'conversational', label: 'Đối thoại' },
+        { value: 'custom', label: 'Khác' },
     ];
 
     const durationOptions = [
         { value: 'short', label: 'Ngắn (2-3 phút)' },
         { value: 'standard', label: 'Tiêu chuẩn (4-5 phút)' },
         { value: 'long', label: 'Dài (7-10 phút)' },
+        { value: 'custom', label: 'Khác' },
     ];
 
     useEffect(() => {
@@ -143,7 +155,16 @@ const ScriptAutoGenerate = ({
             setError('Không tìm thấy nội dung tác phẩm');
             return;
         }
-        generateScript(scriptContent.content, scriptContent.title, scriptConfig);
+        
+        // Chuẩn bị cấu hình cuối cùng để gửi đi
+        const finalConfig = {
+            genre: scriptConfig.genre === 'custom' ? scriptConfig.customGenre || 'custom' : scriptConfig.genre,
+            audience: scriptConfig.audience === 'custom' ? scriptConfig.customAudience || 'custom' : scriptConfig.audience,
+            tone: scriptConfig.tone === 'custom' ? scriptConfig.customTone || 'custom' : scriptConfig.tone,
+            duration: scriptConfig.duration === 'custom' ? scriptConfig.customDuration || 'custom' : scriptConfig.duration,
+        };
+        
+        generateScript(scriptContent.content, scriptContent.title, finalConfig);
         setConfigMode(false);
     };
 
@@ -333,7 +354,7 @@ const ScriptAutoGenerate = ({
             <div className={clsx(styles.cardHeader)}>
                 <h4 className={clsx(styles.cardTitle)}>Cấu hình kịch bản</h4>
             </div>
-            <div className={clsx(styles.cardBody)}>
+            <div className={clsx(styles.cardBody)} style={{ maxHeight: '55vh' }}>
                 <div className={clsx(styles.inputGroup)}>
                     <div className={clsx(styles.formGroup)}>
                         <label className={clsx(styles.formLabel)}>Thể loại:</label>
@@ -348,6 +369,16 @@ const ScriptAutoGenerate = ({
                                 </option>
                             ))}
                         </select>
+                        {scriptConfig.genre === 'custom' && (
+                            <input
+                                type="text"
+                                className={clsx(styles.formControl, styles.mt2)}
+                                style={{ height: 'auto', marginTop: '0.5rem' }}
+                                placeholder="Nhập thể loại tùy chỉnh"
+                                value={scriptConfig.customGenre}
+                                onChange={(e) => handleConfigChange('customGenre', e.target.value)}
+                            />
+                        )}
                     </div>
 
                     <div className={clsx(styles.formGroup)}>
@@ -363,6 +394,16 @@ const ScriptAutoGenerate = ({
                                 </option>
                             ))}
                         </select>
+                        {scriptConfig.audience === 'custom' && (
+                            <input
+                                type="text"
+                                className={clsx(styles.formControl, styles.mt2)}
+                                style={{ height: 'auto', marginTop: '0.5rem' }}
+                                placeholder="Nhập đối tượng tùy chỉnh"
+                                value={scriptConfig.customAudience}
+                                onChange={(e) => handleConfigChange('customAudience', e.target.value)}
+                            />
+                        )}
                     </div>
 
                     <div className={clsx(styles.formGroup)}>
@@ -378,6 +419,16 @@ const ScriptAutoGenerate = ({
                                 </option>
                             ))}
                         </select>
+                        {scriptConfig.tone === 'custom' && (
+                            <input
+                                type="text"
+                                className={clsx(styles.formControl, styles.mt2)}
+                                style={{ height: 'auto', marginTop: '0.5rem' }}
+                                placeholder="Nhập giọng điệu tùy chỉnh"
+                                value={scriptConfig.customTone}
+                                onChange={(e) => handleConfigChange('customTone', e.target.value)}
+                            />
+                        )}
                     </div>
 
                     <div className={clsx(styles.formGroup)}>
@@ -393,6 +444,16 @@ const ScriptAutoGenerate = ({
                                 </option>
                             ))}
                         </select>
+                        {scriptConfig.duration === 'custom' && (
+                            <input
+                                type="text"
+                                className={clsx(styles.formControl, styles.mt2)}
+                                style={{ height: 'auto', marginTop: '0.5rem' }}
+                                placeholder="Nhập độ dài tùy chỉnh"
+                                value={scriptConfig.customDuration}
+                                onChange={(e) => handleConfigChange('customDuration', e.target.value)}
+                            />
+                        )}
                     </div>
                 </div>
 
