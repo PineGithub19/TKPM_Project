@@ -10,6 +10,7 @@ import PromptEdit from './EditVideoComponents/PromptEdit/PromptEdit';
 import SoundAndSpeed from './EditVideoComponents/SoundAndSpeed/SoundAndSpeed';
 import ImageEdit from './EditVideoComponents/ImageEdit/ImageEdit';
 import ImageAdjustment from './EditVideoComponents/ImageAdjustment/ImageAdjustment';
+import LoadingComponent from '../../components/Loading';
 
 interface LocationState {
     scriptSegments?: string[];
@@ -377,10 +378,10 @@ const EditVideo: React.FC = () => {
         return () => window.removeEventListener('resize', updateSize);
     }, [selectedRatio]);
 
-    const [loading, setLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleCreateVideo = async () => {
-        setLoading(true);
+        setIsLoading(true);
         try {
             // Create config object from current state
             const images = scriptSegments.map((segment, index) => {
@@ -452,8 +453,8 @@ const EditVideo: React.FC = () => {
                 images,
                 resolution: getResolutionFromRatio(selectedRatio),
                 videoDuration: 5,
-                backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
-                backgroundMusicVolume: volume / 100,
+                // backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
+                // backgroundMusicVolume: volume / 100,
                 cleanupTemp: false,
             };
 
@@ -484,7 +485,7 @@ const EditVideo: React.FC = () => {
             console.error('Error creating video:', error);
             alert('Failed to create video. Please try again.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -776,19 +777,28 @@ const EditVideo: React.FC = () => {
                 <div className={clsx(styles.rightSide)}>
                     <div className={clsx(styles.nextButtonWrapper)}>
                         <button
-                            className={clsx(styles.nextButton, { [styles.disabled]: loading })}
+                            className={clsx(styles.nextButton, { [styles.disabled]: isLoading })}
                             onClick={handleCreateVideo}
-                            disabled={loading}
+                            disabled={isLoading}
                         >
-                            {loading ? (
+                            {/* {isLoading ? (
                                 <span className={styles.loader}></span>
                             ) : (
                                 <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
-                            )}
+                            )} */}
+                            <img src="/arrow_right.png" alt="Next" className={clsx(styles.nextIcon)} />
                         </button>
                     </div>
                 </div>
             </div>
+
+            {isLoading && (
+                <LoadingComponent
+                    customClassName={clsx('position-fixed', 'top-50', 'start-50', 'translate-middle')}
+                    description="Video của bạn đang được tạo ..."
+                    isOverlay={isLoading}
+                />
+            )}
         </div>
     );
 };

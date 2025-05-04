@@ -481,14 +481,19 @@ function generateDrawTextFilter(subtitle: any, resolutionWidth: any, resolutionH
 }
 
 function wrapSubtitle(subtitle: string, maxLineLength: number): string {
-    // Simple text wrapping function
+    // Helper: center a line by padding space in front (works best with monospace fonts)
+    function centerLine(line: string, maxLineLength: number): string {
+        const padding = Math.floor((maxLineLength - line.length) / 2);
+        return ' '.repeat(Math.max(0, padding)) + line;
+    }
+
     const words = subtitle.split(' ');
-    const lines = [];
+    const lines: string[] = [];
     let currentLine = '';
 
     for (const word of words) {
         if ((currentLine + word).length > maxLineLength) {
-            lines.push(currentLine.trim());
+            lines.push(centerLine(currentLine.trim(), maxLineLength));
             currentLine = word + ' ';
         } else {
             currentLine += word + ' ';
@@ -496,11 +501,12 @@ function wrapSubtitle(subtitle: string, maxLineLength: number): string {
     }
 
     if (currentLine.trim()) {
-        lines.push(currentLine.trim());
+        lines.push(centerLine(currentLine.trim(), maxLineLength));
     }
 
     return lines.join('\n');
 }
+
 
 const user_config: Partial<SlideshowConfig> = {
     images: [
