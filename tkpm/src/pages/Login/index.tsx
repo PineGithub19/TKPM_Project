@@ -47,6 +47,7 @@ const Login: React.FC = () => {
     };
 
     const handleGoogleLogin = useGoogleLogin({
+        scope: 'https://www.googleapis.com/auth/youtube.readonly',
         onSuccess: async (tokenResponse) => {
             clearGoogleSession(); 
             try {
@@ -65,12 +66,14 @@ const Login: React.FC = () => {
                 localStorage.setItem('tokenExpiration', expirationTime.toString());
     
                 // Gửi thông tin user về server để xử lý
-                const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/google-login`, { email, name }, {
-                    withCredentials: true,
-                });
+                const response = await axios.post(
+                    `${import.meta.env.VITE_BACKEND_URL}/user/google-login`,
+                    { email, name },
+                    { withCredentials: true }
+                );
     
                 if (response.data.status === 'OK') {
-                    navigate('/dashboard'); // Chuyển hướng đến trang dashboard
+                    navigate('/dashboard');
                 } else {
                     setError('Google login failed on server');
                 }
@@ -83,6 +86,7 @@ const Login: React.FC = () => {
             setError('Google login failed');
         },
     });
+    
     
     const clearGoogleSession = () => {
         localStorage.removeItem('googleToken');
