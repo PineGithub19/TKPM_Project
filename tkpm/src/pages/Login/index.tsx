@@ -18,13 +18,11 @@ const Login: React.FC = () => {
     const [videoInformation, setVideoInformation] = useState<any[]>([]);
 
     useEffect(() => {
-        // Xóa dữ liệu lưu trữ mỗi khi trang login được truy cập
         localStorage.removeItem('googleToken');
         localStorage.removeItem('token');
         localStorage.removeItem('videoInformation');
-        sessionStorage.clear();  // Clear sessionStorage nếu cần
+        sessionStorage.clear();
 
-        // Reset state để đảm bảo không có dữ liệu cũ
         setEmail('');
         setPassword('');
         setError('');
@@ -54,8 +52,7 @@ const Login: React.FC = () => {
         scope: 'https://www.googleapis.com/auth/youtube.force-ssl',
         prompt: 'consent',
         onSuccess: async (tokenResponse) => {
-            clearGoogleSession(); // Xoá session trước khi làm gì
-    
+            clearGoogleSession(); 
             try {
                 // Lấy thông tin người dùng
                 const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
