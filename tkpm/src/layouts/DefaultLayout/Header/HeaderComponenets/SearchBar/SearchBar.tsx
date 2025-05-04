@@ -163,11 +163,11 @@ function SeearchBar() {
                         >
                             <div className={clsx('d-flex', 'justify-content-between', 'w-100')}>
                                 <h5 className={clsx('text-black')}>{video.title}</h5>
-                                <span className={clsx('text-black', 'text-black-50')}>{video.genre}</span>
+                                {/* <span className={clsx('text-black', 'text-black-50')}>{video.genre}</span> */}
                             </div>
                             <div className={clsx('d-flex', 'justify-content-between', 'w-100')}>
-                                <span className={clsx('text-black')}>{video.author}</span>
-                                <span className={clsx('text-black', 'text-black-50')}>{video.createdAt}</span>
+                                {/* <span className={clsx('text-black')}>{video.author}</span> */}
+                                <span className={clsx('text-black', 'text-black-50')}>Ngày tạo: {video.createdAt}</span>
                             </div>
                         </div>
                     </div>
