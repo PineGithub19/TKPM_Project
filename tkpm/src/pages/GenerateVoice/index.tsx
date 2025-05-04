@@ -227,23 +227,47 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     };
 
     // Hàm xử lý khi nhận được bản ghi âm từ VoiceRecorder
-    const handleRecordingComplete = (recordingUrl: string, blob: Blob) => {
+    const handleRecordingComplete = async (recordingUrl: string, blob: Blob) => {
         if (selectedSegmentIndex !== null) {
-            setVoiceSegments((prev) =>
-                prev.map((s) =>
-                    s.index === selectedSegmentIndex
-                        ? {
-                              ...s,
-                              audioUrl: recordingUrl,
-                              status: 'success',
-                              isRecorded: true,
-                          }
-                        : s,
-                ),
-            );
-            setRecordingMode(false);
-            setSelectedSegmentIndex(null);
-            message.success('Đã thêm bản ghi âm vào phân đoạn!');
+            try {
+                // Tạo FormData để gửi blob lên server
+                const formData = new FormData();
+                formData.append('voice', blob, `recording_${Date.now()}.mp3`);
+                
+                // Upload file lên server
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/voice/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Sử dụng đường dẫn từ server thay vì blob URL
+                    const serverAudioUrl = `${import.meta.env.VITE_BACKEND_URL}${result.path}`;
+                    
+                    setVoiceSegments((prev) =>
+                        prev.map((s) =>
+                            s.index === selectedSegmentIndex
+                                ? {
+                                      ...s,
+                                      audioUrl: serverAudioUrl,
+                                      status: 'success',
+                                      isRecorded: true,
+                                  }
+                                : s,
+                        ),
+                    );
+                    setRecordingMode(false);
+                    setSelectedSegmentIndex(null);
+                    message.success('Đã thêm bản ghi âm vào phân đoạn!');
+                } else {
+                    throw new Error('Không thể tải lên bản ghi âm');
+                }
+            } catch (error) {
+                console.error('Error uploading recording:', error);
+                message.error('Không thể lưu bản ghi âm vào server!');
+            }
         }
     };
 

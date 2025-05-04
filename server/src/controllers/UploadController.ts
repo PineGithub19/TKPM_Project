@@ -12,14 +12,36 @@ const oauth2Client = new google.auth.OAuth2(
     process.env.YOUTUBE_REDIRECT_URI
 );
 
+// Thư mục static mà bạn đã cấu hình, ví dụ:
+// app.use("/videos", express.static(path.join(__dirname, "public", "videos")))
+const PUBLIC_DIR = path.resolve(__dirname, "..", "public");   //  ...\server\public
+
+function urlToLocalPath(rawUrl: string): string {
+  // new URL sẽ ném lỗi nếu rawUrl chỉ là tên file, nên bọc try/catch
+  try {
+    const { pathname } = new URL(rawUrl);          // → "/videos/final_output_with_music_1746….mp4"
+    const relativePath = pathname.replace(/^\/+/, ""); // bỏ dấu "/" đầu
+    // Giữ nguyên “videos/…” rồi ghép vào thư mục public
+    return path.join(PUBLIC_DIR, relativePath);    // → D:\TKPM\Project\TKPM_Project\server\public\videos\final_output_with_music_1746….mp4
+  } catch {
+    // Nếu rawUrl đã là đường dẫn cục bộ thì resolve luôn
+    return path.resolve(rawUrl);
+  }
+}
+
 export const redirectToYoutubeAuth = (req: Request, res: Response) => {
     const { title, description, videoUrl } = req.query;
+
+    console.log("CHECK videoUrl before upload YTB: ", videoUrl);
+
+    // Chuyển URL ⇒ path cục bộ
+    const localVideoPath = urlToLocalPath(decodeURIComponent(videoUrl as string));
 
     // Lưu lại để dùng sau khi xác thực
     cachedMeta = {
         title: (title as string) || "Unknown",
         description: (description as string) || "",
-        videoUrl: decodeURIComponent(videoUrl as string) || ""
+        videoUrl: localVideoPath || ""
     };
 
     const url = getYoutubeAuthUrl();

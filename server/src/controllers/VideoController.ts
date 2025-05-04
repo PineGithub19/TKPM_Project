@@ -16,9 +16,14 @@ class VideoController {
         try {
             const videoUrl = await slideshowGenerator.generate();
             console.log("CHECK VIDEO URL COMPLETE IN BE: ", videoUrl);
+
+            var finalUrl = '';
+            if (videoUrl.outputWithMusicPath != null && videoUrl.outputWithMusicPath != 'No background music') {
+                finalUrl = videoUrl.outputWithMusicPath;
+            }else if (videoUrl.outputPath != null) finalUrl = videoUrl.outputPath;
             
             // Get the filename from the full path
-            const filename = path.basename(videoUrl.outputPath || '');
+            const filename = path.basename(finalUrl || '');
             
             console.log("CHECK VIDEO URL COMPLETE IN BE: ", filename);
 
