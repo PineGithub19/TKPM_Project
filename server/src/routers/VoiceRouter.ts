@@ -37,6 +37,10 @@ router.post('/upload', uploadVoiceMiddleware, (req, res) => {
     voiceController.uploadVoice(req, res);
 });
 
+router.post('/upload-bgmusic', uploadVoiceMiddleware, (req, res) => {
+    voiceController.uploadBgMusic(req, res);
+});
+
 router.get('/get-voices', voiceController.getVoices);
 
 export default router;

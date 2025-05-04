@@ -64,6 +64,8 @@ const EditVideo: React.FC = () => {
 
     const [volume, setVolume] = useState(50);
     const [speed, setSpeed] = useState(50);
+    const [musicFile, setMusicFile] = useState<File | null>(null);
+    const [musicFileName, setMusicFileName] = useState<string>('');
 
     const [brightness, setBrightness] = useState(50);
     const [contrast, setContrast] = useState(50);
@@ -170,19 +172,19 @@ const EditVideo: React.FC = () => {
     const images =
         checkedImagesList.length > 0
             ? checkedImagesList.map((item, index) => ({
-                  name: `Image ${index + 1}`,
-                  src: item || `/anime${index + 1}.png`,
-              }))
+                name: `Image ${index + 1}`,
+                src: item || `/anime${index + 1}.png`,
+            }))
             : [
-                  { name: 'Sketch Art', src: '/anime1.png' },
-                  { name: 'Watercolor', src: '/anime2.png' },
-                  { name: 'Pixel Art', src: '/anime3.png' },
-                  { name: 'Cyberpunk', src: '/anime.png' },
-                  { name: 'Painting', src: '/anime5.png' },
-                  { name: 'Anime', src: '/anime6.png' },
-                  { name: 'Fantasy', src: '/anime7.png' },
-                  { name: 'Cartoon', src: '/anime8.png' },
-              ];
+                { name: 'Sketch Art', src: '/anime1.png' },
+                { name: 'Watercolor', src: '/anime2.png' },
+                { name: 'Pixel Art', src: '/anime3.png' },
+                { name: 'Cyberpunk', src: '/anime.png' },
+                { name: 'Painting', src: '/anime5.png' },
+                { name: 'Anime', src: '/anime6.png' },
+                { name: 'Fantasy', src: '/anime7.png' },
+                { name: 'Cartoon', src: '/anime8.png' },
+            ];
 
     const [iconsState, setIconsState] = useState<{ [key in IconKeys]: string }>({
         iconStyle: 'styleRed',
@@ -248,6 +250,31 @@ const EditVideo: React.FC = () => {
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setVolume(Number(e.target.value));
+    };
+
+    const handleMusicFileChange = async (file: File) => {
+        setMusicFile(file);
+        const formData = new FormData();
+        const blob = new Blob([file], { type: file.type });
+        formData.append('voice', blob, `bgmusic_${Date.now()}.mp3`);
+        
+        
+        // Upload file lên server
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/voice/upload-bgmusic`, {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await response.json();
+        console.log('Music file upload response:', data);
+        console.log(file);
+        if (data.success) {
+            setMusicFileName(`${import.meta.env.VITE_BACKEND_URL}${data.path}`);
+        }
+    };
+
+    const handleMusicFileRemove = () => {
+        setMusicFile(null);
+        setMusicFileName('');
     };
 
     const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,8 +480,8 @@ const EditVideo: React.FC = () => {
                 images,
                 resolution: getResolutionFromRatio(selectedRatio),
                 videoDuration: 5,
-                // backgroundMusic: `${import.meta.env.VITE_BACKEND_URL}/videos/audios/background.mp3`,
-                // backgroundMusicVolume: volume / 100,
+                backgroundMusic: musicFileName,
+                backgroundMusicVolume: volume / 100,
                 cleanupTemp: false,
             };
 
@@ -552,9 +579,8 @@ const EditVideo: React.FC = () => {
                         <img
                             src={selectedImage || '/anime.png'}
                             alt="Preview"
-                            className={`${styles.previewImage} ${flippedVertically ? styles.flipped : ''} ${
-                                rotated ? styles.rotated : ''
-                            }`}
+                            className={`${styles.previewImage} ${flippedVertically ? styles.flipped : ''} ${rotated ? styles.rotated : ''
+                                }`}
                         />
                         <button className={styles.pauseButton}>
                             <img src="/pause.png" alt="Pause" className={styles.pauseIcon} />
@@ -580,6 +606,9 @@ const EditVideo: React.FC = () => {
                             handleVolumeChange={handleVolumeChange}
                             speed={speed}
                             handleSpeedChange={handleSpeedChange}
+                            musicFile={musicFile}
+                            handleMusicFileChange={handleMusicFileChange}
+                            handleMusicFileRemove={handleMusicFileRemove}
                         />
                     ) : selectedIcon === 'iconCutImage' ? (
                         <ImageEdit
@@ -611,40 +640,38 @@ const EditVideo: React.FC = () => {
                         <div className={selectedIcon === 'iconRatio' ? styles.ratioGrid : styles.imageGrid}>
                             {selectedIcon === 'iconRatio'
                                 ? ratioImages.map((ratio, idx) => {
-                                      const isSelected = selectedRatio === ratio.name;
-                                      return (
-                                          <div
-                                              key={idx}
-                                              className={styles.imageStyleItem}
-                                              onClick={() => handleRatioClick(ratio.name)}
-                                          >
-                                              <img
-                                                  src={isSelected ? ratio.src.replace('white', 'green') : ratio.src}
-                                                  alt={ratio.name}
-                                              />
-                                              <p className={isSelected ? styles.selectedRatioText : styles.imageText}>
-                                                  {ratio.name}
-                                              </p>
-                                          </div>
-                                      );
-                                  })
+                                    const isSelected = selectedRatio === ratio.name;
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className={styles.imageStyleItem}
+                                            onClick={() => handleRatioClick(ratio.name)}
+                                        >
+                                            <img
+                                                src={isSelected ? ratio.src.replace('white', 'green') : ratio.src}
+                                                alt={ratio.name}
+                                            />
+                                            <p className={isSelected ? styles.selectedRatioText : styles.imageText}>
+                                                {ratio.name}
+                                            </p>
+                                        </div>
+                                    );
+                                })
                                 : images.map((style, idx) => (
-                                      <div
-                                          key={idx}
-                                          className={`${styles.imageItem} ${
-                                              selectedImage === style.src ? styles.selected : ''
-                                          }`}
-                                          onClick={() => handleImageClick(style.src)}
-                                      >
-                                          <img
-                                              src={style.src}
-                                              alt={style.name}
-                                              className={`${styles.styleImageInImages} ${
-                                                  selectedImage === style.src ? styles.selected : ''
-                                              }`}
-                                          />
-                                      </div>
-                                  ))}
+                                    <div
+                                        key={idx}
+                                        className={`${styles.imageItem} ${selectedImage === style.src ? styles.selected : ''
+                                            }`}
+                                        onClick={() => handleImageClick(style.src)}
+                                    >
+                                        <img
+                                            src={style.src}
+                                            alt={style.name}
+                                            className={`${styles.styleImageInImages} ${selectedImage === style.src ? styles.selected : ''
+                                                }`}
+                                        />
+                                    </div>
+                                ))}
                         </div>
                     )}
                 </div>

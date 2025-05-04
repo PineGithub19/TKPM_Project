@@ -268,6 +268,34 @@ export class VoiceController {
         }
     }
 
+    async uploadBgMusic(req: Request, res: Response): Promise<void> {
+        try {
+            const file = req.file;
+            if (!file) {
+                res.status(400).json({ success: false, message: 'No file uploaded' });
+                return;
+            }
+
+            // Tạo đường dẫn cho file nhạc nền
+            const outputDir: string = path.join(process.cwd(), 'public', 'voices');
+            const filename: string = `bg_music_${Date.now()}.mp3`;
+            const outputPath: string = path.join(outputDir, filename);
+
+            // Di chuyển file nhạc nền vào thư mục voices
+            fs.renameSync(file.path, outputPath);
+
+            res.status(200).json({
+                success: true,
+                path: `/voices/${filename}`,
+                message: 'Background music uploaded successfully'
+            });
+        } catch (error) {
+            console.error('Error uploading background music:', error);
+            res.status(500).json({ success: false, message: 'Error uploading background music' });
+        }
+    }
+
+
     // Helper function to get audio duration
     private async getAudioDuration(filePath: string): Promise<number> {
         return new Promise((resolve, reject) => {

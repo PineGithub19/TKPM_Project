@@ -391,7 +391,7 @@ class SlideshowGenerator {
                 await this.addMusicToVideo(
                     this.config.finalOutputPath,
                     this.config.backgroundMusic,
-                    this.config.backgroundMusicVolume?.toString() || '0.3',
+                    this.config.backgroundMusicVolume?.toString() || '0.2',
                     this.config.finalWithMusicPath,
                 );
             }
