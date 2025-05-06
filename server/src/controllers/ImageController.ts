@@ -59,7 +59,7 @@ class ImageController {
             let { prompt, configuration } = req.body;
             prompt = await translate(prompt);
             console.log('Translated prompt:', prompt); // Log the translated prompt
-            const response = await imageService.generateAnimation(prompt, configuration);
+            const response = await imageService.generateAnimation(prompt.text, configuration);
             res.status(200).json({ imageList: response });
         } catch (error) {
             console.error(error);
