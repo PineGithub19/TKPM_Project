@@ -5,6 +5,7 @@ import * as request from '../../utils/request';
 import styles from './ScriptAutoGenerate.module.css';
 import clsx from 'clsx';
 import ReactMarkdown from 'react-markdown';
+// import { m } from 'framer-motion';
 
 interface ScriptResponse {
     success: boolean;
@@ -34,7 +35,9 @@ interface ScriptAutoGenerateProps {
     literatureTitle?: string;
     scriptSegment?: string[];
     selectedLiterature?: { content: string; title: string };
-    onComplete?: (segments: string[], title: string, imagepromptSegments: string[]) => void;
+    propImageDes?: string[];
+    onComplete?: (segments: string[], title: string, propImageDes: string[]) => void;
+    onScriptChange?: (script: string[]) => void;
 }
 
 interface ScriptSegment {
@@ -54,7 +57,9 @@ const ScriptAutoGenerate = ({
     literatureTitle,
     scriptSegment,
     selectedLiterature,
+    propImageDes,
     onComplete,
+    onScriptChange,
 }: ScriptAutoGenerateProps) => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -80,7 +85,7 @@ const ScriptAutoGenerate = ({
     const [showSegments, setShowSegments] = useState(false);
     const [segmentLoading, setSegmentLoading] = useState(false);
     const [scriptTitle, setScriptTitle] = useState<string>('');
-    const [imagepromptSegments, setImgPromptSegments] = useState<string[]>([]);
+    const [imagepromptSegments, setImgPromptSegments] = useState<string[]>(propImageDes ? propImageDes : []);
     // Danh sách các tùy chọn
     const genreOptions = [
         { value: 'educational', label: 'Giáo dục' },
@@ -155,7 +160,7 @@ const ScriptAutoGenerate = ({
             setError('Không tìm thấy nội dung tác phẩm');
             return;
         }
-        
+
         // Chuẩn bị cấu hình cuối cùng để gửi đi
         const finalConfig = {
             genre: scriptConfig.genre === 'custom' ? scriptConfig.customGenre || 'custom' : scriptConfig.genre,
@@ -163,7 +168,7 @@ const ScriptAutoGenerate = ({
             tone: scriptConfig.tone === 'custom' ? scriptConfig.customTone || 'custom' : scriptConfig.tone,
             duration: scriptConfig.duration === 'custom' ? scriptConfig.customDuration || 'custom' : scriptConfig.duration,
         };
-        
+
         generateScript(scriptContent.content, scriptContent.title, finalConfig);
         setConfigMode(false);
     };
@@ -313,6 +318,15 @@ const ScriptAutoGenerate = ({
         }
     };
 
+    const handleSegmentChange = (value: string, index: number) => {
+        const updatedSegments = [...scriptSegments];
+        updatedSegments[index] = value;
+        setScriptSegments(updatedSegments);
+        if (onScriptChange) {
+            onScriptChange(updatedSegments);
+        }
+    };
+
     const handleContinue = () => {
         if (onComplete) {
             // If no segments are available but we have a script, automatically generate segments
@@ -329,10 +343,11 @@ const ScriptAutoGenerate = ({
                     .then((response: ScriptSegmentsResponse | null) => {
                         if (response !== null && response.success) {
                             // Call onComplete with the generated segments
-                            onComplete(response.segments, scriptTitle, response.imageDescriptions);
+                            console.log('CHECK response in handleContinue: ', response);
+                            onComplete(response.segments, scriptTitle, imagepromptSegments);
                         } else {
                             // If splitting fails, create a single segment from the full script
-                            onComplete([textToSplit], scriptTitle, response?.imageDescriptions || imagepromptSegments);
+                            onComplete([textToSplit], scriptTitle, imagepromptSegments);
                         }
                     })
                     .catch(() => {
@@ -494,7 +509,11 @@ const ScriptAutoGenerate = ({
                             </button>
                         </div>
                         <div className={clsx(styles.cardBody)}>
-                            <p className={clsx(styles.textMuted)}>{segment}</p>
+                            <textarea
+                                className={clsx(styles.formControl, styles.segmentTextarea)}
+                                value={segment}
+                                onChange={(e) => handleSegmentChange(e.target.value, index)}
+                            />
                         </div>
                     </div>
                 ))}
@@ -502,13 +521,33 @@ const ScriptAutoGenerate = ({
         </div>
     );
 
-    const markdownFormatter = (text: string) => {
+    const firstFormatMarkdown = (text: string) => {
         const jsonText: ScriptJSON = JSON.parse(text);
         let md = `# 📖 ${jsonText.title}\n\n---\n`;
         jsonText.segments.forEach((seg, idx) => {
             md += `## ${idx + 1}. ${seg.title}\n\n`;
             md += `${seg.content}\n\n`;
             md += `> _🖼️ ${seg.image_description}_\n\n`;
+            md += `---\n`;
+        });
+        return md;
+    };
+
+    const markdownFormatter = (title: string, scriptSeg: string[], image_des: string[]) => {
+        console.log('title: ', title);
+        console.log('scriptSeg: ', scriptSeg);
+        console.log('image_des: ', image_des);
+        console.log('imagepromptSegments: ', imagepromptSegments);
+        console.log('editedScript: ', editedScript);
+        console.log('script: ', script);
+        if (!title || !scriptSeg?.length || !image_des?.length)
+            return firstFormatMarkdown(editedScript || script);
+
+        let md = `# 📖 ${title}\n\n---\n`;
+        scriptSeg.forEach((seg, idx) => {
+            md += `## ${idx + 1}. Phân đoạn #${idx + 1}\n\n`;
+            md += `${seg}\n\n`;
+            md += `> _🖼️ ${image_des[idx]}_\n\n`;
             md += `---\n`;
         });
         return md;
@@ -574,7 +613,7 @@ const ScriptAutoGenerate = ({
                         </button>
                         {scriptSegments.length > 0 && (
                             <button className={clsx(styles.infoButton)} onClick={() => setShowSegments(true)}>
-                                Xem phân đoạn ({scriptSegments.length})
+                                Xem và chỉnh sửa phân đoạn ({scriptSegments.length})
                             </button>
                         )}
                         <button className={clsx(styles.primaryButton)} onClick={handleCopy}>
@@ -607,7 +646,7 @@ const ScriptAutoGenerate = ({
                         </div>
                         <div className={clsx(styles.cardBody)}>
                             <ReactMarkdown>
-                                {editedScript ? markdownFormatter(editedScript) : markdownFormatter(script)}
+                                {markdownFormatter(scriptTitle, scriptSegments, imagepromptSegments)}
                             </ReactMarkdown>
                         </div>
                     </div>

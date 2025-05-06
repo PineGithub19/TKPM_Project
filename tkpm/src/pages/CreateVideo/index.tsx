@@ -201,6 +201,10 @@ function CreateVideo() {
         handleNext(); // Move to the next step (GenerateVoice)
     };
 
+    const handleScriptChange = (segments: string[]) => {
+        setScriptSegments(segments);
+    };
+
     const handleVoiceComplete = (voices: string[], scripts: string[]) => {
         setVoicesList(voices);
         setScriptSegments(scripts);
@@ -257,7 +261,7 @@ function CreateVideo() {
             checkedImagesList,
             voicesList,
         });
-    }, [promptId, scriptPromptId, voicePromptId, imagePromptId]);
+    }, [promptId, scriptPromptId, voicePromptId, imagePromptId, scriptSegments, checkedImagesList, voicesList]);
 
     return (
         <>
@@ -295,7 +299,9 @@ function CreateVideo() {
                                     promptId={scriptPromptId}
                                     literatureContent={selectedLiterature.content}
                                     literatureTitle={selectedLiterature.title}
+                                    propImageDes={imagepromptSegments}
                                     onComplete={handleScriptComplete}
+                                    onScriptChange={handleScriptChange}
                                     scriptSegment={scriptSegments}
                                     selectedLiterature={selectedLiterature}
                                 />
@@ -305,7 +311,7 @@ function CreateVideo() {
                             <div className="create-video-image-container">
                                 <ImagePrompt
                                     promptId={imagePromptId}
-                                    scriptSegments={imagepromptSegments.length > 0 ? imagepromptSegments : scriptSegments} // Kiểm tra và gán giá trị
+                                    imageDes={imagepromptSegments}
                                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                                     checkedImagesList={checkedImagesList}
                                 />

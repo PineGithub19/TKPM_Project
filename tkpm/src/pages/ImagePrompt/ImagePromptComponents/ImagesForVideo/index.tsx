@@ -17,7 +17,7 @@ interface ImagesSegment {
 }
 
 interface ImagesForVideoProps {
-    scriptSegments: string[];
+    imageDes?: string[];
     promptId?: string;
     handleCheckedImagesListComplete?: (images: string[]) => void;
     imageConfig: ImageConfig;
@@ -27,7 +27,7 @@ interface ImagesForVideoProps {
 }
 
 const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
-    scriptSegments,
+    imageDes,
     promptId,
     handleCheckedImagesListComplete,
     imageConfig,
@@ -57,9 +57,10 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
     const [localPath, setLocalPath] = useState<string[]>([]);
 
     useEffect(() => {
-        if (scriptSegments && scriptSegments.length > 0) {
+        console.log("ImageDes trong useEffect: ", imageDes);
+        if (imageDes && imageDes.length > 0) {
             setImageData(
-                scriptSegments.map((segment, index) => ({
+                imageDes.map((segment, index) => ({
                     text: segment,
                     images: checkedImagesList && index < checkedImagesList.length ? [checkedImagesList[index]] : [],
                     status: checkedImagesList && index < checkedImagesList.length ? 'success' : 'idle',
@@ -70,7 +71,7 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
         if (checkedImagesList && checkedImagesList.length > 0) {
             setLocalPath(checkedImagesList);
         }
-    }, [scriptSegments, checkedImagesList]);
+    }, [imageDes, checkedImagesList]);
 
     const handleGenerateImagesForSegments = async () => {
         try {
@@ -87,8 +88,8 @@ const ImagesForVideo: React.FC<ImagesForVideoProps> = ({
             } else if (generationType === 'motion') {
                 endpoint = '/image/text-to-animation';
             }
-
-            for (const segment of scriptSegments) {
+            if(imageDes)
+            for (const segment of imageDes) {
                 const response = await request.post(endpoint, {
                     prompt: segment,
                     configuration: imageConfig,

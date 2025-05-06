@@ -6,6 +6,7 @@ import styles from './GenerateVoice.module.css';
 import { VoiceRecorder } from '../../components/RecordVoice';
 import clsx from 'clsx';
 import LoadingComponent from '../../components/Loading';
+import { set } from 'date-fns';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -56,7 +57,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
     const [currentLanguage, setCurrentLanguage] = useState<string>('vi');
     const [batchProcessing, setBatchProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [translatedSegments, setTranslatedSegments] = useState<string[]>([]);
+    const [translatedSegments, setTranslatedSegments] = useState<string[]>(scriptSegments); // State để lưu trữ các phân đoạn đã dịch
 
     const [recordingMode, setRecordingMode] = useState(false); // State để kiểm soát chế độ ghi âm
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState<number | null>(null); // Segment đang được chọn để ghi âm
@@ -163,11 +164,11 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                     prev.map((s) =>
                         s.index === segment.index
                             ? {
-                                  ...s,
-                                  audioUrl: `${import.meta.env.VITE_BACKEND_URL}${response.path}`,
-                                  status: 'success',
-                                  isRecorded: false,
-                              }
+                                ...s,
+                                audioUrl: `${import.meta.env.VITE_BACKEND_URL}${response.path}`,
+                                status: 'success',
+                                isRecorded: false,
+                            }
                             : s,
                     ),
                 );
@@ -218,11 +219,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
             voiceSegments.forEach((voice) => {
                 if (voice.status === 'success' && voice.audioUrl) list_voice.push(voice.audioUrl);
             });
-            if (translatedSegments.length > 0) {
-                onComplete(list_voice, translatedSegments);
-            }else {
-                onComplete(list_voice, scriptSegments);
-            }
+            onComplete(list_voice, translatedSegments);
         }
     };
 
@@ -233,31 +230,31 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                 // Tạo FormData để gửi blob lên server
                 const formData = new FormData();
                 formData.append('voice', blob, `recording_${Date.now()}.mp3`);
-                
+
                 // Thêm flag để server biết đây là file cần chuẩn hóa
                 formData.append('needNormalization', 'true');
-                
+
                 // Upload file lên server
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/voice/upload`, {
                     method: 'POST',
                     body: formData,
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     // Sử dụng đường dẫn từ server thay vì blob URL
                     const serverAudioUrl = `${import.meta.env.VITE_BACKEND_URL}${result.path}`;
-                    
+
                     setVoiceSegments((prev) =>
                         prev.map((s) =>
                             s.index === selectedSegmentIndex
                                 ? {
-                                      ...s,
-                                      audioUrl: serverAudioUrl,
-                                      status: 'success',
-                                      isRecorded: true,
-                                  }
+                                    ...s,
+                                    audioUrl: serverAudioUrl,
+                                    status: 'success',
+                                    isRecorded: true,
+                                }
                                 : s,
                         ),
                     );
@@ -499,7 +496,20 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                         }
                         style={{ padding: '0', border: '1px solid white' }}
                     >
-                        <div className={styles.segmentCardBody}>{segment.text}</div>
+                        <div className={clsx(styles.cardBody)}>
+                            <textarea
+                                className={styles.textArea}
+                                value={segment.text}
+                                style={{ width: '100%', height: '12rem', fontSize: '20px' }}
+                                onChange={(e) => {
+                                    // Xử lý khi người dùng hủy việc nhập văn bản
+                                    const newText = e.target.value;
+                                    setVoiceSegments((prev) =>
+                                        prev.map((s) => (s.index === segment.index ? { ...s, text: newText } : s)),
+                                    );
+                                }}
+                            ></textarea>
+                        </div>
 
                         {segment.status === 'loading' && (
                             <div className="text-center py-3">
@@ -518,7 +528,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                     Trình duyệt của bạn không hỗ trợ phát audio.
                                 </audio>
                                 <div className={styles.segmentCardDownload}>
-                                    <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`}>
+                                    <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`} target='_blank'>
                                         Tải xuống
                                     </a>
                                 </div>
