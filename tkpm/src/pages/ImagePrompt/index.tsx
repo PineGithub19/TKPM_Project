@@ -7,12 +7,12 @@ const { TabPane } = Tabs;
 
 function ImagePrompt({
     promptId,
-    scriptSegments = [],
+    imageDes,
     handleCheckedImagesListComplete,
     checkedImagesList,
 }: {
     promptId?: string;
-    scriptSegments?: string[];
+    imageDes?: string[];
     handleCheckedImagesListComplete?: (images: string[]) => void;
     checkedImagesList?: string[];
 }) {
@@ -55,9 +55,9 @@ function ImagePrompt({
     useEffect(() => {
         console.log('CHECK THONG TIN TRONG ImagePrompt: ', {
             checkedImagesList,
-            scriptSegments,
+            imageDes,
         });
-    }, [checkedImagesList, scriptSegments]);
+    }, [checkedImagesList, imageDes]);
 
     return (
         <Tabs activeKey={activeTab} onChange={handleTabChange} className="custom-tabs">
@@ -66,7 +66,7 @@ function ImagePrompt({
             </TabPane>
             <TabPane tab="Tạo ảnh" key="2" className="custom-tab-pane">
                 <ImagesForVideo
-                    scriptSegments={scriptSegments}
+                    imageDes={imageDes}
                     promptId={promptId}
                     handleCheckedImagesListComplete={handleCheckedImagesListComplete}
                     imageConfig={config.imageConfig}
