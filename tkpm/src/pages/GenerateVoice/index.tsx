@@ -528,7 +528,7 @@ const GenerateVoice: React.FC<GenerateVoiceProps> = ({
                                     Trình duyệt của bạn không hỗ trợ phát audio.
                                 </audio>
                                 <div className={styles.segmentCardDownload}>
-                                    <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`}>
+                                    <a href={segment.audioUrl} download={`segment-${index + 1}.mp3`} target='_blank'>
                                         Tải xuống
                                     </a>
                                 </div>

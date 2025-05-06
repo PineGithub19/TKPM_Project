@@ -613,7 +613,7 @@ const ScriptAutoGenerate = ({
                         </button>
                         {scriptSegments.length > 0 && (
                             <button className={clsx(styles.infoButton)} onClick={() => setShowSegments(true)}>
-                                Xem phân đoạn ({scriptSegments.length})
+                                Xem và chỉnh sửa phân đoạn ({scriptSegments.length})
                             </button>
                         )}
                         <button className={clsx(styles.primaryButton)} onClick={handleCopy}>
