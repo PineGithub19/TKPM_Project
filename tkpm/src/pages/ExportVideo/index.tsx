@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "./ExportVideo.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import clsx from "clsx";
+import * as request from "../../utils/request";
 
 const resolutionOptions = ["360p", "720p", "1080p", "4k"];
 
 function ExportVideo() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { videoUrl } = location.state || {}; // Lấy videoUrl từ state đã truyền
+    const { videoUrl, videoId } = location.state || {}; // Lấy videoUrl từ state đã truyền
 
     const [selectedResolution, setResolution] = useState<string>("720p");
     const [showModal, setShowModal] = useState(false);
@@ -41,7 +42,8 @@ function ExportVideo() {
         }
     };
 
-    const handleUploadToYouTube = () => {
+    const handleUploadToYouTube = async () => {
+        await request.put('/information/update', { promptId: videoId });
         setShowModal(true);
     };
 
@@ -52,7 +54,7 @@ function ExportVideo() {
         const query = new URLSearchParams({
             title,
             description: updatedDescription,
-            videoUrl: encodeURIComponent(videoUrl) // Encode để tránh vấn đề với ký tự đặc biệt
+            videoUrl: encodeURIComponent(videoUrl), // Encode để tránh vấn đề với ký tự đặc biệt
         }).toString();
     
         window.location.href = `http://localhost:3000/api/upload/auth?${query}`;

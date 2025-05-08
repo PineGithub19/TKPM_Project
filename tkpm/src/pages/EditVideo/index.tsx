@@ -62,7 +62,7 @@ const EditVideo: React.FC = () => {
     const [height, setHeight] = useState<number>(0);
     const [width, setWidth] = useState<number>(0);
 
-    const [volume, setVolume] = useState(50);
+    const [volume, setVolume] = useState(30);
     const [speed, setSpeed] = useState(50);
     const [musicFile, setMusicFile] = useState<File | null>(null);
     const [musicFileName, setMusicFileName] = useState<string>('');
@@ -504,7 +504,7 @@ const EditVideo: React.FC = () => {
 
             // Navigate to export video with the video URL
             if (data.outputPath) {
-                navigate('/export-video', { state: { videoUrl: data.outputPath } });
+                navigate('/export-video', { state: { videoUrl: data.outputPath, videoId: promptId } });
             } else {
                 throw new Error('No video URL received from server');
             }

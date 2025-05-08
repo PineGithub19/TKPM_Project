@@ -32,7 +32,12 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve static files from public directory
 app.use(express.static('public'));
-// app.use('/videos', express.static(path.join(__dirname, './services/VideoService')));
+// Setup proper video serving with range support
+app.use('/videos', (req, res, next) => {
+    // Set appropriate headers for video streaming
+    res.setHeader('Accept-Ranges', 'bytes');
+    next();
+}, express.static(path.join(__dirname, '../public/videos')));
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Express + TypeScript Server');

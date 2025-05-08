@@ -222,21 +222,21 @@ export class VoiceController {
                 res.status(400).json({ success: false, message: 'No file uploaded' });
                 return;
             }
-    
+
             // Always normalize recorded audio
             const normalizedFileName = `voicee_${Date.now()}.mp3`;
             const normalizedFilePath = path.join(path.dirname(file.path), normalizedFileName);
-    
+
             console.log('📢 Normalizing recorded audio...');
-            
+
             try {
                 await this.normalizeAudioFile(file.path, normalizedFilePath);
-                
+
                 // If normalization succeeded, use the normalized file
                 fs.unlinkSync(file.path); // Remove original file
                 const relativePath = `/voices/${normalizedFileName}`;
                 console.log('📢 Voice uploaded and normalized:', relativePath);
-                
+
                 res.status(200).json({
                     success: true,
                     path: relativePath,
@@ -244,18 +244,18 @@ export class VoiceController {
                 });
             } catch (normalizationError) {
                 console.error('⚠️ Audio normalization failed, using original file:', normalizationError);
-                
+
                 // If normalization fails, use the original file but rename it to match expected pattern
                 const fallbackFileName = `voicee_original_${Date.now()}.mp3`;
                 const fallbackFilePath = path.join(path.dirname(file.path), fallbackFileName);
-                
+
                 // Simple copy without processing
                 fs.copyFileSync(file.path, fallbackFilePath);
                 fs.unlinkSync(file.path); // Remove original file
-                
+
                 const relativePath = `/voices/${fallbackFileName}`;
                 console.log('📢 Voice uploaded (without normalization):', relativePath);
-                
+
                 res.status(200).json({
                     success: true,
                     path: relativePath,
@@ -325,49 +325,34 @@ export class VoiceController {
     }
 
     private async normalizeAudioFile(inputPath: string, outputPath: string): Promise<void> {
-        console.log('🔍 Normalizing recorded audio with simplified parameters...');
-        
+        console.log("🔍 Normalizing recorded audio with improved parameters...")
+
         return new Promise((resolve, reject) => {
             ffmpeg(inputPath)
-                // Use simpler parameters that are more likely to be compatible
-                .audioCodec('libmp3lame')      // Use MP3 codec
-                .audioBitrate('128k')          // Set bitrate
-                .audioChannels(1)              // Use mono (1 channel)
-                .audioFrequency(24000)         // Use 24kHz sample rate
-                // Combine all audio filters into a single -af parameter
+                // Use high-quality settings that preserve voice characteristics
+                .audioCodec("libmp3lame")
+                .audioBitrate("192k") // Higher bitrate for better quality
+                .audioChannels(1) // Keep mono for voice
+                .audioFrequency(44100) // Use standard 44.1kHz for better quality
+                // Simplified audio filters that preserve natural speaking pace
                 .audioFilters([
-                    'aresample=async=1',       // Fix asynchronous audio issues
-                    'asetrate=24000',          // Set the sample rate
-                    'aresample=24000',         // Resample to ensure consistency
-                    'apad=pad_dur=0.5'         // Add 0.5s padding
+                    "dynaudnorm=f=150:g=15", // Dynamic audio normalization with gentler settings
+                    "aresample=44100:async=1", // Resample without changing speed
                 ])
-                // Add metadata in a compatible way
-                .outputOptions([
-                    '-write_xing', '1',        // Add Xing header with duration info
-                    '-id3v2_version', '3'      // Add ID3 metadata
-                ])
+                .outputOptions(["-write_xing", "1", "-id3v2_version", "3"])
                 .save(outputPath)
-                .on('start', (cmd) => {
-                    console.log('⚙️ Normalizing audio with command:', cmd);
+                .on("start", (cmd) => {
+                    console.log("⚙️ Normalizing audio with command:", cmd)
                 })
-                .on('end', () => {
-                    console.log('✅ Audio normalized successfully:', outputPath);
-                    
-                    // Verify the output file
-                    ffmpeg.ffprobe(outputPath, (err, metadata) => {
-                        if (err) {
-                            console.error('⚠️ Warning: Could not verify normalized audio:', err);
-                        } else {
-                            console.log('✓ Verified audio duration:', metadata.format.duration, 'seconds');
-                        }
-                        resolve();
-                    });
+                .on("end", () => {
+                    console.log("✅ Audio normalized successfully:", outputPath)
+                    resolve()
                 })
-                .on('error', (err) => {
-                    console.error('❌ Error normalizing audio:', err);
-                    reject(err);
-                });
-        });
+                .on("error", (err) => {
+                    console.error("❌ Error normalizing audio:", err)
+                    reject(err)
+                })
+        })
     }
 
     private processToneStyle(text: string, tone?: ToneStyle): string {
