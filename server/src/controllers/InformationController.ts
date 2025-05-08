@@ -1,120 +1,21 @@
-import mongoose, { Types } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
-import * as DBServices from '../services/DBServices';
-import ImageConfigModel from '../models/ImageConfig';
-import VideoConfigModel from '../models/Video';
-import VoiceConfigModel from '../models/VoiceConfig';
-import ScriptModel from '../models/LiteratureWork';
-
-interface VideoConfigData {
-    _id?: string;
-    user_id?: Types.ObjectId;
-    literature_work_id: Types.ObjectId;
-    script: string;
-    voice_config: Types.ObjectId;
-    image_config: Types.ObjectId;
-    is_finished: boolean;
-    publish_date: Date;
-}
-
-interface LiteratureWorkData {
-    _id?: string;
-    title: string;
-    full_content: string;
-    author: string;
-    genre: string;
-    summary: string;
-    content: string[];
-}
-
-interface ImageConfigData {
-    _id?: string;
-    style: string;
-    size: string;
-    resolution: string;
-    color_scheme: string;
-    generated_images: string[];
-}
-
-interface VoiceConfigData {
-    _id?: string;
-    voice_service: string;
-    language: string;
-    style: string;
-    speed: number;
-    pitch: number;
-    volume: number;
-    audio_content: string[];
-}
+import mongoose from 'mongoose';
+import InformationService from '../services/InformationService/InformationService';
 
 class InformationController {
-    private DEFAULT_IMAGE_HEIGHT;
-    private DEFAULT_IMAGE_WIDTH;
+    private informationService: InformationService;
 
     constructor() {
-        this.DEFAULT_IMAGE_HEIGHT = 256;
-        this.DEFAULT_IMAGE_WIDTH = 256;
-
+        this.informationService = new InformationService();
         this.createNewImagePrompt = this.createNewImagePrompt.bind(this);
+        this.updateImagePrompt = this.updateImagePrompt.bind(this);
+        this.deleteImagePrompt = this.deleteImagePrompt.bind(this);
     }
 
     async createNewImagePrompt(req: Request, res: Response, next: NextFunction) {
         try {
-            const scriptData: LiteratureWorkData = {
-                title: 'title',
-                full_content: 'default',
-                author: 'author',
-                genre: 'gerne',
-                summary: 'summary',
-                content: [],
-            };
-            const scriptResponse = (await DBServices.createDocument(ScriptModel, scriptData)) as LiteratureWorkData;
-
-            const VoiceConfigData: VoiceConfigData = {
-                voice_service: 'Google TTS',
-                language: 'VN',
-                style: 'style',
-                speed: 1,
-                pitch: 1,
-                volume: 1,
-                audio_content: [],
-            };
-            const voiceResponse = (await DBServices.createDocument(
-                VoiceConfigModel,
-                VoiceConfigData,
-            )) as VoiceConfigData;
-
-            const imageData: ImageConfigData = {
-                style: 'classic',
-                size: 'small',
-                resolution: `${this.DEFAULT_IMAGE_WIDTH}x${this.DEFAULT_IMAGE_HEIGHT}`,
-                color_scheme: 'normal',
-                generated_images: [],
-            };
-            const imageResponse = (await DBServices.createDocument(ImageConfigModel, imageData)) as ImageConfigData;
-
-            const videoData: VideoConfigData = {
-                literature_work_id: new mongoose.Types.ObjectId(scriptResponse._id),
-                script: 'script',
-                voice_config: new mongoose.Types.ObjectId(voiceResponse._id),
-                image_config: new mongoose.Types.ObjectId(imageResponse._id),
-                is_finished: false,
-                publish_date: new Date(),
-            };
-            const videoResponse = (await DBServices.createDocument(VideoConfigModel, videoData)) as VideoConfigData;
-
-            console.log("Check videoResponse in BE: ", videoResponse);
-
-            if (!videoResponse || !scriptResponse || !voiceResponse || !imageResponse) {
-                res.status(500).send('Error creating prompt');
-            } else {
-                res.status(200).json({
-                    promptId: videoResponse._id,
-                    scriptPromptId: scriptResponse._id,
-                    voicePromptId: voiceResponse._id,
-                    imagePromptId: imageResponse._id,
-                });
-            }
+            const response = await this.informationService.createNewImagePrompt();
+            res.status(200).json(response);
         } catch (error) {
             console.error('Error creating prompt:', error);
             if (error instanceof mongoose.Error.ValidationError) {
@@ -135,29 +36,22 @@ class InformationController {
         const { promptId } = req.body;
 
         if (!promptId) {
-            res.status(400).json({ message: 'Prompt ID is required' });
+            return res.status(400).json({ message: 'Prompt ID is required' });
         }
 
         try {
-            const data = await DBServices.getDocumentById(VideoConfigModel, promptId as string);
-
-            if (!data) {
-                res.status(404).json({ message: 'Prompt not found' });
-                return;
-            } else {
-                data.is_finished = true;
-            }
-
-            const response = await DBServices.updateDocument(VideoConfigModel, promptId as string, data);
-
-            if (response) {
-                res.status(200).json({ message: 'Prompt updated' });
-            } else {
-                res.status(500).send('Error: prompt is null');
-            }
+            await this.informationService.updateImagePrompt(promptId as string);
+            res.status(200).json({ message: 'Prompt updated' });
         } catch (error) {
             console.error(error);
-            res.status(500).send('Error updating prompt');
+            if (error instanceof Error && error.message === 'Prompt not found') {
+                res.status(404).json({ message: 'Prompt not found' });
+            } else {
+                res.status(500).json({ 
+                    message: 'Error updating prompt',
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
         }
     }
 
@@ -165,25 +59,23 @@ class InformationController {
         const { promptId, scriptId, voiceId, imageId } = req.query;
 
         if (!promptId) {
-            res.status(400).json({ message: 'Prompt ID is required' });
+            return res.status(400).json({ message: 'Prompt ID is required' });
         }
 
         try {
-            const response = await Promise.all([
-                DBServices.deleteDocument(VideoConfigModel, promptId as string),
-                DBServices.deleteDocument(ScriptModel, scriptId as string),
-                DBServices.deleteDocument(VoiceConfigModel, voiceId as string),
-                DBServices.deleteDocument(ImageConfigModel, imageId as string),
-            ]);
-
-            if (response) {
-                res.status(200).json({ message: 'Prompt deleted' });
-            } else {
-                res.status(500).send('Error: prompt is null');
-            }
+            await this.informationService.deleteImagePrompt(
+                promptId as string,
+                scriptId as string,
+                voiceId as string,
+                imageId as string
+            );
+            res.status(200).json({ message: 'Prompt deleted' });
         } catch (error) {
             console.error(error);
-            res.status(500).send('Error deleting prompt');
+            res.status(500).json({
+                message: 'Error deleting prompt',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
     }
 }
