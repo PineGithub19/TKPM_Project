@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
 import styles from "./ExportVideo.module.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import clsx from "clsx";
+// import clsx from "clsx";
 import * as request from "../../utils/request";
 
-const resolutionOptions = ["360p", "720p", "1080p", "4k"];
+// const resolutionOptions = ["360p", "720p", "1080p", "4k"];
 
 function ExportVideo() {
     const navigate = useNavigate();
     const location = useLocation();
     const { videoUrl, videoId } = location.state || {}; // Lấy videoUrl từ state đã truyền
 
-    const [selectedResolution, setResolution] = useState<string>("720p");
+    // const [selectedResolution, setResolution] = useState<string>('720p');
     const [showModal, setShowModal] = useState(false);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
 
     // Đọc query parameters để kiểm tra nếu video đã được đăng thành công
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
-        const success = searchParams.get("uploadSuccess");
-        if (success === "true") {
+        const success = searchParams.get('uploadSuccess');
+        if (success === 'true') {
             setUploadSuccess(true);
         }
     }, [location.search]);
@@ -36,11 +36,11 @@ function ExportVideo() {
         }
     }, [uploadSuccess]);
 
-    const handleResolutionClick = (style: string) => {
-        if (style !== selectedResolution) {
-            setResolution(style);
-        }
-    };
+    // const handleResolutionClick = (style: string) => {
+    //     if (style !== selectedResolution) {
+    //         setResolution(style);
+    //     }
+    // };
 
     const handleUploadToYouTube = async () => {
         await request.put('/information/update', { promptId: videoId });
@@ -48,23 +48,22 @@ function ExportVideo() {
     };
 
     const handleSubmit = () => {
-        const updatedDescription = description + " #ChillUS";
-        
+        const updatedDescription = description + ' #ChillUS';
+
         // Truyền cả videoUrl để server có thể sử dụng đúng video
         const query = new URLSearchParams({
             title,
             description: updatedDescription,
             videoUrl: encodeURIComponent(videoUrl), // Encode để tránh vấn đề với ký tự đặc biệt
         }).toString();
-    
+
         window.location.href = `http://localhost:3000/api/upload/auth?${query}`;
     };
-    
 
     const handleCancel = () => {
         setShowModal(false);
-        setTitle("");
-        setDescription("");
+        setTitle('');
+        setDescription('');
     };
 
     const handleCloseSuccessMessage = () => {
@@ -74,7 +73,7 @@ function ExportVideo() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <button onClick={() => navigate("/edit-video")} className={styles.backButton}>
+                <button onClick={() => navigate('/edit-video')} className={styles.backButton}>
                     <img src="/arrow_left_black.png" alt="Back" className={styles.arrowIcon} />
                 </button>
                 <span className={styles.title}>Export Video</span>
@@ -95,7 +94,7 @@ function ExportVideo() {
 
             <div className={styles.footer}>
                 <div className={styles.leftPanel}>
-                    <div className={styles.titleBody}>Resolution</div>
+                    {/* <div className={styles.titleBody}>Resolution</div>
 
                     <div className={`${styles.style_buttons} content`}>
                         {resolutionOptions.map((style) => (
@@ -109,7 +108,7 @@ function ExportVideo() {
                                 {style}
                             </button>
                         ))}
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className={styles.rightPanel}>
@@ -129,7 +128,7 @@ function ExportVideo() {
             </div>
 
             {showModal && (
-                <div className={styles.modal} style={{ animation: "fadeIn 0.3s ease-out" }}>
+                <div className={styles.modal} style={{ animation: 'fadeIn 0.3s ease-out' }}>
                     <h3>Thông tin video YouTube</h3>
                     <input
                         type="text"
@@ -141,11 +140,11 @@ function ExportVideo() {
                     <textarea
                         placeholder="Nhập mô tả video"
                         className={styles.modalInput}
-                        style={{ marginTop: "10px" }}
+                        style={{ marginTop: '10px' }}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <div style={{ marginTop: "10px", display: "flex", gap: "30px" }}>
+                    <div style={{ marginTop: '10px', display: 'flex', gap: '30px' }}>
                         <button className={styles.submitButton} onClick={handleSubmit} disabled={!videoUrl}>
                             Đăng lên YouTube
                         </button>
