@@ -64,7 +64,11 @@ function Sidebar() {
 
     return (
         <div className={clsx('d-flex', 'flex-column', styles.sidebar)}>
-            <h3 className={clsx('text-light', 'mb-4', 'ms-auto', 'me-auto')}>ChillUS</h3>
+            <h3 className={clsx('text-light', 'mb-4', 'ms-auto', 'me-auto')}>
+                <Link to="/dashboard" className={clsx('text-light', 'text-decoration-none')}>
+                    <span className={clsx(styles.logo)}>ChillUS</span>
+                </Link>
+            </h3>
             {routes.map((route, index) => (
                 <Link
                     to={route.route}

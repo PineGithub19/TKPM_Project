@@ -36,7 +36,7 @@
 }
 
 .backButton:hover {
-    background-color: #FF4242;
+    background-color: #ff4242;
     border: 1px solid black;
 }
 
@@ -51,7 +51,7 @@
     color: white;
 }
 
-.titleBody{
+.titleBody {
     font-size: 30px;
 }
 
@@ -189,8 +189,8 @@
 }
 
 .activeContent {
-    background-color: #8A2BE2;
-    border-color: #FFFFFF;
+    background-color: #8a2be2;
+    border-color: #ffffff;
     color: white;
 }
 
@@ -217,15 +217,19 @@
 .loader {
     border: 5px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top: 5px solid #8A2BE2;
+    border-top: 5px solid #8a2be2;
     width: 50px;
     height: 50px;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .noVideoMessage {
@@ -258,7 +262,8 @@
     padding-right: 32px;
 }
 
-.downloadButton, .shareButton {
+.downloadButton,
+.shareButton {
     padding: 12px 32px;
     border-radius: 30px;
     font-size: 20px;
@@ -268,7 +273,7 @@
 }
 
 .downloadButton {
-    background-color: #8A2BE2;
+    background-color: #8a2be2;
     color: white;
     border: none;
 }
@@ -306,7 +311,7 @@
     transform: scale(1.1);
 }
 .modal {
-    background: rgba(48, 48, 48, 0.9); 
+    background: rgba(48, 48, 48, 0.9);
     position: absolute;
     top: 45%;
     left: 50%;
@@ -345,13 +350,13 @@
 }
 
 .modalInput:focus {
-    border-color: #8A2BE2;
+    border-color: #8a2be2;
     outline: none;
 }
 
 .submitButton,
 .cancelButton {
-    background-color: #8A2BE2;
+    background-color: #8a2be2;
     color: white;
     padding: 15px 20px;
     border: none;
@@ -368,11 +373,11 @@
 }
 
 .submitButton {
-    background-color: #4CAF50;
+    background-color: #4caf50;
 }
 
 .cancelButton {
-    background-color: #FF4242;
+    background-color: #ff4242;
 }
 
 .submitButton:hover {
@@ -398,7 +403,7 @@
     }
 }
 .successMessage {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
     padding: 10px 10px 10px 20px;
     text-align: center;
