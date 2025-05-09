@@ -36,10 +36,10 @@ export interface IVideo extends Document {
 
 export interface IVideoPublishHistory extends Document {
     video_id: mongoose.Types.ObjectId;
+    video_url: string;
     platform: string;
     publish_date: Date;
-    status: string;
-    video_url: string;
+    is_uploaded: boolean;
 }
 
 export interface IVoiceConfig extends Document {

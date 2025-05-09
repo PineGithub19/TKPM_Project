@@ -28,6 +28,10 @@ const deleteDocument = async <T extends Document>(model: Model<T>, id: string) =
     return await model.findByIdAndDelete(id);
 };
 
+const deleteDocumentById = async <T extends Document>(model: Model<T>, id: string) => {
+    return await model.findByIdAndDelete(id);
+};
+
 const getDocumentByQuery = async <T extends Document>(model: Model<T>, query: any) => {
     return await model.findOne(query).exec();
 };
@@ -39,5 +43,6 @@ export {
     updateDocument,
     updateDocumentById,
     deleteDocument,
+    deleteDocumentById,
     getDocumentByQuery,
 };

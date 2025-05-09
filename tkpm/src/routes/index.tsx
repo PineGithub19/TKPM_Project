@@ -15,6 +15,7 @@ import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 // import GenerateVoice from '../pages/GenerateVoice';
 // import SRTVoice from '../pages/SRTGenerateVoicePage';
+import WatchVideos from '../pages/WatchVideo';
 
 interface Route {
     path: string;
@@ -40,6 +41,7 @@ const publicRoutes: Route[] = [
     // { path: '/generate_scrip', component: ScriptAutoGenerate, layout: OutSideLayout, private: true},
     // { path: '/voice', component: GenerateVoice, layout: DefaultLayout, private: true },
     // { path: '/srt-voice', component: SRTVoice, layout: DefaultLayout, private: true},
+    { path: '/watch-video', component: WatchVideos, layout: DefaultLayout },
 ];
 
 // with authentication

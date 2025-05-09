@@ -12,6 +12,7 @@ import InformationRouter from './routers/InformationRouter';
 import UserRouter from './routers/UserRouter';
 import voiceRoutes from './routers/VoiceRouter';
 import UploadRouter from './routers/UploadRouter';
+import VideoPublishHistoryRouter from './routers/VideoPublishHistoryRouter';
 
 dotenv.config();
 
@@ -33,11 +34,15 @@ app.use(express.json({ limit: '10mb' }));
 // Serve static files from public directory
 app.use(express.static('public'));
 // Setup proper video serving with range support
-app.use('/videos', (req, res, next) => {
-    // Set appropriate headers for video streaming
-    res.setHeader('Accept-Ranges', 'bytes');
-    next();
-}, express.static(path.join(__dirname, '../public/videos')));
+app.use(
+    '/videos',
+    (req, res, next) => {
+        // Set appropriate headers for video streaming
+        res.setHeader('Accept-Ranges', 'bytes');
+        next();
+    },
+    express.static(path.join(__dirname, '../public/videos')),
+);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Express + TypeScript Server');
@@ -51,6 +56,7 @@ app.use('/information', InformationRouter);
 app.use('/user', UserRouter);
 app.use('/voice', voiceRoutes);
 app.use('/api/upload', UploadRouter);
+app.use('/video_publish_history', VideoPublishHistoryRouter);
 
 mongoose
     .connect(databaseURL)
