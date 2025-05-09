@@ -32,7 +32,7 @@ function ExportVideo() {
             const timer = setTimeout(() => {
                 setUploadSuccess(false);
             }, 3000); // 3000ms = 3s
-            return () => clearTimeout(timer); // Dọn dẹp timer khi component bị hủy
+            return () => clearTimeout(timer); // Dọn dẹp timer khi component bị hủyb
         }
     }, [uploadSuccess]);
 
