@@ -82,10 +82,7 @@ class InformationService {
             volume: 1,
             audio_content: [],
         };
-        const voiceResponse = (await DBServices.createDocument(
-            VoiceConfigModel,
-            VoiceConfigData,
-        )) as VoiceConfigData;
+        const voiceResponse = (await DBServices.createDocument(VoiceConfigModel, VoiceConfigData)) as VoiceConfigData;
 
         const imageData: ImageConfigData = {
             style: 'classic',
@@ -106,7 +103,7 @@ class InformationService {
         };
         const videoResponse = (await DBServices.createDocument(VideoConfigModel, videoData)) as VideoConfigData;
 
-        console.log("Check videoResponse in BE: ", videoResponse);
+        console.log('Check videoResponse in BE: ', videoResponse);
 
         if (!videoResponse || !scriptResponse || !voiceResponse || !imageResponse) {
             throw new Error('Error creating prompt');
@@ -153,4 +150,4 @@ class InformationService {
     }
 }
 
-export default InformationService; 
+export const informationService = new InformationService();
