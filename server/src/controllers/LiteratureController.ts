@@ -1,13 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import LiteratureService from '../services/LiteratureService/Literature.service';
+import { literatureService } from '../services/LiteratureService/Literature.service';
 
 class LiteratureController {
-    private literatureService: LiteratureService;
-
-    constructor() {
-        this.literatureService = new LiteratureService();
-    }
-
     async searchWikipedia(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { query } = req.query;
@@ -17,16 +11,16 @@ class LiteratureController {
                 return;
             }
 
-            const result = await this.literatureService.searchWikipedia(query);
-            
+            const result = await literatureService.searchWikipedia(query);
+
             res.status(200).json({
                 success: true,
-                data: result
+                data: result,
             });
         } catch (error) {
             console.error('Error fetching Wikipedia data:', error);
             const errorMessage = error instanceof Error ? error.message : 'Lỗi khi lấy dữ liệu từ Wikipedia';
-            
+
             // Xử lý các loại lỗi khác nhau
             if (errorMessage.includes('Không tìm thấy')) {
                 res.status(404).json({ success: false, message: errorMessage });

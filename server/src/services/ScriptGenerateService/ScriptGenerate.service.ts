@@ -10,7 +10,7 @@ import {
     EditScriptParams,
     ScriptGenerationResult,
     ScriptSplitResult,
-    ScriptGetResult
+    ScriptGetResult,
 } from '../interface/ScriptInterface';
 import dotenv from 'dotenv';
 
@@ -27,7 +27,7 @@ class ScriptGenerateService {
         if (!apiKey) {
             throw new Error('GEMINI_API_KEY is not defined in environment variables');
         }
-        
+
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
             model: 'gemini-2.0-pro-exp-02-05',
@@ -93,7 +93,10 @@ class ScriptGenerateService {
 
         // Gửi prompt và nhận kết quả
         const result = await chatSession.sendMessage(prompt);
-        const script = result.response.text().replace(/```(?:json)?|```/g, '').trim();
+        const script = result.response
+            .text()
+            .replace(/```(?:json)?|```/g, '')
+            .trim();
 
         return { script };
     }
@@ -107,9 +110,9 @@ class ScriptGenerateService {
 
         const scriptText: ScriptJSON = JSON.parse(script.replace(/```(?:json)?|```/g, '').trim());
 
-        const segments = scriptText.segments.map(seg => seg.content);
-        const imageDescriptions = scriptText.segments.map(seg => seg.image_description);
-        
+        const segments = scriptText.segments.map((seg) => seg.content);
+        const imageDescriptions = scriptText.segments.map((seg) => seg.image_description);
+
         // Ensure we have a reasonable number of segments
         let finalSegments = segments;
         if (segments.length < 5) {
@@ -179,11 +182,16 @@ class ScriptGenerateService {
 
         return {
             scriptList: data.content,
-            selectedLiterature: { content: data.full_content, title: data.title }
+            selectedLiterature: { content: data.full_content, title: data.title },
         };
     }
 
-    private createGenerateScriptPrompt(title: string, content: string, scriptConfig: ScriptConfig, durationText: string): string {
+    private createGenerateScriptPrompt(
+        title: string,
+        content: string,
+        scriptConfig: ScriptConfig,
+        durationText: string,
+    ): string {
         return `
             Tạo kịch bản video chi tiết cho tác phẩm văn học: "${title}"
             
@@ -228,4 +236,4 @@ class ScriptGenerateService {
     }
 }
 
-export default ScriptGenerateService;
+export const scriptGenerateService = new ScriptGenerateService();

@@ -1,36 +1,57 @@
 import { Request, Response, NextFunction } from 'express';
 import SlideshowGenerator from '../services/VideoService/SlideshowGenerator';
 import * as DBService from '../services/DBServices';
+import VideoPublishHistory from '../models/VideoPublishHistory';
 import Video from '../models/Video';
 import LiteratureWork from '../models/LiteratureWork';
 import path from 'path';
 
 class VideoController {
     public async createSlideshow(req: Request, res: Response, next: NextFunction) {
-        const { config } = req.body;
-        console.log('Received config:', config); // Log the received config for debugging
+        const { config, videoId } = req.body;
+        console.log('Received config:', config, videoId); // Log the received config for debugging
         if (!config) {
             return res.status(400).json({ error: 'Config is required' });
         }
         const slideshowGenerator = new SlideshowGenerator(config);
         try {
             const videoUrl = await slideshowGenerator.generate();
-            console.log("CHECK VIDEO URL COMPLETE IN BE: ", videoUrl);
+            console.log('CHECK VIDEO URL COMPLETE IN BE: ', videoUrl);
 
             var finalUrl = '';
             if (videoUrl.outputWithMusicPath != null && videoUrl.outputWithMusicPath != 'No background music') {
                 finalUrl = videoUrl.outputWithMusicPath;
-            }else if (videoUrl.outputPath != null) finalUrl = videoUrl.outputPath;
-            
+            } else if (videoUrl.outputPath != null) finalUrl = videoUrl.outputPath;
+
             // Get the filename from the full path
             const filename = path.basename(finalUrl || '');
-            
-            console.log("CHECK VIDEO URL COMPLETE IN BE: ", filename);
+
+            console.log('CHECK VIDEO URL COMPLETE IN BE: ', filename);
 
             // Construct URL using PORT from environment variables
             const port = process.env.PORT || '3000';
             const outputUrl = `http://localhost:${port}/videos/${filename}`;
-            
+
+            if (videoId) {
+                const existingHistory = await VideoPublishHistory.findOne({ videoId: videoId });
+                if (!existingHistory) {
+                    const videoPublishHistoryObject = {
+                        video_id: videoId,
+                        platform: 'YouTube',
+                        video_url: outputUrl,
+                        publish_date: new Date(),
+                        is_uploaded: false,
+                    };
+
+                    await DBService.createDocument(VideoPublishHistory, videoPublishHistoryObject);
+                } else {
+                    existingHistory.video_url = outputUrl;
+                    existingHistory.publish_date = new Date();
+
+                    await DBService.updateDocument(VideoPublishHistory, videoId, existingHistory);
+                }
+            }
+
             res.status(200).json({ outputPath: outputUrl });
         } catch (error) {
             next(error);

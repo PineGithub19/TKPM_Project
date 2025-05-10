@@ -25,14 +25,14 @@ class LiteratureService {
 
         // Đầu tiên tìm kiếm các bài viết liên quan
         const searchResults = await this.findWikipediaArticles(query);
-        
+
         if (!searchResults.length) {
             throw new Error('Không tìm thấy thông tin về tác phẩm này');
         }
 
         // Lấy bài viết đầu tiên từ kết quả tìm kiếm
         const firstResult = searchResults[0];
-        
+
         // Lấy nội dung chi tiết của bài viết
         const pageContent = await this.getArticleContent(firstResult.title);
 
@@ -56,7 +56,7 @@ class LiteratureService {
             url: pageInfo.fullurl,
             displayTitle: pageInfo.displaytitle,
             originalImage: pageInfo.original?.source,
-            fullText: fullContent
+            fullText: fullContent,
         };
     }
 
@@ -67,7 +67,7 @@ class LiteratureService {
             list: 'search',
             srsearch: query,
             srlimit: 5,
-            origin: '*'
+            origin: '*',
         };
 
         const searchResponse = await axios.get(this.wikiUrl, { params: searchParams });
@@ -84,16 +84,16 @@ class LiteratureService {
             exsentences: 1000,
             exlimit: 1,
             titles: title,
-            origin: '*'
+            origin: '*',
         };
 
         const contentResponse = await axios.get(this.wikiUrl, { params: contentParams });
         const page = Object.values(contentResponse.data.query.pages)[0] as any;
-        
+
         if (page.missing) {
             return null;
         }
-        
+
         return page;
     }
 
@@ -105,7 +105,7 @@ class LiteratureService {
             inprop: 'url|displaytitle',
             piprop: 'original',
             titles: title,
-            origin: '*'
+            origin: '*',
         };
 
         const infoResponse = await axios.get(this.wikiUrl, { params: infoParams });
@@ -118,7 +118,7 @@ class LiteratureService {
             format: 'json',
             page: title,
             prop: 'text',
-            origin: '*'
+            origin: '*',
         };
 
         const fullContentResponse = await axios.get(this.wikiUrl, { params: fullContentParams });
@@ -126,7 +126,8 @@ class LiteratureService {
     }
 
     private parseContentIntoSections(content: string): WikipediaSection[] {
-        return content.split('\n\n')
+        return content
+            .split('\n\n')
             .filter((section: string) => section.trim())
             .map((section: string, index: number) => {
                 const lines = section.split('\n');
@@ -134,10 +135,10 @@ class LiteratureService {
                 const content = lines.slice(1).join('\n');
                 return {
                     title,
-                    content
+                    content,
                 };
             });
     }
 }
 
-export default LiteratureService;
+export const literatureService = new LiteratureService();
