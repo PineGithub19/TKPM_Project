@@ -62,7 +62,7 @@ class InformationService {
         this.DEFAULT_IMAGE_WIDTH = 256;
     }
 
-    async createNewImagePrompt(): Promise<PromptResponse> {
+    async createNewPrompt(): Promise<PromptResponse> {
         const scriptData: LiteratureWorkData = {
             title: 'title',
             full_content: 'default',
@@ -117,7 +117,7 @@ class InformationService {
         };
     }
 
-    async updateImagePrompt(promptId: string): Promise<boolean> {
+    async updatePrompt(promptId: string): Promise<boolean> {
         const data = await DBServices.getDocumentById(VideoConfigModel, promptId);
 
         if (!data) {
@@ -134,7 +134,7 @@ class InformationService {
         return true;
     }
 
-    async deleteImagePrompt(promptId: string, scriptId: string, voiceId: string, imageId: string): Promise<boolean> {
+    async deletePrompt(promptId: string, scriptId: string, voiceId: string, imageId: string): Promise<boolean> {
         const response = await Promise.all([
             DBServices.deleteDocument(VideoConfigModel, promptId),
             DBServices.deleteDocument(ScriptModel, scriptId),
