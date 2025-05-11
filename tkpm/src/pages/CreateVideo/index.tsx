@@ -99,11 +99,11 @@ function ImportantAlert({
 
     return isAlerted ? (
         <SweetAlert
-            title="Wanna leave this page?"
-            text="Your video has not been created yet. Do you want to keep the progress?."
+            title="Thoát trong lúc tạo Video?"
+            text="Video của bạn chưa được lưu lại. Bạn có muốn lưu không?"
             icon="question"
             confirmButtonText="Delete"
-            denyButtonText="Keep it"
+            denyButtonText="Save"
             onConfirm={() => handleConfirmAlert(blocker)}
             onDenied={() => {
                 blocker.proceed?.();
