@@ -64,11 +64,12 @@ function Sidebar() {
 
     return (
         <div className={clsx('d-flex', 'flex-column', styles.sidebar)}>
-            <h3 className={clsx('text-light', 'mb-4', 'ms-auto', 'me-auto')}>
+            <div className={clsx('text-light', 'mb-4', 'ms-auto', 'me-auto', 'd-flex', 'align-items-center')}>
+                <img src="../../../../public/logotkpm.png" alt="ChillUS Logo" className={clsx(styles.logoImg)} />
                 <Link to="/dashboard" className={clsx('text-light', 'text-decoration-none')}>
-                    <span className={clsx(styles.logo)}>ChillUS</span>
+                    <span className={clsx('fs-2')}>ChillUS</span>
                 </Link>
-            </h3>
+            </div>
             {routes.map((route, index) => (
                 <Link
                     to={route.route}
