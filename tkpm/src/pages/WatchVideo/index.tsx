@@ -43,7 +43,7 @@ function WatchVideos() {
         };
 
         fetchExportedVideos();
-    }, [videos]);
+    }, [videos.length]);
 
     const handleClickVideo = (videoUrl: string) => {
         setShowModal(true);
