@@ -4,14 +4,14 @@ import { informationService } from '../services/InformationService/InformationSe
 
 class InformationController {
     constructor() {
-        this.createNewImagePrompt = this.createNewImagePrompt.bind(this);
-        this.updateImagePrompt = this.updateImagePrompt.bind(this);
-        this.deleteImagePrompt = this.deleteImagePrompt.bind(this);
+        this.createNewPrompt = this.createNewPrompt.bind(this);
+        this.updatePrompt = this.updatePrompt.bind(this);
+        this.deletePrompt = this.deletePrompt.bind(this);
     }
 
-    async createNewImagePrompt(req: Request, res: Response, next: NextFunction) {
+    async createNewPrompt(req: Request, res: Response, next: NextFunction) {
         try {
-            const response = await informationService.createNewImagePrompt();
+            const response = await informationService.createNewPrompt();
             res.status(200).json(response);
         } catch (error) {
             console.error('Error creating prompt:', error);
@@ -29,7 +29,7 @@ class InformationController {
         }
     }
 
-    async updateImagePrompt(req: Request, res: Response, next: NextFunction) {
+    async updatePrompt(req: Request, res: Response, next: NextFunction) {
         const { promptId } = req.body;
 
         if (!promptId) {
@@ -37,7 +37,7 @@ class InformationController {
         }
 
         try {
-            await informationService.updateImagePrompt(promptId as string);
+            await informationService.updatePrompt(promptId as string);
             res.status(200).json({ message: 'Prompt updated' });
         } catch (error) {
             console.error(error);
@@ -52,7 +52,7 @@ class InformationController {
         }
     }
 
-    async deleteImagePrompt(req: Request, res: Response, next: NextFunction) {
+    async deletePrompt(req: Request, res: Response, next: NextFunction) {
         const { promptId, scriptId, voiceId, imageId } = req.query;
 
         if (!promptId) {
@@ -60,7 +60,7 @@ class InformationController {
         }
 
         try {
-            await informationService.deleteImagePrompt(
+            await informationService.deletePrompt(
                 promptId as string,
                 scriptId as string,
                 voiceId as string,

@@ -4,9 +4,10 @@ import InformationController from '../controllers/InformationController';
 const router = express.Router();
 const informationController = new InformationController();
 
-// Configure routes with appropriate middleware
-router.post('/create', informationController.createNewImagePrompt);
-router.put('/update', informationController.updateImagePrompt);
-router.delete('/delete', informationController.deleteImagePrompt);
+const router = express.Router();
+
+router.post('/create', informationController.createNewPrompt);
+router.put('/update', informationController.updatePrompt);
+router.delete('/delete', informationController.deletePrompt);
 
 export default router;

@@ -83,7 +83,14 @@ function Sidebar() {
                 </Link>
             ))}
             <div
-                className={clsx('d-flex', 'align-items-center', 'mt-auto', styles.sidebarItem, styles.logoutBtn)}
+                className={clsx(
+                    'd-flex',
+                    'align-items-center',
+                    'justify-content-center',
+                    'mt-auto',
+                    styles.sidebarItem,
+                    styles.logoutBtn,
+                )}
                 onClick={handleLogout}
             >
                 <FontAwesomeIcon icon={faRightFromBracket} className={clsx('me-2')} />
