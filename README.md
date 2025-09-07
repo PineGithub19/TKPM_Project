@@ -6,7 +6,14 @@ A web application that allows users to generate AI-powered videos from literary 
 
 ## Demo & Report
 
-- **Demo:** [Demo video link](https://drive.google.com/drive/folders/1CkElsqmGb_7RhaEvnnXLi7C4k8vMETVL?usp=drive_link)
+- 📺 **Demo Video:** [Watch on YouTube](https://youtu.be/V9iz58P-7fo)
+
+<div align="center">
+  <a href="https://youtu.be/V9iz58P-7fo">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" 
+       alt="YouTube Demo Video" width="80">  </a>
+</div>
+
 - **Report:** [Report](https://drive.google.com/drive/folders/1Vqn-W6EMY0KUj9jRC5zDXyOdMaXnTCgC?usp=sharing)
 
 ---
